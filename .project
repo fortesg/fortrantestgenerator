@@ -3,6 +3,7 @@
 	<name>fortrantestgenerator</name>
 	<comment></comment>
 	<projects>
+		<project>github-fortrancallgraph</project>
 		<project>github-fortrantestgenerator</project>
 	</projects>
 	<buildSpec>
