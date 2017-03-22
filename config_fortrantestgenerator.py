@@ -7,7 +7,7 @@ import sys
 FTG_FOLDER = os.path.dirname(os.path.realpath(__file__))
 FCG_FOLDER = FTG_FOLDER + '/../fortrancallgraph'
 
-TEMPLATE_FOLDER = FCG_FOLDER + '/templates/standalone'
+TEMPLATE_FOLDER = FTG_FOLDER + '/templates/standalone'
 TEST_SOURCE_FOLDER = ''
 
 #################
