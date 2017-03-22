@@ -5,7 +5,7 @@ import sys
 ### EDIT HERE ###
 
 FTG_FOLDER = os.path.dirname(os.path.realpath(__file__))
-FCG_FOLDER = FTG_FOLDER + '/../github-fortrancallgraph'
+FCG_FOLDER = FTG_FOLDER + '/../fortrancallgraph'
 sys.path.append(FCG_FOLDER)
 
 TEMPLATE_FOLDER = FCG_FOLDER + '/templates/standalone'
