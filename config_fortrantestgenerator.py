@@ -6,7 +6,6 @@ import sys
 
 FTG_FOLDER = os.path.dirname(os.path.realpath(__file__))
 FCG_FOLDER = FTG_FOLDER + '/../fortrancallgraph'
-sys.path.append(FCG_FOLDER)
 
 TEMPLATE_FOLDER = FCG_FOLDER + '/templates/standalone'
 TEST_SOURCE_FOLDER = ''
@@ -15,6 +14,10 @@ TEST_SOURCE_FOLDER = ''
 
 BACKUP_SUFFIX = 'ftg-backup'
 FTG_PREFIX = 'ftg_'
+
+#################
+
+sys.path.append(FCG_FOLDER)
 
 #################
 
