@@ -91,21 +91,21 @@
 ################################################################################
   ! ================= BEGIN FORTRAN TEST GENERATOR (FTG) =======================
   
-  SUBROUTINE ftg_${subroutine.name}_init_for_capture(serializer, stage)
+  SUBROUTINE ftg_${subroutine.name}_init_for_capture(serializer, stage, dir)
 
     USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
     USE mo_mpi,            ONLY: get_my_mpi_all_id
     USE m_serialize,       ONLY: t_serializer, fs_create_serializer, fs_add_serializer_metainfo
 
     TYPE(t_serializer), INTENT(INOUT) :: serializer
-    CHARACTER(*), INTENT(IN) :: stage
+    CHARACTER(*), INTENT(IN) :: stage, dir
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
 
     WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), get_my_mpi_all_id()
-    CALL fs_create_serializer(".", TRIM(basename), 'w', serializer)
+    CALL fs_create_serializer(TRIM(dir), TRIM(basename), 'w', serializer)
     CALL fs_add_serializer_metainfo(serializer, 'subroutine', '${subroutine.name}')
     CALL fs_add_serializer_metainfo(serializer, 'stage', stage)
     CALL fs_add_serializer_metainfo(serializer, 'mpi_all_id', get_my_mpi_all_id())
@@ -137,7 +137,7 @@
 
     IF (ftg_${subroutine.name}_capture_input_active()) THEN
       
-      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'input')
+      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'input', ftg_${subroutine.name}_input_dir)
       CALL fs_create_savepoint('input', savepoint)
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
@@ -197,7 +197,7 @@
 
     IF (ftg_${subroutine.name}_capture_output_active()) THEN
 
-      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'output')
+      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'output', ftg_${subroutine.name}_output_dir)
       CALL fs_create_savepoint('output', savepoint)
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()

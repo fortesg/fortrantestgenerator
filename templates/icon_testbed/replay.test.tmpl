@@ -74,13 +74,14 @@
 ################################################################################
 MODULE mo_ftg_${subroutine.name}_test
 
-  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round
-  
-  USE mo_kind,                ONLY: wp
-  USE mo_impl_constants,      ONLY: MAX_CHAR_LENGTH
-  USE mo_mpi,                 ONLY: get_my_mpi_all_id
-  USE mo_exception,           ONLY: message
-  USE m_serialize,            ONLY: t_serializer, t_savepoint, fs_create_serializer, fs_create_savepoint, fs_destroy_serializer, fs_destroy_savepoint, fs_get_field_bounds, fs_read_field, fs_write_field, fs_allocate_allocatable, fs_allocate_pointer, fs_field_exists
+  USE mo_kind,           ONLY: wp
+  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+  USE mo_exception,      ONLY: message
+  USE mo_mpi,            ONLY: get_my_mpi_all_id
+
+  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_output_dir
+
+  USE m_serialize, ONLY: t_serializer, t_savepoint, fs_create_serializer, fs_create_savepoint, fs_destroy_serializer, fs_destroy_savepoint, fs_get_field_bounds, fs_read_field, fs_write_field, fs_allocate_allocatable, fs_allocate_pointer, fs_field_exists, fs_print_debuginfo
   
   ${globals.imports}
   
@@ -89,6 +90,11 @@ MODULE mo_ftg_${subroutine.name}_test
 IMPLICIT NONE
 
 PRIVATE
+
+CHARACTER(*), PARAMETER :: INPUT_DIR = '../../ftg/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '../../ftg/ftg_${subroutine.name}_test/output_test'
+LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
+LOGICAL, PARAMETER :: DEBUG = .FALSE.
 
 PUBLIC :: ftg_test_${subroutine.name}
 
@@ -104,6 +110,7 @@ CONTAINS
     
     ftg_${subroutine.name}_capture_input_enabled = .FALSE.
     ftg_${subroutine.name}_capture_output_enabled = .TRUE.
+    ftg_${subroutine.name}_output_dir = OUTPUT_DIR
     ftg_${subroutine.name}_capture_round = 1
 
     CALL ftg_${subroutine.name}_init_for_replay(serializer, 'input')
@@ -125,7 +132,10 @@ CONTAINS
     WRITE (basename,'(a,a,a,i1)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
-    CALL fs_create_serializer(".", TRIM(basename), 'r', serializer)
+    CALL fs_create_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r', serializer)
+    IF (DEBUG) THEN
+      CALL fs_print_debuginfo(serializer)
+    END IF
 
   END SUBROUTINE ftg_${subroutine.name}_init_for_replay
   
@@ -143,7 +153,7 @@ CONTAINS
 
     CALL fs_create_savepoint('input', savepoint)
   
-    WRITE (0,*) 'FTG READ INPUT DATA ${subroutine.name}'
+    WRITE (0,'(a,i1,a)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
 
     ! BASIC ARGUMENTS
     #for $argument in $arguments.all.basic
