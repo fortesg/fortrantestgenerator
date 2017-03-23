@@ -37,7 +37,6 @@ class ReplayCodeGenerator(CodeGenerator):
             testFilePath = self.__testSourceFolder + "/" + testModuleName + '.f90'
             print "      Rename file to " + testFilePath
             os.rename(tempTestFile, testFilePath)
-#             self._checkStyle(testFilePath)
         
     def __findModuleNameInTestFile(self, testFilePath):
         
