@@ -109,7 +109,7 @@ CONTAINS
     CALL message('FTG', '*** Run test for ${subroutine.name} ***')
     
     ftg_${subroutine.name}_capture_input_enabled = .FALSE.
-    ftg_${subroutine.name}_capture_output_enabled = .TRUE.
+    ftg_${subroutine.name}_capture_output_enabled = OUTPUT_ENABLED
     ftg_${subroutine.name}_output_dir = OUTPUT_DIR
     ftg_${subroutine.name}_capture_round = 1
 

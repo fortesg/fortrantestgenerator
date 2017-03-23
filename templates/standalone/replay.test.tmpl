@@ -75,11 +75,9 @@
 PROGRAM ftg_${subroutine.name}_test
 
   USE mpi
-  USE mo_kind, ONLY: wp !ICON
-  USE mo_mpi,  ONLY: start_mpi, stop_mpi !ICON
 
-  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_dir
-  
+  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_output_dir
+
   USE m_serialize, ONLY: t_serializer, t_savepoint, fs_create_serializer, fs_create_savepoint, fs_destroy_serializer, fs_destroy_savepoint, fs_get_field_bounds, fs_read_field, fs_write_field, fs_allocate_allocatable, fs_allocate_pointer, fs_field_exists, fs_print_debuginfo
   
   ${globals.imports}
@@ -89,19 +87,20 @@ PROGRAM ftg_${subroutine.name}_test
 IMPLICIT NONE
 
 INTEGER, PARAMETER :: MAX_CHAR_LENGTH = 1024
-INTEGER (kind=4) my_mpi_id, error
-CHARACTER(*), PARAMETER :: INPUT_DIR = '../ftg/ftg_${subroutine.name}_test'
-CHARACTER(*), PARAMETER :: OUTPUT_DIR = INPUT_DIR
+CHARACTER(*), PARAMETER :: INPUT_DIR = 'ftg/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = 'ftg/ftg_${subroutine.name}_test/output_test'
 LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
 LOGICAL, PARAMETER :: DEBUG = .FALSE.
 
-CALL start_mpi() !ICON
+INTEGER (kind=4) :: my_mpi_id, error
 
-CALL MPI_COMM_RANK (MPI_COMM_WORLD, my_mpi_id, error)
+CALL MPI_INIT(error)
+
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
 
 CALL ftg_test_${subroutine.name}()
 
-CALL stop_mpi() !ICON
+CALL MPI_FINALIZE(error)
 
 CONTAINS
   
@@ -117,8 +116,8 @@ CONTAINS
     
     ftg_${subroutine.name}_capture_input_enabled = .FALSE.
     ftg_${subroutine.name}_capture_output_enabled = OUTPUT_ENABLED
+    ftg_${subroutine.name}_output_dir = OUTPUT_DIR
     ftg_${subroutine.name}_capture_round = 1
-    ftg_${subroutine.name}_dir = OUTPUT_DIR
 
     CALL ftg_${subroutine.name}_init_for_replay(serializer, 'input')
     CALL ftg_${subroutine.name}_replay_input(serializer, ${arguments.all.names})
@@ -139,7 +138,7 @@ CONTAINS
     WRITE (basename,'(a,a,a,i1)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
-    CALL fs_create_serializer(INPUT_DIR, TRIM(basename), 'r', serializer)
+    CALL fs_create_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r', serializer)
     IF (DEBUG) THEN
       CALL fs_print_debuginfo(serializer)
     END IF
