@@ -1,0 +1,182 @@
+#def ftg_read($var)
+  #if $isReferencable($var)
+    #set $d = 1
+    #for $level in $levels($var)[:-1]
+      #set $container = $getExpression($var, $level)
+      #set $contDim = $dim($container)
+      #if $needsAllocation($container)
+        IF (fs_field_exists(serializer, "$container")) THEN
+          ftg_bounds = fs_get_field_bounds(serializer, "$container")
+          $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1 ,2)", "ftg_bounds(2 ,1):ftg_bounds(2 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(4 ,1):ftg_bounds(4 ,2)")
+        ELSE
+          $alloc($container, $contDim, "0", "0", "0", "0")
+        END IF
+        #set $d = $d + $contDim
+      #end if
+    #end for
+    #if $needsAllocation($var)
+      #if $isAllocatable($var)
+        CALL fs_allocate_allocatable(serializer, "$var", $var)
+      #else
+        CALL fs_allocate_pointer(serializer, "$var", $var)
+      #end if
+    #end if
+        CALL fs_read_field(serializer, savepoint, "$var", $var)
+  #else
+  
+    #set $mandDims = $getNumberOfMandatoryDimensions($var)
+    #set $topContainer = $var
+    #for $d in range(1, $mandDims + 1)
+      #set $topContainer = $getContainer($var, $d)
+      #for $level in $levels($topContainer)
+        #set $container = $getExpression($topContainer, $level)
+        #set $contDim = $dim($container)
+        #if $needsAllocation($container)
+          #set $container = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          IF (fs_field_exists(serializer, ftg_c)) THEN
+            ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
+            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+          ELSE
+            $alloc($container, $contDim, "0", "0", "0", "0")
+          END IF
+        #end if
+      #end for
+      DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #end for
+    #for $level in sorted(set($levels($var)[:-1]) - set($levels($topContainer)))
+      #set $container = $getExpression($var, $level)
+      #set $contDim = $dim($container)
+      #if $needsAllocation($container)
+        #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+        IF (fs_field_exists(serializer, ftg_c)) THEN
+          ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
+            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+        ELSE
+          $alloc($container, $contDim, "0", "0", "0", "0")
+        END IF
+      #end if
+    #end for
+    $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #if $isAllocatable($var)
+      CALL fs_allocate_allocatable(serializer, ftg_c, $filled)
+    #else if $isPointer($var)
+      CALL fs_allocate_pointer(serializer, ftg_c, $filled)
+    #end if
+    CALL fs_read_field(serializer, savepoint, ftg_c, $filled)
+    #for $d in range(1, $getNumberOfMandatoryDimensions($var) + 1)
+      END DO
+    #end for
+  #end if
+#end def
+################################################################################
+PROGRAM ftg_${subroutine.name}_test
+
+  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_output_dir
+
+  USE m_serialize, ONLY: t_serializer, t_savepoint, fs_create_serializer, fs_create_savepoint, fs_destroy_serializer, fs_destroy_savepoint, fs_get_field_bounds, fs_read_field, fs_write_field, fs_allocate_allocatable, fs_allocate_pointer, fs_field_exists, fs_print_debuginfo
+  
+  ${globals.imports}
+  
+  ${types.imports}
+  
+IMPLICIT NONE
+
+INTEGER, PARAMETER :: MAX_CHAR_LENGTH = 1024
+CHARACTER(*), PARAMETER :: INPUT_DIR = 'ftg/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = 'ftg/ftg_${subroutine.name}_test/output_test'
+LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
+LOGICAL, PARAMETER :: DEBUG = .FALSE.
+
+CALL ftg_test_${subroutine.name}()
+
+CONTAINS
+  
+  SUBROUTINE ftg_test_${subroutine.name}()
+
+    ${arguments.all.specifications(allocatable = True, charLengthZero = True)}
+  
+    TYPE(t_serializer) :: serializer
+
+    WRITE(*,*) ('*** FTG: Run test for ${subroutine.name} ***')
+    
+    ftg_${subroutine.name}_capture_input_enabled = .FALSE.
+    ftg_${subroutine.name}_capture_output_enabled = OUTPUT_ENABLED
+    ftg_${subroutine.name}_output_dir = OUTPUT_DIR
+    ftg_${subroutine.name}_capture_round = 1
+
+    CALL ftg_${subroutine.name}_init_for_replay(serializer, 'input')
+    CALL ftg_${subroutine.name}_replay_input(serializer, ${arguments.all.names})
+    CALL fs_destroy_serializer(serializer)
+
+    CALL ${subroutine.name}(${arguments.all.names})
+
+  END SUBROUTINE ftg_test_${subroutine.name}
+
+  
+  SUBROUTINE ftg_${subroutine.name}_init_for_replay(serializer, stage)
+
+    TYPE(t_serializer), INTENT(INOUT)  :: serializer
+    CHARACTER(*), INTENT(IN) :: stage
+
+    CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+
+    WRITE (basename,'(a,a,a,i1)') 'ftg_${subroutine.name}_', TRIM(stage)
+
+    WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
+    CALL fs_create_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r', serializer)
+    IF (DEBUG) THEN
+      CALL fs_print_debuginfo(serializer)
+    END IF
+
+  END SUBROUTINE ftg_${subroutine.name}_init_for_replay
+  
+  SUBROUTINE ftg_${subroutine.name}_replay_input(serializer, ${arguments.all.names})
+    
+    TYPE(t_serializer), INTENT(in)  :: serializer
+    
+    ${arguments.all.specifications(intent = 'inout', allocatable = True)}
+
+    TYPE(t_savepoint)  :: savepoint
+    
+    INTEGER, DIMENSION(4,2) :: ftg_bounds
+    INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+    CHARACTER(len=256) :: ftg_c
+
+    CALL fs_create_savepoint('input', savepoint)
+  
+    WRITE (0,'(a,i1,a)') 'FTG READ INPUT DATA ${subroutine.name}'
+
+    ! BASIC ARGUMENTS
+    #for $argument in $arguments.all.basic
+      #if $isArray($argument)
+        CALL fs_allocate_allocatable(serializer, "$argument", $argument)
+      #end if
+        CALL fs_read_field(serializer, savepoint, "$argument", $argument)
+    #end for
+
+    ! OPTIONAL ARGUMENTS
+    #for $argument in $arguments.all.optional
+      IF (PRESENT($argument)) THEN
+      #if $isArray($argument)
+        CALL fs_allocate_allocatable(serializer, "$argument", $argument)
+      #end if
+        CALL fs_read_field(serializer, savepoint, "$argument", $argument)
+      END IF
+    #end for
+
+    ! TYPE MEMBERS
+    #for $member in $arguments.all.usedTypeMembers
+    $ftg_read($member) #end for
+
+    ! GLOBALS
+    #for $globalVar in $globals.usedVariables
+    $ftg_read($globalVar) #end for
+
+    CALL fs_destroy_savepoint(savepoint)
+
+  END SUBROUTINE ftg_${subroutine.name}_replay_input
+  
+END PROGRAM ftg_${subroutine.name}_test
