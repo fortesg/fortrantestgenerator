@@ -229,7 +229,7 @@
       CALL fs_destroy_serializer(serializer)
       
       CALL work_mpi_barrier()
-      CALL finish('FTG EXIT')
+      CALL finish('FTG EXIT', 'Output captured: ${subroutine.name}', 0)
 
     END IF
 
