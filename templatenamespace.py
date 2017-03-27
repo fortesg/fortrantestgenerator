@@ -31,7 +31,7 @@ class TemplatesNameSpace(object):
         self.module = ModuleNameSpace(subroutine.getModuleName())
         self.arguments = ArgumentsNameSpace(subroutine, typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
-        self.folder = testDataFolder
+        self.folder = testDataFolder.rstrip('/');
      
     def getExpression(self, variableName, level):
         reference = self._findReference(variableName)

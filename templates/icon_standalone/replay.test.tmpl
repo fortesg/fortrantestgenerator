@@ -89,8 +89,8 @@ PROGRAM ftg_${subroutine.name}_test
   
 IMPLICIT NONE
 
-CHARACTER(*), PARAMETER :: INPUT_DIR = '../../../ftg/ftg_${subroutine.name}_test/input'
-CHARACTER(*), PARAMETER :: OUTPUT_DIR = '../../../ftg/ftg_${subroutine.name}_test/output_test'
+CHARACTER(*), PARAMETER :: INPUT_DIR = '${folder}/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${folder}/ftg_${subroutine.name}_test/output_test'
 LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
 LOGICAL, PARAMETER :: DEBUG = .FALSE.
 
