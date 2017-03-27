@@ -7,7 +7,7 @@ from symbol import argument
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataFolder):
+    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
         assertType(subroutine, 'subroutine', Subroutine)
         assertType(typeArgumentReferences, 'typeArgumentReferences', list)
         assertType(globalsReferences, 'globalsReferences', list)
@@ -31,7 +31,7 @@ class TemplatesNameSpace(object):
         self.module = ModuleNameSpace(subroutine.getModuleName())
         self.arguments = ArgumentsNameSpace(subroutine, typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
-        self.folder = testDataFolder.rstrip('/');
+        self.dataDir = testDataDir.rstrip('/');
      
     def getExpression(self, variableName, level):
         reference = self._findReference(variableName)
@@ -322,9 +322,9 @@ class TemplatesNameSpace(object):
 
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataFolder):
+    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
         
-        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataFolder)
+        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.__registered = set()
         
     def needsRegistration(self, variableName):
@@ -352,9 +352,9 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         
 class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataFolder):
+    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
         
-        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataFolder)
+        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)        
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
         self.__allocated = set()

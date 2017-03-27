@@ -13,25 +13,25 @@ class CaptureCodeGenerator(CodeGenerator):
     BEFORE_END_TEMPLATE = 'capture.beforeend.tmpl'
     EXPORT_TEMPLATE = 'export.beforecontains.tmpl'
     
-    def __init__(self, sourceFiles, templateFolder, testDataFolder, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, templateDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
-        assertType(templateFolder, 'templateFolder', str)
-        if not os.path.isdir(templateFolder):
-            raise IOError("Not a directory: " + templateFolder);
-        assertType(testDataFolder, 'testDataFolder', str)
-        if not os.path.isdir(testDataFolder):
-            raise IOError("Not a directory: " + testDataFolder);
+        assertType(templateDir, 'templateDir', str)
+        if not os.path.isdir(templateDir):
+            raise IOError("Not a directory: " + templateDir);
+        assertType(testDataDir, 'testDataDir', str)
+        if not os.path.isdir(testDataDir):
+            raise IOError("Not a directory: " + testDataDir);
 
         super(CaptureCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         
-        self.__afterLastLineTemplate = templateFolder + '/' + self.AFTER_LAST_LINE_TEMPLATE
-        self.__beforeContainsTemplate = templateFolder + '/' + self.BEFORE_CONTAINS_TEMPLATE
-        self.__afterLastUseTemplate = templateFolder + '/' + self.AFTER_LAST_USE_TEMPLATE
-        self.__afterLastSpecificationTemplate = templateFolder + '/' + self.AFTER_LAST_SPECIFICATION_TEMPLATE
-        self.__beforeEndTemplate = templateFolder + '/' + self.BEFORE_END_TEMPLATE
-        self.__exportTemplate = templateFolder + '/' + self.EXPORT_TEMPLATE
+        self.__afterLastLineTemplate = templateDir + '/' + self.AFTER_LAST_LINE_TEMPLATE
+        self.__beforeContainsTemplate = templateDir + '/' + self.BEFORE_CONTAINS_TEMPLATE
+        self.__afterLastUseTemplate = templateDir + '/' + self.AFTER_LAST_USE_TEMPLATE
+        self.__afterLastSpecificationTemplate = templateDir + '/' + self.AFTER_LAST_SPECIFICATION_TEMPLATE
+        self.__beforeEndTemplate = templateDir + '/' + self.BEFORE_END_TEMPLATE
+        self.__exportTemplate = templateDir + '/' + self.EXPORT_TEMPLATE
         
-        self.__testDataFolder = testDataFolder
+        self.__testDataDir = testDataDir
 
         
     def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
@@ -41,7 +41,7 @@ class CaptureCodeGenerator(CodeGenerator):
         
         print "    ...to Module under Test"
         self._createFileBackup(sourceFilePath)
-        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataFolder)
+        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
         # Reihenfolge wichtig: von unten nach oben!!!
         self._processTemplate(sourceFilePath, subroutine.getLastLineNumber() + 1, self.__afterLastLineTemplate, templateNameSpace)
         lastLine = subroutine.getContainsLineNumber()

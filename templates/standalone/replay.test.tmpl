@@ -87,8 +87,8 @@ PROGRAM ftg_${subroutine.name}_test
 IMPLICIT NONE
 
 INTEGER, PARAMETER :: MAX_CHAR_LENGTH = 1024
-CHARACTER(*), PARAMETER :: INPUT_DIR = '${folder}/ftg_${subroutine.name}_test/input'
-CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${folder}/ftg_${subroutine.name}_test/output_test'
+CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output_test'
 LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
 LOGICAL, PARAMETER :: DEBUG = .FALSE.
 

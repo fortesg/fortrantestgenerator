@@ -10,35 +10,35 @@ class ReplayCodeGenerator(CodeGenerator):
     TEST_TEMPLATE = 'replay.test.tmpl'
     TEMP_TEST_FILE = 'ftg_temp_test.f90'
     
-    def __init__(self, sourceFiles, templateFolder, testSourceFolder, testDataFolder, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, templateDir, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
-        assertType(templateFolder, 'templateFolder', str)
-        if not os.path.isdir(templateFolder):
-            raise IOError("Not a directory: " + templateFolder);
-        assertType(testDataFolder, 'testDataFolder', str)
-        if not os.path.isdir(testDataFolder):
-            raise IOError("Not a directory: " + testDataFolder);
+        assertType(templateDir, 'templateDir', str)
+        if not os.path.isdir(templateDir):
+            raise IOError("Not a directory: " + templateDir);
+        assertType(testDataDir, 'testDataDir', str)
+        if not os.path.isdir(testDataDir):
+            raise IOError("Not a directory: " + testDataDir);
 
         super(ReplayCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
-        self.__testTemplate = templateFolder.rstrip('/') + '/' + self.TEST_TEMPLATE
-        self.__testSourceFolder = testSourceFolder.rstrip('/')
-        self.__testDataFolder = testDataFolder
+        self.__testTemplate = templateDir.rstrip('/') + '/' + self.TEST_TEMPLATE
+        self.__testSourceDir = testSourceDir.rstrip('/')
+        self.__testDataDir = testDataDir
         
     def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Create code"
         print "    ...in new test source file"
         
-        tempTestFile = self.__testSourceFolder + '/' + self.TEMP_TEST_FILE
+        tempTestFile = self.__testSourceDir + '/' + self.TEMP_TEST_FILE
         
         print "      Create file " + tempTestFile
         self._writeFile(tempTestFile, [])
         
-        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataFolder)
+        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
         self._processTemplate(tempTestFile, 0, self.__testTemplate, templateNameSpace)
         
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)
         if testModuleName is not None:
-            testFilePath = self.__testSourceFolder + "/" + testModuleName + '.f90'
+            testFilePath = self.__testSourceDir + "/" + testModuleName + '.f90'
             print "      Rename file to " + testFilePath
             os.rename(tempTestFile, testFilePath)
         

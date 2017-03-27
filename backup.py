@@ -5,18 +5,18 @@ class BackupFileFinder(object):
     
     DEFAULT_SUFFIX = 'f90'
     
-    def __init__(self, sourceFolder, backupSuffix):
-        assertType(sourceFolder, 'sourceFolder', str)
-        if not os.path.isdir(sourceFolder):
-            raise IOError("Not a directory: " + sourceFolder);
+    def __init__(self, sourceDir, backupSuffix):
+        assertType(sourceDir, 'sourceDir', str)
+        if not os.path.isdir(sourceDir):
+            raise IOError("Not a directory: " + sourceDir);
         assertType(backupSuffix, 'backupSuffix', str)
         
-        self.__sourceFolder = sourceFolder
+        self.__sourceDir = sourceDir
         self.__backupSuffix = backupSuffix
 
     def find(self):
         backupFiles = []
-        for root, _, files in os.walk(self.__sourceFolder):
+        for root, _, files in os.walk(self.__sourceDir):
             for name in files:
                 if name.find(self.__backupSuffix) >= 0:
                     backupFiles.append(os.path.join(root, name))
