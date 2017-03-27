@@ -9,6 +9,7 @@ FCG_FOLDER = FTG_FOLDER + '/../fortrancallgraph'
 
 TEMPLATE_FOLDER = FTG_FOLDER + '/templates/standalone'
 TEST_SOURCE_FOLDER = ''
+TEST_DATA_BASE_DIR = FTG_FOLDER + '/data'
 
 #################
 
