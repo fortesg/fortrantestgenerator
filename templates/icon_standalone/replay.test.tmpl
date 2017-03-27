@@ -74,7 +74,7 @@
 ################################################################################
 PROGRAM ftg_${subroutine.name}_test
 
-  USE mo_kind,           ONLY: wp
+  USE mo_kind
   USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
   USE mo_exception,      ONLY: message
   USE mo_mpi,            ONLY: get_my_mpi_all_id, start_mpi, stop_mpi !ICON
@@ -92,7 +92,7 @@ IMPLICIT NONE
 CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
 CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output_test'
 LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
-LOGICAL, PARAMETER :: DEBUG = .FALSE.
+LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 CALL start_mpi() !ICON
 
@@ -135,7 +135,7 @@ CONTAINS
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
     CALL fs_create_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r', serializer)
-    IF (DEBUG) THEN
+    IF (SERIALBOX_DEBUG) THEN
       CALL fs_print_debuginfo(serializer)
     END IF
 
