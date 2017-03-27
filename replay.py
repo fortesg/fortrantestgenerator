@@ -10,15 +10,19 @@ class ReplayCodeGenerator(CodeGenerator):
     TEST_TEMPLATE = 'replay.test.tmpl'
     TEMP_TEST_FILE = 'ftg_temp_test.f90'
     
-    def __init__(self, sourceFiles, templateFolder, testSourceFolder, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, templateFolder, testSourceFolder, testDataFolder, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templateFolder, 'templateFolder', str)
         if not os.path.isdir(templateFolder):
             raise IOError("Not a directory: " + templateFolder);
+        assertType(testDataFolder, 'testDataFolder', str)
+        if not os.path.isdir(testDataFolder):
+            raise IOError("Not a directory: " + testDataFolder);
 
         super(ReplayCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
         self.__testTemplate = templateFolder.rstrip('/') + '/' + self.TEST_TEMPLATE
         self.__testSourceFolder = testSourceFolder.rstrip('/')
+        self.__testDataFolder = testDataFolder
         
     def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Create code"
@@ -29,7 +33,7 @@ class ReplayCodeGenerator(CodeGenerator):
         print "      Create file " + tempTestFile
         self._writeFile(tempTestFile, [])
         
-        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences)
+        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataFolder)
         self._processTemplate(tempTestFile, 0, self.__testTemplate, templateNameSpace)
         
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)

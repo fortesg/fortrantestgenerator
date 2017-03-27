@@ -13,11 +13,14 @@ class CaptureCodeGenerator(CodeGenerator):
     BEFORE_END_TEMPLATE = 'capture.beforeend.tmpl'
     EXPORT_TEMPLATE = 'export.beforecontains.tmpl'
     
-    def __init__(self, sourceFiles, templateFolder, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, templateFolder, testDataFolder, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templateFolder, 'templateFolder', str)
         if not os.path.isdir(templateFolder):
             raise IOError("Not a directory: " + templateFolder);
+        assertType(testDataFolder, 'testDataFolder', str)
+        if not os.path.isdir(testDataFolder):
+            raise IOError("Not a directory: " + testDataFolder);
 
         super(CaptureCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         
@@ -27,6 +30,8 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__afterLastSpecificationTemplate = templateFolder + '/' + self.AFTER_LAST_SPECIFICATION_TEMPLATE
         self.__beforeEndTemplate = templateFolder + '/' + self.BEFORE_END_TEMPLATE
         self.__exportTemplate = templateFolder + '/' + self.EXPORT_TEMPLATE
+        
+        self.__testDataFolder = testDataFolder
 
         
     def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
@@ -36,7 +41,7 @@ class CaptureCodeGenerator(CodeGenerator):
         
         print "    ...to Module under Test"
         self._createFileBackup(sourceFilePath)
-        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences)
+        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataFolder)
         # Reihenfolge wichtig: von unten nach oben!!!
         self._processTemplate(sourceFilePath, subroutine.getLastLineNumber() + 1, self.__afterLastLineTemplate, templateNameSpace)
         lastLine = subroutine.getContainsLineNumber()
