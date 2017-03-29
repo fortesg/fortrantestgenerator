@@ -1,77 +1,3 @@
-#def ftg_read($var)
-  #if $isReferencable($var)
-    #set $d = 1
-    #for $level in $levels($var)[:-1]
-      #set $container = $getExpression($var, $level)
-      #set $contDim = $dim($container)
-      #if $needsAllocation($container)
-        IF (fs_field_exists(serializer, "$container")) THEN
-          ftg_bounds = fs_get_field_bounds(serializer, "$container")
-          $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1 ,2)", "ftg_bounds(2 ,1):ftg_bounds(2 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(4 ,1):ftg_bounds(4 ,2)")
-        ELSE
-          $alloc($container, $contDim, "0", "0", "0", "0")
-        END IF
-        #set $d = $d + $contDim
-      #end if
-    #end for
-    #if $needsAllocation($var)
-      #if $isAllocatable($var)
-        CALL fs_allocate_allocatable(serializer, "$var", $var)
-      #else
-        CALL fs_allocate_pointer(serializer, "$var", $var)
-      #end if
-    #end if
-        CALL fs_read_field(serializer, savepoint, "$var", $var)
-  #else
-  
-    #set $mandDims = $getNumberOfMandatoryDimensions($var)
-    #set $topContainer = $var
-    #for $d in range(1, $mandDims + 1)
-      #set $topContainer = $getContainer($var, $d)
-      #for $level in $levels($topContainer)
-        #set $container = $getExpression($topContainer, $level)
-        #set $contDim = $dim($container)
-        #if $needsAllocation($container)
-          #set $container = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-          $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-          IF (fs_field_exists(serializer, ftg_c)) THEN
-            ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
-            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
-          ELSE
-            $alloc($container, $contDim, "0", "0", "0", "0")
-          END IF
-        #end if
-      #end for
-      DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #end for
-    #for $level in sorted(set($levels($var)[:-1]) - set($levels($topContainer)))
-      #set $container = $getExpression($var, $level)
-      #set $contDim = $dim($container)
-      #if $needsAllocation($container)
-        #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-        IF (fs_field_exists(serializer, ftg_c)) THEN
-          ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
-            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
-        ELSE
-          $alloc($container, $contDim, "0", "0", "0", "0")
-        END IF
-      #end if
-    #end for
-    $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #if $isAllocatable($var)
-      CALL fs_allocate_allocatable(serializer, ftg_c, $filled)
-    #else if $isPointer($var)
-      CALL fs_allocate_pointer(serializer, ftg_c, $filled)
-    #end if
-    CALL fs_read_field(serializer, savepoint, ftg_c, $filled)
-    #for $d in range(1, $getNumberOfMandatoryDimensions($var) + 1)
-      END DO
-    #end for
-  #end if
-#end def
-################################################################################
 PROGRAM ftg_${subroutine.name}_test
 
   USE mo_kind
@@ -188,3 +114,77 @@ CONTAINS
   END SUBROUTINE ftg_${subroutine.name}_replay_input
   
 END PROGRAM ftg_${subroutine.name}_test
+################################################################################
+#def ftg_read($var)
+  #if $isReferencable($var)
+    #set $d = 1
+    #for $level in $levels($var)[:-1]
+      #set $container = $getExpression($var, $level)
+      #set $contDim = $dim($container)
+      #if $needsAllocation($container)
+        IF (fs_field_exists(serializer, "$container")) THEN
+          ftg_bounds = fs_get_field_bounds(serializer, "$container")
+          $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1 ,2)", "ftg_bounds(2 ,1):ftg_bounds(2 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(4 ,1):ftg_bounds(4 ,2)")
+        ELSE
+          $alloc($container, $contDim, "0", "0", "0", "0")
+        END IF
+        #set $d = $d + $contDim
+      #end if
+    #end for
+    #if $needsAllocation($var)
+      #if $isAllocatable($var)
+        CALL fs_allocate_allocatable(serializer, "$var", $var)
+      #else
+        CALL fs_allocate_pointer(serializer, "$var", $var)
+      #end if
+    #end if
+        CALL fs_read_field(serializer, savepoint, "$var", $var)
+  #else
+  
+    #set $mandDims = $getNumberOfMandatoryDimensions($var)
+    #set $topContainer = $var
+    #for $d in range(1, $mandDims + 1)
+      #set $topContainer = $getContainer($var, $d)
+      #for $level in $levels($topContainer)
+        #set $container = $getExpression($topContainer, $level)
+        #set $contDim = $dim($container)
+        #if $needsAllocation($container)
+          #set $container = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          IF (fs_field_exists(serializer, ftg_c)) THEN
+            ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
+            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+          ELSE
+            $alloc($container, $contDim, "0", "0", "0", "0")
+          END IF
+        #end if
+      #end for
+      DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #end for
+    #for $level in sorted(set($levels($var)[:-1]) - set($levels($topContainer)))
+      #set $container = $getExpression($var, $level)
+      #set $contDim = $dim($container)
+      #if $needsAllocation($container)
+        #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+        IF (fs_field_exists(serializer, ftg_c)) THEN
+          ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
+            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+        ELSE
+          $alloc($container, $contDim, "0", "0", "0", "0")
+        END IF
+      #end if
+    #end for
+    $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #if $isAllocatable($var)
+      CALL fs_allocate_allocatable(serializer, ftg_c, $filled)
+    #else if $isPointer($var)
+      CALL fs_allocate_pointer(serializer, ftg_c, $filled)
+    #end if
+    CALL fs_read_field(serializer, savepoint, ftg_c, $filled)
+    #for $d in range(1, $getNumberOfMandatoryDimensions($var) + 1)
+      END DO
+    #end for
+  #end if
+#end def
