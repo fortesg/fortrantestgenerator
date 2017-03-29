@@ -14,7 +14,7 @@ class CodeGenerator(object):
     
     MAX_LINE_LENGTH = 132
     INDENT_LENGTH = 2
-    CHECK_STYLE_TEMP_PREFIX = '.ftg-tmp'
+    DEFAULT_SUFFIX = '.f90'
     
     def __init__(self, sourceFiles, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
@@ -26,7 +26,7 @@ class CodeGenerator(object):
         
         self._sourceFiles = sourceFiles
         self.__graphBuilder = graphBuilder
-        self.__backupSuffix = backupSuffix
+        self._backupSuffix = '.' + backupSuffix.lstrip('.')
         self.__excludeModules = excludeModules
         self.__ignoredModulesForGlobals = ignoredModulesForGlobals;
         self.__ignoredTypes = ignoredTypes;
@@ -93,11 +93,16 @@ class CodeGenerator(object):
         
     def _createFileBackup(self, originalPath):
         print "      Create File Backup of " + originalPath,
-        backupPath = originalPath.replace('f90', self.__backupSuffix)
+        backupPath = originalPath.replace(CodeGenerator.DEFAULT_SUFFIX, self._backupSuffix)
+        backupPath = backupPath.replace(CodeGenerator.DEFAULT_SUFFIX.upper(), self._backupSuffix)
         if (backupPath == originalPath):
-            backupPath = originalPath + self.__backupSuffix
+            backupPath = originalPath + self._backupSuffix
         if not os.path.exists(backupPath):
             shutil.copyfile(originalPath, backupPath)
+            print
+            return True
+        elif not os.path.exists(originalPath):
+            shutil.copyfile(backupPath, originalPath)
             print
             return True
         else:
@@ -106,9 +111,10 @@ class CodeGenerator(object):
         
     def _removeFileBackup(self, originalPath):
         print "      Remove File Backup of " + originalPath,
-        backupPath = originalPath.replace('f90', self.__backupSuffix)
+        backupPath = originalPath.replace(CodeGenerator.DEFAULT_SUFFIX, self._backupSuffix)
+        backupPath = backupPath.replace(CodeGenerator.DEFAULT_SUFFIX.upper(), self._backupSuffix)
         if (backupPath == originalPath):
-            backupPath = originalPath + self.__backupSuffix
+            backupPath = originalPath + self._backupSuffix
         if os.path.exists(backupPath):
             os.remove(backupPath)
             print

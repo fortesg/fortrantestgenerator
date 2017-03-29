@@ -3,7 +3,7 @@ from utils import assertType
 
 class BackupFileFinder(object):
     
-    DEFAULT_SUFFIX = 'f90'
+    DEFAULT_SUFFIX = '.f90'
     
     def __init__(self, sourceDir, backupSuffix):
         assertType(sourceDir, 'sourceDir', str)
@@ -12,7 +12,7 @@ class BackupFileFinder(object):
         assertType(backupSuffix, 'backupSuffix', str)
         
         self.__sourceDir = sourceDir
-        self.__backupSuffix = backupSuffix
+        self.__backupSuffix = '.' + backupSuffix.lstrip('.')
 
     def find(self):
         backupFiles = []
@@ -45,7 +45,9 @@ class BackupFileFinder(object):
         return backupFile.replace(self.__backupSuffix, BackupFileFinder.DEFAULT_SUFFIX)
             
     def __getBackupFile(self, originalFile):
-        return originalFile.replace(BackupFileFinder.DEFAULT_SUFFIX, self.__backupSuffix)
+        backupFile = originalFile.replace(BackupFileFinder.DEFAULT_SUFFIX, self.__backupSuffix)
+        backupFile = backupFile.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.__backupSuffix)
+        return backupFile
             
     def __getModuleName(self, filE):
         return filE[(filE.rfind('/') + 1):filE.rfind('.')]

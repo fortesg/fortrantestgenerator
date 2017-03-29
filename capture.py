@@ -1,7 +1,7 @@
 import os
 from generator import CodeGenerator 
 from utils import assertType
-from source import SourceFiles
+from source import SourceFiles, SourceFile
 from templatenamespace import CaptureTemplatesNameSpace, ExportNameSpace
 
 class CaptureCodeGenerator(CodeGenerator):
@@ -38,7 +38,10 @@ class CaptureCodeGenerator(CodeGenerator):
         print "  Add Code"
         
         sourceFilePath = subroutine.getSourceFile().getPath()
-        
+        if sourceFilePath.endswith(self._backupSuffix):
+            sourceFilePath = sourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
+            subroutine = SourceFile(sourceFilePath).getSubroutine(subroutine.getName())
+                    
         print "    ...to Module under Test"
         self._createFileBackup(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
@@ -58,6 +61,9 @@ class CaptureCodeGenerator(CodeGenerator):
                 usedSourceFile = self._findSourceFileForModule(refModule)
                 if not usedSourceFile.isPublic():
                     usedSourceFilePath = usedSourceFile.getPath()
+                    if usedSourceFilePath.endswith(self._backupSuffix):
+                        usedSourceFilePath = usedSourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
+                        usedSourceFile = SourceFile(usedSourceFilePath)
                     backup = self._createFileBackup(usedSourceFilePath)
                     exportTemplateNameSpace = ExportNameSpace(refModule, usedSourceFile, globalsReferences)
                     result = self._processTemplate(usedSourceFilePath, usedSourceFile.getContainsLineNumber() - 1, self.__exportTemplate, exportTemplateNameSpace)
