@@ -66,9 +66,9 @@ class CodeGenerator(object):
         
         subroutine = sourceFile.getSubroutine(subroutineFullName)
         
-        self._addCode(subroutine, typeArgumentReferences, globalsReferences)
+        self.addCode(subroutine, typeArgumentReferences, globalsReferences)
         
-    def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
+    def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         raise NotImplementedError()
     
     def _findSourceFileForSubroutine(self, subroutineFullName):

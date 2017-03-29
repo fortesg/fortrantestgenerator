@@ -24,7 +24,7 @@ class ReplayCodeGenerator(CodeGenerator):
         self.__testSourceDir = testSourceDir.rstrip('/')
         self.__testDataDir = testDataDir
         
-    def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
+    def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Create code"
         print "    ...in new test source file"
         

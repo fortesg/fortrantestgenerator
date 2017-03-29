@@ -34,7 +34,7 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir
 
         
-    def _addCode(self, subroutine, typeArgumentReferences, globalsReferences):
+    def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Add Code"
         
         sourceFilePath = subroutine.getSourceFile().getPath()

@@ -1,5 +1,8 @@
 import os
 from utils import assertType
+from difflib import restore
+import time
+from posix import O_RDONLY
 
 class BackupFileFinder(object):
     
@@ -25,7 +28,7 @@ class BackupFileFinder(object):
     def restore(self):
         for backupFile in self.find():
             restoreFile = self.__getOriginalFile(backupFile)
-            print 'Restore ' + restoreFile
+            print '  Restore ' + restoreFile
             os.rename(backupFile, restoreFile)
             
     def extendSpecialModuleFiles(self, specialModuleFiles):
