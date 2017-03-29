@@ -98,7 +98,7 @@
     TYPE(t_serializer), INTENT(INOUT) :: serializer
     CHARACTER(*), INTENT(IN) :: stage, dir
 
-    CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+    CHARACTER(len=1024) :: basename
     
     WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage)
 

@@ -100,7 +100,7 @@
     CHARACTER(*), INTENT(IN) :: stage, dir
 
     INTEGER (kind=4) my_mpi_id, error
-    CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+    CHARACTER(len=1024) :: basename
     
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
 
