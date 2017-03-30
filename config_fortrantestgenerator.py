@@ -25,5 +25,4 @@ sys.path.append(FCG_FOLDER)
 ### Instead of importing config_fortrancallgraph, you can also configure those variables here, 
 ### just copy the structure from config_fortrancallgraph.py,
 
-from config_fortrancallgraph import SPECIAL_MODULE_FILES, GRAPH_BUILDER, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, EXCLUDE_MODULES  # @UnusedImport
-from config_fortrancallgraph import SOURCE_FOLDER, SOURCE_FILES  # @UnusedImport
+from config_fortrancallgraph import SPECIAL_MODULE_FILES, GRAPH_BUILDER, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, EXCLUDE_MODULES, SOURCE_DIR, SOURCE_FILES  # @UnusedImport
