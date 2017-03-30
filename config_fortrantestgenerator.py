@@ -14,7 +14,7 @@ TEST_DATA_BASE_DIR = FTG_FOLDER + '/data'
 #################
 
 BACKUP_SUFFIX = 'ftg-backup'
-FTG_PREFIX = 'ftg_'
+FTG_PREFIX = 'ftg_' # Do not edit as long as you not also edit the templates accordingly.
 
 #################
 
