@@ -1,6 +1,6 @@
 # FortranTestGenerator
 
-`fortrantestgenerator` (FTG) is a tool for automatically generating unit tests for subroutines of existing Fortran applications based on an approach called Capture & Replay.
+`FortranTestGenerator` (FTG) is a tool for automatically generating unit tests for subroutines of existing Fortran applications based on an approach called Capture & Replay.
 
 One of the main effort for creating unit tests is the set-up of consistent input data. When working with legacy code, we can make use of the existing infrastructure and extract test data from the running application. 
 FTG generates code for serializing and storing a subroutines input data and inserts this code temporarily into the subroutine (capture code).
@@ -13,9 +13,8 @@ FTG is written in Python and the principles of FTG are described in the followin
 > C. Hovy and J. Kunkel, "Towards Automatic and Flexible Unit Test Generation for Legacy HPC Code," *2016 Fourth International Workshop on Software Engineering for High Performance Computing in Computational Science and Engineering (SE-HPCCSE)*, Salt Lake City, UT, 2016, pp. 1-8.
 > http://dx.doi.org/10.1109/SE-HPCCSE.2016.005
 
-Since the documentation is still very poor, please feel free to contact me if you are interested in trying the FortranTestGenerator:
-
-Christian Hovy (hovy@informatik.uni-hamburg.de)
+So far, the documentation is very poor. If your interested in using `FortranTestGenerator`, please feel free to contact me:   
+Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## In general it works as follows
 
@@ -43,8 +42,43 @@ To run FTG, you will need the following software packages:
 * This modified version of the `SerialBox` library: https://github.com/chovy1/serialbox
 * `FortranCallgraph`: https://github.com/chovy1/fortrancallgraph
 
+## Quick Start Guide
+
+#### 1. Get and install `SerialBox`
+... from here: https://github.com/chovy1/serialbox and learn how to built your application with it. 
+
+#### 2. Get and install the `Cheetah Template Engine`
+...from here: https://github.com/cheetahtemplate/cheetah or here: https://github.com/CheetahTemplate3/cheetah3 or just look if your OS provides a package (e.g. Ubuntu does).
+
+#### 3. Get `FortranCallgraph` 
+...from here: https://github.com/chovy1/fortrancallgraph
+
+#### 4. Configure and try `FortranCallgraph`
+...according to its [documentation](https://github.com/chovy1/fortrancallgraph/blob/master/README.md).
+
+#### 5. Clone this repo
+
+```
+$> git clone https://github.com/chovy1/fortrantestgenerator.git
+$> cd fortrantestgenerator
+```
+
+#### 6. Fill out the configuration file [config_fortrantestgenerator.py](config_fortrantestgenerator.py)
+
+`FTG_DIR` : The location of FortranTestGenerator (usually `os.path.dirname(os.path.realpath(__file__))`)
+
+`FCG_DIR` : The location of FortranCallgraph (usually `FTG_DIR + '../fortrancallgraph'')
+
+`TEMPLATE_DIR` : The location of the templates to be used for code generation (`FTG_DIR + '/templates/standalone_nompi'` shall be a good start, or `FTG_DIR + '/templates/standalone'` if your application uses MPI)
+
+`TEST_SOURCE_DIR` : The folder where the generated test driver shall be put in.
+
+'TEST_DATA_BASE_DIR' : The folder where the captured data shall be put in.
+
+**Please note:** If you don't want to have the configuration spread over the two files of FortranCallgraph and FortranTestGenerator, you can put all the variables from config_fortrancallgraph.py to config_fortrantestgenerator.py instead of importing them.
+
+##### to be continued...
+
 ## License
 
 [GNU General Public License v3.0](LICENSE)
-
-##### to be continued...
