@@ -1,8 +1,5 @@
 import os
 from utils import assertType
-from difflib import restore
-import time
-from posix import O_RDONLY
 
 class BackupFileFinder(object):
     

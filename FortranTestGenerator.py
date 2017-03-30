@@ -15,7 +15,6 @@ from capture import CaptureCodeGenerator
 from replay import ReplayCodeGenerator
 from backup import BackupFileFinder
 from combined import CombinedCodeGenerator
-import time
 
 def parseArguments(argParser):
     
