@@ -43,4 +43,8 @@ To run FTG, you will need the following software packages:
 * This modified version of the `SerialBox` library: https://github.com/chovy1/serialbox
 * `FortranCallgraph`: https://github.com/chovy1/fortrancallgraph
 
+## License
+
+[GNU General Public License v3.0](LICENSE)
+
 ##### to be continued...
