@@ -56,12 +56,10 @@ def main():
         if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):
             argParser.error('Subroutine ' + str(subroutineFullName) + ' not found!');
         
-        if not SOURCE_FILES.existsSubroutine(subroutineFullName):
-            argParser.error('Subroutine ' + str(subroutineFullName) + ' not found!');
-        
     if args.restore:
         print 'Restore Backup Files'
         backupFinder.restore()
+        SOURCE_FILES.clearCache()
     else: 
         SOURCE_FILES.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(SOURCE_FILES.getSpecialModuleFiles()))
 
