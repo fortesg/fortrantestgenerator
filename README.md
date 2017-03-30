@@ -73,7 +73,7 @@ $> cd fortrantestgenerator
 
 `TEST_SOURCE_DIR` : The folder where the generated test driver shall be put in.
 
-'TEST_DATA_BASE_DIR' : The folder where the captured data shall be put in.
+`TEST_DATA_BASE_DIR` : The folder where the captured data shall be put in.
 
 **Please note:** If you don't want to have the configuration spread over the two files of FortranCallgraph and FortranTestGenerator, you can put all the variables from config_fortrancallgraph.py to config_fortrantestgenerator.py instead of importing them.
 
