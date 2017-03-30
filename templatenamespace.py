@@ -1,6 +1,5 @@
 from utils import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference
-from blinker._utilities import reference
 from string import find
 import re
 from symbol import argument
