@@ -13,6 +13,10 @@ FTG is written in Python and the principles of FTG are described in the followin
 > C. Hovy and J. Kunkel, "Towards Automatic and Flexible Unit Test Generation for Legacy HPC Code," *2016 Fourth International Workshop on Software Engineering for High Performance Computing in Computational Science and Engineering (SE-HPCCSE)*, Salt Lake City, UT, 2016, pp. 1-8.
 > http://dx.doi.org/10.1109/SE-HPCCSE.2016.005
 
+Since the documentation is still very poor, please feel free to contact me if you are interested in trying the FortranTestGenerator:
+
+Christian Hovy (hovy@informatik.uni-hamburg.de)
+
 ## In general it works as follows
 
 1. You identify an existing subroutine in your Fortran application and a certain execution of this subroutine that you want to run for test purposes in isolation, that is without the surrounding application.
