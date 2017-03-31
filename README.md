@@ -140,9 +140,9 @@ $> sbcompare output/ftg_my_subroutine_output_0.json output_test/ftg_my_subroutin
 ```
 This compares the output for the first MPI process. Replace `_0` by `_1`, `_2`, etc. for comparing the output of the other processes. 
 
-If deviations are shown, it's up you to figure out what went wrong, for example if one variable was missed by the source code analysis or if there is some kind of non-determinism in your code.
+If deviations are shown, it's up to you to figure out what went wrong, for example if one variable was missed by the source code analysis or if there is some kind of non-determinism in your code.
 
-### 15. Make a real test out of the generated test driver
+#### 15. Make a real test out of the generated test driver
 
 For example add some checks, modify the loaded input data and run the subroutine under test again etc.
 
@@ -150,7 +150,38 @@ You should also remove the dependencies to the capture code, so that you can rem
 
 If you want to load the original output data for your checks, just have a look how this is done for the input data.
 
-## to be continued...
+## Please Note
+
+* `FortranTestGenerator.py -c` not only generates the capture code in the module with the subroutine under test, but also a PUBLIC statements in every module that contains a module variable that is needed by the test and not yet public (export code).
+This only works for module variables that are private because the whole module is private and they are not explicitly set to public. If a variable is private because it has the private keyword in its declaration, this procedure won't work and you have to manually make them public. The compiler will tell you if there is such a problem. Similar problems can occure elsewhere.
+
+* For each module that is modified by `FortranTestGenerator.py -c` a copy of the original version is created with the file ending `.ftg-backup`. You can restore these backups by running
+  ```
+  $> ./FortranTestGenerator.py -b
+  ```
+* You can combine the options `-b`, `-c` and `-r` in any combination. When running `FortranTestGenerator.py` with `-b` option, restoring the backups will always be the first action, and when running with `-r`, generating the replay code will come at last.
+
+* `-b` will restore all backups, so also the generated PUBLIC statements will be removed, but usually, you will need them for your test. So, if you want any generated code to stay, just remove the corresponding .ftg-backup file. It then might make sense to add some preprocessor directives around the generated code (e.g. something like `#ifdef __FTG_TESTS_ENABLED__ ... #endif`). If you want to have such directives always be there, just add them to the template you are using.
+
+* As long as there is a backup file, any analysis is done on this instead of the original file.
+
+* As mentioned before, the static source code analysis is done by [FortranCallgraph](https://github.com/chovy1/fortrancallgraph) which combines an analysis of assembler files with an analysis of the original source code. Actually, it first creates a call graph with the subroutine under test as root by parsing the assembler files and then it traverses this call graph while analysing the original (unpreprocessed) source files. This procedure can lead to problems if your code contains too much preprocessor acrobatics. 
+
+  And there also are other cases where the assembler code differs from the orginal source code. Example:
+  ```fortran
+  LOGICAL, PARAMETER check = .TRUE.
+  IF (check) THEN
+    CALL a()
+  ELSE
+    CALL b()
+  END IF
+  ```
+  Even when compiled with `-O0`, the `ELSE` block in this example won't be in the assembler/binary code. But usually this is not a problem, there will just be a warning during the analysis that the subroutine `b` is not found in the call graph.
+  
+* When you change your code, you will have to compile again with `-S -g -O0` to generate new assembler files. For example, when you have generated capture and export code and removed some backup files to make the code permanent, you have to compile again.
+
+* If any problem occurs, please feel free to contact me:   
+Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## License
 
