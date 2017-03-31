@@ -41,13 +41,13 @@ To run FTG, you will need the following software packages:
 
 * `Python 2.7` (Python 3+ is currently not supported, but all uncompatible stuff will be removed in the future)
 * The `Cheetah Template Engine`: https://github.com/cheetahtemplate/cheetah (Unfortunately, development and support here has stopped during the development of FTG, but there is now a fork on: https://github.com/CheetahTemplate3/cheetah3, which has not yet been tested with FTG though.)
-* This modified version of the `SerialBox` library: https://github.com/fortesg/serialbox
+* This modified version of the `SerialBox` library: https://github.com/fortesg/serialbox-ftg
 * `FortranCallgraph`: https://github.com/fortesg/fortrancallgraph
 
 ## Quick Start Guide
 
-#### 1. Get and install `SerialBox`
-... from here: https://github.com/fortesg/serialbox and learn how to built your application with it. 
+#### 1. Get and install `SerialBox-ftg`
+... from here: https://github.com/fortesg/serialbox-ftg and learn how to built your application with it. 
 
 #### 2. Get and install the `Cheetah Template Engine`
 ...from here: https://github.com/cheetahtemplate/cheetah or here: https://github.com/CheetahTemplate3/cheetah3 or just look if your OS provides a package (e.g. Ubuntu does).
@@ -112,7 +112,7 @@ It is a little bit annoying that you have to create these folders manually, but 
 
 #### 11. Compile and run your application with the capture code
 
-This will only work if you have added the includes and libraries of SerialBox to your build configuration, see step 1.
+This will only work if you have added the includes and libraries of SerialBox-ftg to your build configuration, see step 1.
 
 When the capturing is taking place, there will be messages printed to `stdout` beginning with `FTG...`.
 
@@ -207,7 +207,7 @@ Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## Notes for ICON developers
 
-#### 1. Building ICON with SerialBox
+#### 1. Building ICON with SerialBox-ftg
 
 * For including the libraries, you can just use the `OTHER_LIBS` variable in your `mh-linux` file:
   ```
