@@ -184,6 +184,19 @@ This only works for module variables that are private because the whole module i
 
 * The static source code analysis has the same limitations as every static analysis, it can only find out what can be found out by parsing the source code. So mainly, it can not handle runtime polymorphism. That means, the use of, for example, function pointers or inheritance can lead to wrong results.
 
+* The modified SerialBox library used by FTG contains code like
+
+  ```fortran
+  IF (ASSOCIATED(ptr)) THEN
+     ! write ptr
+  THEN
+  ```
+  to prevent unassociated pointer variables and alike from being captured.
+
+  Unfortunately, the `ASSOCIATED` function only works properly for pointer variables that have either been nullified or actually associated with some variable, but not with variables that have never been initialized.
+
+  So, if a segmentation fault occures during capturing, please check first if an uninitialized pointer has been passed. It is good practice to add `=> NULL()` to every declaration of a pointer variable.
+
 * If any problem occurs, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
@@ -290,6 +303,9 @@ IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + ['mo_mpi']
 
 IGNORE_DERIVED_TYPES = []
 ```
+#### 5. Uninitialized pointer variables
+
+Please see the note on that above. Unfortunately, ICON contains a lot of such variables, especially in the derived types. Just add `=> NULL()` to all of the declarations if possible.
 
 ## License
 
