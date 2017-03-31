@@ -13,7 +13,7 @@ FTG is written in Python and the principles of FTG are described in the followin
 > C. Hovy and J. Kunkel, "Towards Automatic and Flexible Unit Test Generation for Legacy HPC Code," *2016 Fourth International Workshop on Software Engineering for High Performance Computing in Computational Science and Engineering (SE-HPCCSE)*, Salt Lake City, UT, 2016, pp. 1-8.
 > http://dx.doi.org/10.1109/SE-HPCCSE.2016.005
 
-So far, the documentation is very poor. If your interested in using `FortranTestGenerator`, please feel free to contact me:   
+So far, the documentation is not complete. If your interested in using `FortranTestGenerator`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## In general it works as follows
@@ -285,7 +285,11 @@ IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + ['mo_mpi']
 
 IGNORE_DERIVED_TYPES = []
 ```
-  
+## Modifying the templates
+
+The templates are based on the `Cheetah Template Engine` and an API which has no documentation so far. Please ask me, if you need help with adapting the generated code to your needs:   
+Christian Hovy <<hovy@informatik.uni-hamburg.de>>
+
 ## License
 
 [GNU General Public License v3.0](LICENSE)
