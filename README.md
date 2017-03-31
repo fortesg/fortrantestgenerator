@@ -150,9 +150,11 @@ You should also remove the dependencies to the capture code, so that you can rem
 
 If you want to load the original output data for your checks, just have a look how this is done for the input data.
 
+Some basic checks will be added to the provided templates in the future.
+
 ## Please Note
 
-* `FortranTestGenerator.py -c` not only generates the capture code in the module with the subroutine under test, but also a PUBLIC statements in every module that contains a module variable that is needed by the test and not yet public (export code).
+* `FortranTestGenerator.py -c` not only generates the capture code in the module with the subroutine under test, but also a `PUBLIC` statements in every module that contains a module variable that is needed by the test and not yet public (export code).
 This only works for module variables that are private because the whole module is private and they are not explicitly set to public. If a variable is private because it has the private keyword in its declaration, this procedure won't work and you have to manually make them public. The compiler will tell you if there is such a problem. Similar problems can occure elsewhere.
 
 * For each module that is modified by `FortranTestGenerator.py -c` a copy of the original version is created with the file ending `.ftg-backup`. You can restore these backups by running
@@ -179,6 +181,8 @@ This only works for module variables that are private because the whole module i
   Even when compiled with `-O0`, the `ELSE` block in this example won't be in the assembler/binary code. But usually this is not a problem, there will just be a warning during the analysis that the subroutine `b` is not found in the call graph.
   
 * When you change your code, you will have to compile again with `-S -g -O0` to generate new assembler files. For example, when you have generated capture and export code and removed some backup files to make the code permanent, you have to compile again.
+
+* The static source code analysis has the same limitations as every static analysis, it can only find out what can be found out by parsing the source code. So mainly, it can not handle runtime polymorphism. That means, the use of, for example, function pointers or inheritance can lead to wrong results.
 
 * If any problem occurs, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
