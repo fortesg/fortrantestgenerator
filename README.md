@@ -169,7 +169,7 @@ This only works for module variables that are private because the whole module i
 
 * As mentioned before, the static source code analysis is done by [FortranCallgraph](https://github.com/chovy1/fortrancallgraph) which combines an analysis of assembler files with an analysis of the original source code. Actually, it first creates a call graph with the subroutine under test as root by parsing the assembler files and then it traverses this call graph while analysing the original (unpreprocessed) source files. This procedure can lead to problems if your code contains too much preprocessor acrobatics. 
 
-  And there also are other cases where the assembler code differs from the orginal source code. Example:
+  And there are also other cases where the assembler code differs from the orginal source code. Example:
   ```fortran
   LOGICAL, PARAMETER check = .TRUE.
   IF (check) THEN
@@ -187,6 +187,105 @@ This only works for module variables that are private because the whole module i
 * If any problem occurs, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
+## Notes for ICON developers
+
+#### 1. Building ICON with SerialBox
+
+* For including the libraries, you can just use the `OTHER_LIBS` variable in your `mh-linux` file:
+  ```
+  OTHER_LIBS  = ${OTHER_LIBS} -L${SERIALBOX_ROOT}/lib -lFortranSer -lSerialBoxWrapper -lSerialBox -lUtils -ljson -lstdc++ -lsha256
+  ```
+* For including the includes, there is no such variable, so I have just addded them to the `FFLAGS` variable:
+  ```
+  FFLAGS = ${FFLAGS} -I${SERIALBOX_ROOT}/include/fortran
+  ```
+
+#### 2. Create assembler files
+
+I have done it like this:
+
+* In my `mh-linux` file I have added `$FFLAGS` itself to `FFLAGS` under the `gcc` section:
+  ```
+  FFLAGS      = $FFLAGS $FCPP $FLANG $FWARN $INCLUDES
+  ```
+* Then, when I want to create the assembler files, I just run:
+  ```
+  $> export FFLAGS='-S -g -O0'
+  $> ./configure
+  $> rm build/x86_64-unknown-linux-gnu/src/*.o
+  $> make
+  $> export FFLAGS=
+  ```
+  `make` will end up with an error, that an `*.o` file is missing, but that's fine.
+
+#### 3. Compiling the tests
+  
+* When using the `icon_standalone` template, just put the generated test files into the `src/tests` directory, see step 6 in the Quick Start Guide:
+  ```
+  TEST_SOURCE_DIR = '<iconroot>/src/tests'
+  ```
+  `./configure` will then automatically add the test to the `Makefile` and you will get a binary in `build/.../bin`.
+* You can also generate tests for the *testbed* by using the `icon_testbed` templates, but this will be a bit more complicated. You will then have to integrate the generated modules manually into the testbed environment and create proper run scripts.
+
+#### 4. Configuration of FortranCallgraph
+
+The following configuration has shown to work pretty well:
+
+```
+ASSEMBLER_DIR = '<iconroot>/build/x86_64-unknown-linux-gnu/src'
+SOURCE_DIR = '<iconroot>/src'
+
+SPECIAL_MODULE_FILES = {'mo_mcrph_sb': 'mo_2mom_mcrph_driver.f90',
+                        'mo_lrtm': 'mo_lrtm_driver.f90', 'ppm_extents': 'mo_extents.f90',
+                        'psrad_rrsw_kg16': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg17': 'mo_psrad_srtm_kgs.f90', 
+                        'psrad_rrsw_kg18': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg19': 'mo_psrad_srtm_kgs.f90', 
+                        'psrad_rrsw_kg20': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg21': 'mo_psrad_srtm_kgs.f90', 
+                        'psrad_rrsw_kg22': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg23': 'mo_psrad_srtm_kgs.f90', 
+                        'psrad_rrsw_kg24': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg25': 'mo_psrad_srtm_kgs.f90', 
+                        'psrad_rrsw_kg26': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg27': 'mo_psrad_srtm_kgs.f90', 
+                        'psrad_rrsw_kg28': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg29': 'mo_psrad_srtm_kgs.f90', 
+                        'rrlw_planck': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg01': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg02': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg03': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg04': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg05': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg06': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg07': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg08': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg09': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg10': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg11': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg12': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg13': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg14': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg15': 'mo_psrad_lrtm_kgs.f90', 
+                        'psrad_rrlw_kg16': 'mo_psrad_lrtm_kgs.f90', 
+                        'rrlw_kg01': 'mo_lrtm_kgs.f90', 'rrlw_kg02': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg03': 'mo_lrtm_kgs.f90', 'rrlw_kg04': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg05': 'mo_lrtm_kgs.f90', 'rrlw_kg06': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg07': 'mo_lrtm_kgs.f90', 'rrlw_kg08': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg09': 'mo_lrtm_kgs.f90', 'rrlw_kg10': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg11': 'mo_lrtm_kgs.f90', 'rrlw_kg12': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg13': 'mo_lrtm_kgs.f90', 'rrlw_kg14': 'mo_lrtm_kgs.f90', 
+                        'rrlw_kg15': 'mo_lrtm_kgs.f90', 'rrlw_kg16': 'mo_lrtm_kgs.f90', 
+                        'yoesrta16': 'mo_srtm_kgs.f90', 'yoesrta17': 'mo_srtm_kgs.f90', 
+                        'yoesrta18': 'mo_srtm_kgs.f90', 'yoesrta19': 'mo_srtm_kgs.f90', 
+                        'yoesrta20': 'mo_srtm_kgs.f90', 'yoesrta21': 'mo_srtm_kgs.f90', 
+                        'yoesrta22': 'mo_srtm_kgs.f90', 'yoesrta23': 'mo_srtm_kgs.f90', 
+                        'yoesrta24': 'mo_srtm_kgs.f90', 'yoesrta25': 'mo_srtm_kgs.f90', 
+                        'yoesrta26': 'mo_srtm_kgs.f90', 'yoesrta27': 'mo_srtm_kgs.f90', 
+                        'yoesrta28': 'mo_srtm_kgs.f90', 'yoesrta29': 'mo_srtm_kgs.f90'}
+
+EXCLUDE_MODULES = ['mpi', 'omp_lib', 'mo_io_units', 'mo_utilities', 'iso_c_binding', 
+                   'mod_prism_proto', 'ifcore', 'mo_cdi', 'mo_control', 'mo_submodel',
+                   'mtime', 'sct', 'ppm_distributed_array', 'data_parameters',
+                   'data_constants', 'data_runcontrol', 'data_modelconfig', 'data_fields',
+                   'data_parallel', 'data_soil', 'turbulence_data', 'data_1d_global',
+                   'mo_art_nml', 'mo_art_init_interface', 'mo_art_emission_interface', 
+                   'mo_art_washout_interface', 'mo_art_diagnostics_interface', 
+                   'mo_art_reaction_interface', 'mo_art_clouds_interface', 
+                   'mo_art_radiation_interface', 'mo_art_turbdiff_interface', 
+                   'mo_art_sedimentation_interface', 'mo_art_tools_interface', 
+                   'mo_art_tracer_interface', 'mo_art_config']
+
+IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + ['mo_mpi'] 
+
+IGNORE_DERIVED_TYPES = []
+```
+  
 ## License
 
 [GNU General Public License v3.0](LICENSE)
