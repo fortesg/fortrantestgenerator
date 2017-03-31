@@ -99,7 +99,18 @@ By default, both functions just compare the variable `ftg_velocity_tendencies_ro
 
 If you want the capturing to happen for example in the 42nd execution of `my_subroutine`, just set `ftg_velocity_tendencies_capture_round` to `42`, but you can also change the functions to what ever you like. If you want to make the time for capturing dependent on the status of another variable, you can also add arguments to those functions. Of course, then you need to add the arguments also at the places where the functions are called.
 
-#### 10. Compile and run your application with the capture code
+#### 10. Create folders for the captured data
+
+You will need the following directories for capturing data from `my_subroutine`:
+* `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/input`
+* `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output`
+* `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output_test`
+
+`TEST_DATA_BASE_DIR` stands for the path set in the configuration file. `my_subroutine` has to be replaced by the actual subroutine name.
+
+It is a little bit annoying that you have to create these folders manually, but currently there is no other option.
+
+#### 11. Compile and run your application with the capture code
 
 This will only work if you have added the includes and libraries of SerialBox to your build configuration, see step 1.
 
@@ -107,7 +118,39 @@ When the capturing is taking place, there will be messages printed to `stdout` b
 
 When each MPI process has printed `FTG FINALIZE OUTPUT DATA my_subroutine`, capturing has finished and you can kill your application.
 
-##### to be continued...
+#### 12. Create replay code
+Run:
+```
+$> ./FortranTestgenerator.py -r my_module my_subroutine
+```
+#### 13. Compile and run the generated test driver (replay code)
+
+You have to run the test with the same numbers of MPI processes as you have done for capturing.
+
+#### 14. Compare the original output with the output from the test
+
+The original output is located in `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output` and the test output was put into `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output_test`.
+
+To compare the data, you can use `serialbox-compare`: https://github.com/chovy1/serialbox-compare.
+
+Do the following:
+```
+$> cd TEST_DATA_BASE_DIR/ftg_my_subroutine_test
+$> sbcompare output/ftg_my_subroutine_output_0.json output_test/ftg_my_subroutine_output_0.json
+```
+This compares the output for the first MPI process. Replace `_0` by `_1`, `_2`, etc. for comparing the output of the other processes. 
+
+If deviations are shown, it's up you to figure out what went wrong, for example if one variable was missed by the source code analysis or if there is some kind of non-determinism in your code.
+
+### 15. Make a real test out of the generated test driver
+
+For example add some checks, modify the loaded input data and run the subroutine under test again etc.
+
+You should also remove the dependencies to the capture code, so that you can remove that stuff from the subroutine and its module.
+
+If you want to load the original output data for your checks, just have a look how this is done for the input data.
+
+## to be continued...
 
 ## License
 
