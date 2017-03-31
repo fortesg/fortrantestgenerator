@@ -187,6 +187,11 @@ This only works for module variables that are private because the whole module i
 * If any problem occurs, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
+## Modifying the templates
+
+The templates are based on the `Cheetah Template Engine` and an API which has no documentation so far. Please ask me, if you need help with adapting the generated code to your needs:   
+Christian Hovy <<hovy@informatik.uni-hamburg.de>>
+
 ## Notes for ICON developers
 
 #### 1. Building ICON with SerialBox
@@ -285,10 +290,6 @@ IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + ['mo_mpi']
 
 IGNORE_DERIVED_TYPES = []
 ```
-## Modifying the templates
-
-The templates are based on the `Cheetah Template Engine` and an API which has no documentation so far. Please ask me, if you need help with adapting the generated code to your needs:   
-Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## License
 
