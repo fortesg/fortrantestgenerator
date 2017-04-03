@@ -4,12 +4,12 @@ import sys
 
 ### EDIT HERE ###
 
-FTG_FOLDER = os.path.dirname(os.path.realpath(__file__))
-FCG_FOLDER = FTG_FOLDER + '/../fortrancallgraph'
+FTG_DIR = os.path.dirname(os.path.realpath(__file__))
+FCG_DIR = FTG_DIR + '/../fortrancallgraph'
 
-TEMPLATE_FOLDER = FTG_FOLDER + '/templates/standalone'
-TEST_SOURCE_FOLDER = ''
-TEST_DATA_BASE_DIR = FTG_FOLDER + '/data'
+TEMPLATE_DIR = FTG_DIR + '/templates/standalone'
+TEST_SOURCE_DIR = ''
+TEST_DATA_BASE_DIR = FTG_DIR + '/data'
 
 #################
 
@@ -18,7 +18,7 @@ FTG_PREFIX = 'ftg_' # Do not edit as long as you not also edit the templates acc
 
 #################
 
-sys.path.append(FCG_FOLDER)
+sys.path.append(FCG_DIR)
 
 #################
 
