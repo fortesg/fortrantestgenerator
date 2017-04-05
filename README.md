@@ -95,9 +95,9 @@ $> ./FortranTestgenerator.py -c my_module my_subroutine
 Have a look at the generated code in the module file where the subroutine under test (`my_subroutine`) is located.
 When using one of the provided templates, there are now the two functions: `ftg_my_subroutine_capture_input_active` and `ftg_my_subroutine_capture_output_active`. Those functions define when the time is come to capture the subroutines' input and output. 
 
-By default, both functions just compare the variable `ftg_velocity_tendencies_round`, in which the subroutine executions are counted, with the variable `ftg_velocity_tendencies_capture_round`. By default, `ftg_velocity_tendencies_capture_round` is set to `1`, which means that the capturing takes place in the first execution of `my_subroutine`.
+By default, both functions just compare the variable `ftg_my_subroutine_round`, in which the subroutine executions are counted, with the variable `ftg_my_subroutine_round`. By default, `ftg_my_subroutine_capture_round` is set to `1`, which means that the capturing takes place in the first execution of `my_subroutine`.
 
-If you want the capturing to happen for example in the 42nd execution of `my_subroutine`, just set `ftg_velocity_tendencies_capture_round` to `42`, but you can also change the functions to what ever you like. If you want to make the time for capturing dependent on the status of another variable, you can also add arguments to those functions. Of course, then you need to add the arguments also at the places where the functions are called.
+If you want the capturing to happen for example in the 42nd execution of `my_subroutine`, just set `ftg_my_subroutine_capture_round` to `42`, but you can also change the functions to what ever you like. If you want to make the time for capturing dependent on the status of another variable, you can also add arguments to those functions. Of course, then you need to add the arguments also at the places where the functions are called.
 
 #### 10. Create folders for the captured data
 
