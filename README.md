@@ -16,6 +16,8 @@ FTG is written in Python and the principles of FTG are described in the followin
 So far, the documentation is not complete. If your interested in using `FortranTestGenerator`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
+**Contents:** [In general it works as follows](#in-general-it-works-as-follows) | [Prerequisites](#prerequisites) | [Quick Start Guide](#quick-start-guide) | [Please Note](#please-note) | [Modifying the templates](#modifying-the-templates) | [Notes for ICON developers](#notes-for-icon-developers) | [License](#license)
+
 ## In general it works as follows
 
 1. You identify an existing subroutine in your Fortran application and a certain execution of this subroutine that you want to run for test purposes in isolation, that is without the surrounding application.
