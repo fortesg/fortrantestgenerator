@@ -83,7 +83,7 @@ $> cd fortrantestgenerator
 
 #### 7. Create assembler files
 
-Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` to generate assembler files.
+Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `-save-temps -g -O0` to generate assembler files.
 
 #### 8. Create capture code
 
