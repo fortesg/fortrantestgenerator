@@ -257,6 +257,7 @@ SOURCE_DIR = '<iconroot>/src'
 
 SPECIAL_MODULE_FILES = {'mo_mcrph_sb': 'mo_2mom_mcrph_driver.f90',
                         'mo_lrtm': 'mo_lrtm_driver.f90', 'ppm_extents': 'mo_extents.f90',
+                        'ppm_distributed_array': 'mo_dist_array.f90',
                         'psrad_rrsw_kg16': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg17': 'mo_psrad_srtm_kgs.f90', 
                         'psrad_rrsw_kg18': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg19': 'mo_psrad_srtm_kgs.f90', 
                         'psrad_rrsw_kg20': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg21': 'mo_psrad_srtm_kgs.f90', 
