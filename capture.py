@@ -46,12 +46,12 @@ class CaptureCodeGenerator(CodeGenerator):
         self._createFileBackup(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
         # Reihenfolge wichtig: von unten nach oben!!!
-        self._processTemplate(sourceFilePath, subroutine.getLastLineNumber() + 1, self.__afterLastLineTemplate, templateNameSpace)
+        self._processTemplate(sourceFilePath, subroutine.getLastLineNumber(), self.__afterLastLineTemplate, templateNameSpace)
         lastLine = subroutine.getContainsLineNumber()
         if lastLine < 0:
             lastLine = subroutine.getLastLineNumber()
         self._processTemplate(sourceFilePath, lastLine - 1, self.__beforeEndTemplate, templateNameSpace)
-        self._processTemplate(sourceFilePath, subroutine.getLastSpecificationLineNumber() + 1, self.__afterLastSpecificationTemplate, templateNameSpace)
+        self._processTemplate(sourceFilePath, subroutine.getLastSpecificationLineNumber(), self.__afterLastSpecificationTemplate, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.__beforeContainsTemplate, templateNameSpace)
         
         print "    ...to Used Modules"
