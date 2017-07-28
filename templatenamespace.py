@@ -198,10 +198,13 @@ class TemplatesNameSpace(object):
     def allocatedOrAssociated(self, variableName, dim, *placeholder):
         reference = self._findReference(variableName)
         if reference is not None:
+            
             totalDim = reference.getTotalDimensions()
             if dim > totalDim:
                 dim = totalDim
             top = 0
+            if reference.getExpression() == 'dist_cell_owner%dt_info%extent':
+                print '*** DEBUG ***' + str(reference) + ' // ' + str(totalDim) 
             pointer = False
             allocatable = False
             perc = ''

@@ -135,25 +135,33 @@
 
   END SUBROUTINE ftg_${subroutine.name}_capture_output
     
-  ! ================= END FORTRAN TEST GENERATOR (FTG) =========================  
-################################################################################
+  ! ================= END FORTRAN TEST GENERATOR (FTG) =========================
+################################################################################    
 #def ftg_write($var)
   #if $isReferencable($var)
+    #set $contDim = 0
     #if $containerNeedsRegistration($var)
       #for $level in $levels($var)[:-1]
         #set $container = $getExpression($var, $level)
         #set $contType = $type($container)
         #set $contDim = $dim($container)
         #if $needsRegistration($container)
+          #set $aa = $allocatedOrAssociated($var, $contDim)
+          #if $aa != ''
+            IF ($aa) THEN
+          #end if
           #if $isArray($container)
             CALL fs_register_derived_type_field(serializer, "$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
           #else
             CALL fs_register_derived_type_field(serializer, "$container", "$contType")$setRegistered($container)
           #end if $setRegistered($container) 
+          #if $aa != ''
+            END IF
+          #end if
         #end if
       #end for
     #end if
-    #set $aa = $allocatedOrAssociated($var, 0)
+    #set $aa = $allocatedOrAssociated($var, $contDim)
     #if $aa != ''
       IF ($aa) THEN
     #end if
@@ -226,4 +234,4 @@
       #set $ifAA = $ifAA[:-1]
     #end for
   #end if
-#end def  
+#end def
