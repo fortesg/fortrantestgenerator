@@ -203,8 +203,6 @@ class TemplatesNameSpace(object):
             if dim > totalDim:
                 dim = totalDim
             top = 0
-            if reference.getExpression() == 'dist_cell_owner%dt_info%extent':
-                print '*** DEBUG ***' + str(reference) + ' // ' + str(totalDim) 
             pointer = False
             allocatable = False
             perc = ''
