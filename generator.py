@@ -85,9 +85,9 @@ class CodeGenerator(object):
     def _extractModulesFromVariableReferences(self, references):
         modules = set()
         for ref in references:
-            module = ref.getLevel0Variable().getDeclaredIn()
+            module = ref.getDeclaredIn().getModule()
             if module is not None:
-                modules.add(module)
+                modules.add(module.getName())
         
         return modules
         

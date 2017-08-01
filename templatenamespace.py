@@ -18,10 +18,10 @@ class TemplatesNameSpace(object):
         for reference in globalsReferences:
             reference = reference.cleanCopy()
             variableName = reference.getVariableName() 
-            if reference.getDeclaredIn() != subroutine.getModuleName():
+            if reference.getDeclaredIn().getName() != subroutine.getModuleName():
                 variable = reference.getLevel0Variable()
                 if variable is not None and variable.getDeclaredIn() is not None:
-                    newName = variable.getDeclaredIn() + '__' + variableName
+                    newName = variable.getDeclaredIn().getName() + '__' + variableName
                     alias = variable.getAlias(newName)
                     reference.setLevel0Variable(alias)
             self._globalsReferences.append(reference)
@@ -492,7 +492,7 @@ class GlobalsNameSpace(object):
         testModule = subroutine.getName().getModuleName()
         modules = dict()    
         for variable in variables:
-            moduleName = variable.getDeclaredIn()
+            moduleName = variable.getDeclaredIn().getName()
             if moduleName != testModule or includeTestModule:
                 if moduleName not in modules:
                     modules[moduleName] = []
@@ -501,7 +501,7 @@ class GlobalsNameSpace(object):
                     varName += ' => ' + variable.getOriginalName()
                 modules[moduleName].append(varName)
         for typE in types:
-            moduleName = typE.getDeclaredIn()
+            moduleName = typE.getDeclaredIn().getName()
             if isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
                 if moduleName not in modules:
                     modules[moduleName] = []
@@ -544,7 +544,7 @@ class TypesNameSpace(object):
         testModule = subroutine.getName().getModuleName()
         modules = dict()    
         for typE in self.__types.values():
-            moduleName = typE.getDeclaredIn()
+            moduleName = typE.getDeclaredIn().getName()
             if  isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
                 if moduleName not in modules:
                     modules[moduleName] = []
@@ -592,7 +592,7 @@ class ExportGlobalsNameSpace(object):
         types = set()
         for ref in globalsReferences:
             variable = ref.getLevel0Variable()
-            refModule = variable.getDeclaredIn()
+            refModule = variable.getDeclaredIn().getName()
             if refModule == moduleName:
                 variableName = variable.getOriginalName().lower()
                 if variableName not in variables and not variable.isPublic() and variableName not in publicElements:
@@ -600,7 +600,7 @@ class ExportGlobalsNameSpace(object):
                     variables.add(variableName)
             if variable.hasDerivedType() and variable.isTypeAvailable():
                 typE = variable.getType()
-                refModule = typE.getDeclaredIn()
+                refModule = typE.getDeclaredIn().getName()
                 if refModule == moduleName:
                     typeName = typE.getName().lower()
                     if typeName not in types and typeName not in publicElements:
