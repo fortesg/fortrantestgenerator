@@ -79,10 +79,15 @@ CONTAINS
     INTEGER, DIMENSION(4,2) :: ftg_bounds
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
+    INTEGER ftg_mtime_calendar
 
     CALL fs_create_savepoint('input', savepoint)
   
     WRITE (0,'(a,i1,a)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    
+    ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
+    CALL fs_read_field(serializer, savepoint, "ftg_mtime_calendar", ftg_mtime_calendar)
+    CALL setCalendar(ftg_mtime_calendar)
 
     ! BASIC ARGUMENTS
     #for $argument in $arguments.all.basic
@@ -125,7 +130,7 @@ END PROGRAM ftg_${subroutine.name}_test
       #if $needsAllocation($container)
         IF (fs_field_exists(serializer, "$container")) THEN
           ftg_bounds = fs_get_field_bounds(serializer, "$container")
-          $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1 ,2)", "ftg_bounds(2 ,1):ftg_bounds(2 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(4 ,1):ftg_bounds(4 ,2)")
+          $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1 ,2)", "ftg_bounds(2 ,1):ftg_bounds(2 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(4 ,1):ftg_bounds(4 ,2)") ! A
         ELSE
           $alloc($container, $contDim, "0", "0", "0", "0")
         END IF
@@ -154,7 +159,7 @@ END PROGRAM ftg_${subroutine.name}_test
           $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
           IF (fs_field_exists(serializer, ftg_c)) THEN
             ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
-            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)") ! B
           ELSE
             $alloc($container, $contDim, "0", "0", "0", "0")
           END IF
@@ -165,12 +170,12 @@ END PROGRAM ftg_${subroutine.name}_test
     #for $level in sorted(set($levels($var)[:-1]) - set($levels($topContainer)))
       #set $container = $getExpression($var, $level)
       #set $contDim = $dim($container)
-      #if $needsAllocation($container)
+      #if $needsAllocationFilled($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         IF (fs_field_exists(serializer, ftg_c)) THEN
           ftg_bounds = fs_get_field_bounds(serializer, ftg_c)
-            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+          $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)") ! C
         ELSE
           $alloc($container, $contDim, "0", "0", "0", "0")
         END IF

@@ -35,6 +35,7 @@
     
   SUBROUTINE ftg_${subroutine.name}_capture_input(${arguments.all.names})
 
+    USE mtime,             ONLY: calendarType
     USE mo_mpi,            ONLY: get_my_mpi_all_id
     USE m_serialize, ONLY: t_serializer, t_savepoint, fs_create_savepoint, fs_add_savepoint_metainfo, fs_write_field, fs_destroy_savepoint, fs_destroy_serializer, fs_register_derived_type_field
     
@@ -55,6 +56,9 @@
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
       WRITE (0,*) 'FTG WRITE INPUT DATA ${subroutine.name}', get_my_mpi_all_id()
+      
+      ! MTIME CALENDAR TYPE --> Remove this line if mtime is not used
+      CALL fs_write_field(serializer, savepoint, "ftg_mtime_calendar", calendarType())
 
       ! BASIC ARGUMENTS
       #for $var in $arguments.all.basic
