@@ -4,7 +4,7 @@
 
     USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
     USE mo_mpi,            ONLY: get_my_mpi_all_id
-    USE m_serialize,       ONLY: t_serializer, fs_create_serializer, fs_add_serializer_metainfo
+    USE m_serialize,       ONLY: t_serializer, fs_create_serializer, fs_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
 
     TYPE(t_serializer), INTENT(INOUT) :: serializer
     CHARACTER(*), INTENT(IN) :: stage, dir
@@ -14,6 +14,10 @@
     WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), get_my_mpi_all_id()
+    
+    ignore_bullshit_max_dim_size = 100000
+    ignore_bullshit_allow_negative_indices = .TRUE.
+    
     CALL fs_create_serializer(TRIM(dir), TRIM(basename), 'w', serializer)
     CALL fs_add_serializer_metainfo(serializer, 'subroutine', '${subroutine.name}')
     CALL fs_add_serializer_metainfo(serializer, 'stage', stage)
