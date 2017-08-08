@@ -360,6 +360,11 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
         self.__allocated = set()
         
+    def needsAllocationFilled(self, variableName, dim, *indices): 
+        var = self._findVariable(variableName)
+        filled = self.fillIndices(variableName, dim, *indices)
+        return var is not None and (var.isAllocatable() or var.isPointer() or var.hasClassType()) and not self.alreadyAllocated(filled)
+
     def needsAllocation(self, variableName):
         var = self._findVariable(variableName)
         return var is not None and (var.isAllocatable() or var.isPointer() or var.hasClassType()) and not self.alreadyAllocated(variableName)
