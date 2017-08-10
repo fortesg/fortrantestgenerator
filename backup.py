@@ -1,25 +1,30 @@
 import os
-from utils import assertType
+from utils import assertType, assertTypeAll
 
 class BackupFileFinder(object):
     
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceDir, backupSuffix):
-        assertType(sourceDir, 'sourceDir', str)
-        if not os.path.isdir(sourceDir):
-            raise IOError("Not a directory: " + sourceDir);
+    def __init__(self, sourceDirs, backupSuffix):
         assertType(backupSuffix, 'backupSuffix', str)
         
-        self.__sourceDir = sourceDir
+        if isinstance(sourceDirs, str):
+            sourceDirs = [sourceDirs]
+        assertTypeAll(sourceDirs, 'sourceDirs', str)
+        for baseDir in sourceDirs:    
+            if not os.path.isdir(baseDir):
+                raise IOError("Not a directory: " + baseDir);
+        
+        self.__sourceDirs = sourceDirs
         self.__backupSuffix = '.' + backupSuffix.lstrip('.')
 
     def find(self):
         backupFiles = []
-        for root, _, files in os.walk(self.__sourceDir):
-            for name in files:
-                if name.find(self.__backupSuffix) >= 0:
-                    backupFiles.append(os.path.join(root, name))
+        for sourceDir in self.__sourceDirs:
+            for root, _, files in os.walk(sourceDir):
+                for name in files:
+                    if name.find(self.__backupSuffix) >= 0:
+                        backupFiles.append(os.path.join(root, name))
         return backupFiles
         
     def restore(self):
