@@ -272,7 +272,7 @@ class TemplatesNameSpace(object):
         filled = self.fillIndices(variableName, dim, *parts)
         if not filled:
             return ''
-        if filled == variableName:
+        if filled == variableName.lower():
             return destination + ' = "' + variableName + '"'
         
         write = "WRITE (" + destination + ",'("
