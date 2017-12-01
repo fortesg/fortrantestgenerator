@@ -59,28 +59,29 @@ class CodeGenerator(object):
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callGraph)
         
-        sourceFile = self._findSourceFileForSubroutine(subroutineFullName)
+        subroutine = self._findSubroutine(subroutineFullName)
+        if subroutine is None:
+            raise LookupError("Subroutine not found: " + str(subroutineFullName))
+        sourceFile = subroutine.getSourceFile()
         sourceFilePath = sourceFile.getPath()
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
-        subroutine = sourceFile.getSubroutine(subroutineFullName)
         
         self.addCode(subroutine, typeArgumentReferences, globalsReferences)
         
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         raise NotImplementedError()
     
-    def _findSourceFileForSubroutine(self, subroutineFullName):
+    def _findSubroutine(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         
-        return self._findSourceFileForModule(subroutineFullName.getModuleName())
+        return self._sourceFiles.findSubroutine(subroutineFullName)
     
-    def _findSourceFileForModule(self, moduleName):
+    def _findModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
         
-        return self._sourceFiles.findModuleFile(moduleName);
-
+        return self._sourceFiles.findModule(moduleName);
         
     def _extractModulesFromVariableReferences(self, references):
         modules = set()
@@ -89,10 +90,10 @@ class CodeGenerator(object):
             if declaredIn is not None:
                 module = declaredIn.getModule()
                 if module is not None:
-                    modules.add(module.getName())
+                    modules.add(module)
         
         return modules
-        
+    
     def _createFileBackup(self, originalPath):
         print "      Create File Backup of " + originalPath,
         backupPath = originalPath.replace(CodeGenerator.DEFAULT_SUFFIX, self._backupSuffix)

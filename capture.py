@@ -56,17 +56,19 @@ class CaptureCodeGenerator(CodeGenerator):
         
         print "    ...to Used Modules"
         moduleName = subroutine.getModuleName()
-        for refModule in self._extractModulesFromVariableReferences(globalsReferences):
-            if refModule != moduleName:
-                usedSourceFile = self._findSourceFileForModule(refModule)
+        refModules = list(self._extractModulesFromVariableReferences(globalsReferences))
+        refModules.sort(reverse = True)
+        for refModule in refModules:
+            refModuleName = refModule.getName() 
+            if refModuleName != moduleName:
+                usedSourceFile = refModule.getSourceFile()
                 if not usedSourceFile.isPublic():
                     usedSourceFilePath = usedSourceFile.getPath()
                     if usedSourceFilePath.endswith(self._backupSuffix):
                         usedSourceFilePath = usedSourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
                         usedSourceFile = SourceFile(usedSourceFilePath)
                     backup = self._createFileBackup(usedSourceFilePath)
-                    exportTemplateNameSpace = ExportNameSpace(refModule, usedSourceFile, globalsReferences)
-                    result = self._processTemplate(usedSourceFilePath, usedSourceFile.getContainsLineNumber() - 1, self.__exportTemplate, exportTemplateNameSpace)
+                    exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
+                    result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.__exportTemplate, exportTemplateNameSpace)
                     if backup and not result:
                         self._removeFileBackup(usedSourceFilePath)
-        
