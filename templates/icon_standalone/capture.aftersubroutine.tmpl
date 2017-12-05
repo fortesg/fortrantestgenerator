@@ -168,7 +168,7 @@
           #set $contDim = $dim($container)
           #if $needsRegistration($container)
             #set $aa = $allocatedOrAssociated($container, $contDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-            #if $aa != ''
+            #if $aa
               IF ($aa) THEN
             #end if
             #if $isArray($container)
@@ -176,14 +176,14 @@
             #else
               CALL fs_register_derived_type_field(serializer, "$container", "$contType")$setRegistered($container)
             #end if $setRegistered($container) 
-            #if $aa != ''
+            #if $aa
               END IF
             #end if
           #end if
         #end for
       #end if
       #set $aa = $allocatedOrAssociated($var, 0)
-      #if $aa != ''
+      #if $aa
         IF ($aa) THEN
       #end if
       #if $isArray($var)
@@ -191,7 +191,7 @@
       #else
         CALL fs_write_field(serializer, savepoint, "$var", $var)
       #end if  
-      #if $aa != ''
+      #if $aa
         END IF
       #end if
     #else
@@ -209,7 +209,7 @@
           #if $needsRegistration($container)
             #set $filledContainer = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
             #set $caa = $allocatedOrAssociated($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-            #if $caa != ''
+            #if $caa
               IF ($caa) THEN
             #end if
             $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
@@ -218,18 +218,21 @@
             #else
               CALL fs_register_derived_type_field(serializer, ftg_c, "$contType")$setRegistered($container)
             #end if 
-            #if $caa != ''
+            #if $caa
               END IF
             #end if
           #end if
         #end for
         #set $aaNew = $allocatedOrAssociated($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-        #if $aaNew != $aa
+        #if $aaNew and $aaNew != $aa
           IF ($aaNew) THEN
           #set $ifAA += '1' 
           #set $aa = $aaNew 
         #else
           #set $ifAA += '0'
+          #if $aaNew != $aa
+            #set $aa = $aaNew
+          #end if
         #end if
         DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #end for
@@ -239,7 +242,7 @@
         #set $contDim = $dim($container)
         #if $needsRegistration($container)
           #set $caa = $allocatedOrAssociated($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-            #if $caa != ''
+            #if $caa
               IF ($caa) THEN
             #end if
           $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
@@ -249,7 +252,7 @@
           #else
             CALL fs_register_derived_type_field(serializer, ftg_c, "$contType")$setRegistered($container)
           #end if 
-          #if $caa != ''
+          #if $caa
             END IF
           #end if
         #end if
