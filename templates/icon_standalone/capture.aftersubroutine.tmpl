@@ -195,6 +195,7 @@
         END IF
       #end if
     #else
+    
       #set $mandDims = $getNumberOfMandatoryDimensions($var)
       #set $topContainer = $var
       #set $aa = '' 
@@ -281,7 +282,6 @@
         #end if
         #set $ifAA = $ifAA[:-1]
       #end for
-      
     #end if
   #end if
 #end def
