@@ -220,14 +220,15 @@ class TemplatesNameSpace(object):
                 allocatablesAndPointers += (pointer or allocatable)
                 bot = top 
                 top += variable.getDimension()
-                if top < dim and top > bot:
-                    aa += '('
-                    sep = ''
-                    for i in range(bot, top):
-                        aa += sep + placeholder[i]
-                        sep = ', '
-                    aa += ')'
-                if top >= dim and allocatablesAndPointers >= totalAllocatablesAndPointers:
+                if top < dim or allocatablesAndPointers < totalAllocatablesAndPointers:
+                    if top > bot:
+                        aa += '('
+                        sep = ''
+                        for i in range(bot, top):
+                            aa += sep + placeholder[i]
+                            sep = ', '
+                        aa += ')'
+                else:
                     break
             aa += ')'
             if allocatable:
