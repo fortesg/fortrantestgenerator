@@ -199,7 +199,6 @@ class TemplatesNameSpace(object):
     def allocatedOrAssociated(self, variableName, dim, *placeholder):
         reference = self._findReference(variableName)
         if reference is not None:
-            
             totalDim = reference.getTotalDimensions()
             if dim > totalDim:
                 dim = totalDim
@@ -208,6 +207,8 @@ class TemplatesNameSpace(object):
             allocatable = False
             perc = ''
             aa = '('
+            totalAllocatablesAndPointers = reference.getNumberOfPointerAndAllocatableLevels()
+            allocatablesAndPointers = 0
             for level in reference.getLevels():
                 variable = reference.getVariable(level)
                 if variable is None:
@@ -216,17 +217,17 @@ class TemplatesNameSpace(object):
                 perc = '%'
                 pointer = variable.isPointer()
                 allocatable = variable.isAllocatable()
+                allocatablesAndPointers += (pointer or allocatable)
                 bot = top 
                 top += variable.getDimension()
-                if top < dim:
-                    if top > bot:
-                        aa += '('
-                        sep = ''
-                        for i in range(bot, top):
-                            aa += sep + placeholder[i]
-                            sep = ', '
-                        aa += ')'
-                else:
+                if top < dim and top > bot:
+                    aa += '('
+                    sep = ''
+                    for i in range(bot, top):
+                        aa += sep + placeholder[i]
+                        sep = ', '
+                    aa += ')'
+                if top >= dim and allocatablesAndPointers >= totalAllocatablesAndPointers:
                     break
             aa += ')'
             if allocatable:
@@ -443,8 +444,11 @@ class ArgumentsSubNameSpace(object):
         for argument in self.__arguments:
             argCopy = argument.getAlias(argument.getName())
             argCopy.setIntent(intent)
-            if allocatable and (argCopy.hasBuiltInType() and argCopy.getDimension() > 0) or (argCopy.hasClassType()):
-                argCopy.setAllocatable(True)
+            if allocatable: 
+                if (argCopy.hasBuiltInType() and argCopy.getDimension() > 0) or (argCopy.hasClassType()):
+                    argCopy.setAllocatable(True)
+            else:
+                argCopy.setAllocatable(False)
             if charLengthZero and argCopy.hasBuiltInType() and argCopy.getTypeName().startswith('CHARACTER'):
                 argCopy.setTypeName('CHARACTER(len=0)')
             argCopy.setTarget(False)
