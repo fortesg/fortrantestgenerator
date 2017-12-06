@@ -220,7 +220,8 @@ class TemplatesNameSpace(object):
                 allocatablesAndPointers += (pointer or allocatable)
                 bot = top 
                 top += variable.getDimension()
-                if top < dim or allocatablesAndPointers < totalAllocatablesAndPointers:
+                print '*** DEBUG *** ' + reference.getExpression() + ' : ' + str(dim) + ' : ' + str(top)
+                if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
                     if top > bot:
                         aa += '('
                         sep = ''
