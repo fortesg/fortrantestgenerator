@@ -39,6 +39,9 @@ def loadFortranTestGeneratorConfiguration(configFile):
     if 'TEST_DATA_BASE_DIR' not in config or not config['TEST_DATA_BASE_DIR']:
         print >> sys.stderr, 'Missing config variable: TEST_DATA_BASE_DIR'
         configError = True
+
+    if 'MODIFY_SOURCE_DIR' not in config or not config['MODIFY_SOURCE_DIR']:
+        config['MODIFY_SOURCE_DIR'] = None
         
     if 'BACKUP_SUFFIX' not in config or not config['BACKUP_SUFFIX']:
         config['BACKUP_SUFFIX'] = 'ftg-backup'
