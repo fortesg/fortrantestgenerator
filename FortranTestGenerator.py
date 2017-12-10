@@ -39,7 +39,6 @@ def main():
     config.update(loadFortranCallGraphConfiguration(config['FCG_CONFIG_FILE']))
     config.update(loadFortranTestGeneratorConfiguration(args.configFile)) # Load again to overwrite variables from FCG config file
 
-    SOURCE_DIR = config['SOURCE_DIR']
     BACKUP_SUFFIX = config['BACKUP_SUFFIX']
     FTG_PREFIX = config['FTG_PREFIX']
     TEMPLATE_DIR = config['TEMPLATE_DIR']
@@ -53,7 +52,12 @@ def main():
     if config['CACHE_DIR']:
         GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config['CACHE_DIR'], GRAPH_BUILDER)
     SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'])
-    BACKUP_FINDER = BackupFileFinder(SOURCE_DIR, BACKUP_SUFFIX) 
+    if config['MODIFY_SOURCE_DIR'] is not None:
+        MODIFY_SOURCE_FILES = SourceFiles(config['MODIFY_SOURCE_DIR'], config['SPECIAL_MODULE_FILES'])
+    else:
+        MODIFY_SOURCE_FILES = SOURCE_FILES
+        
+    BACKUP_FINDER = BackupFileFinder(config['SOURCE_DIR'], BACKUP_SUFFIX) 
 
     if args.capture or args.replay:
         moduleName = args.module;
