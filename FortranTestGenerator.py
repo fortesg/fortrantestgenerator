@@ -7,16 +7,7 @@ Created on 05.02.2016
 '''
 
 import argparse;
-
-from source import SubroutineFullName, SourceFiles
-from capture import CaptureCodeGenerator
-from replay import ReplayCodeGenerator
-from backup import BackupFileFinder
-from combined import CombinedCodeGenerator
 from ftgconfigurator import loadFortranTestGeneratorConfiguration
-from fcgconfigurator import loadFortranCallGraphConfiguration
-from assembler import FromAssemblerCallGraphBuilder
-from treecache import CachedAssemblerCallGraphBuilder
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
@@ -36,6 +27,16 @@ def main():
     config = loadFortranTestGeneratorConfiguration(args.configFile)
     if config is None:
         exit(3)
+        
+    from fcgconfigurator import loadFortranCallGraphConfiguration
+    from source import SubroutineFullName, SourceFiles
+    from capture import CaptureCodeGenerator
+    from replay import ReplayCodeGenerator
+    from backup import BackupFileFinder
+    from combined import CombinedCodeGenerator
+    from assembler import FromAssemblerCallGraphBuilder
+    from treecache import CachedAssemblerCallGraphBuilder
+    
     config.update(loadFortranCallGraphConfiguration(config['FCG_CONFIG_FILE']))
     config.update(loadFortranTestGeneratorConfiguration(args.configFile)) # Load again to overwrite variables from FCG config file
 
@@ -47,7 +48,7 @@ def main():
     EXCLUDE_MODULES = config['EXCLUDE_MODULES']
     IGNORE_GLOBALS_FROM_MODULES = config['IGNORE_GLOBALS_FROM_MODULES']
     IGNORE_DERIVED_TYPES = config['IGNORE_DERIVED_TYPES']
-
+    
     GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config['ASSEMBLER_DIR'], config['SPECIAL_MODULE_FILES'])
     if config['CACHE_DIR']:
         GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config['CACHE_DIR'], GRAPH_BUILDER)
@@ -93,7 +94,7 @@ def main():
             generator = CombinedCodeGenerator(SOURCE_FILES, TEMPLATE_DIR, TEST_SOURCE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)
         elif args.capture:
             print 'Generate capture code'
-            generator = CaptureCodeGenerator(SOURCE_FILES, TEMPLATE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)
+            generator = CaptureCodeGenerator(SOURCE_FILES, MODIFY_SOURCE_FILES, TEMPLATE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)
         else:
             print 'Generate replay code'
             generator = ReplayCodeGenerator(SOURCE_FILES, TEMPLATE_DIR, TEST_SOURCE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)

@@ -1,14 +1,11 @@
 import os
 import sys
-from utils import assertType
         
 def loadFortranTestGeneratorConfiguration(configFile):
-    assertType(configFile, 'configFile', str, True)
-
     if configFile:
         configFile = configFile.strip('"\'')
     else:
-        configFile = 'config_testgenerator.py'
+        configFile = 'config_fortrantestgenerator.py'
     originalConfigFile = configFile
     if not os.path.isfile(configFile):
         configFile = os.path.dirname(os.path.realpath(__file__)) + '/' + originalConfigFile
@@ -27,6 +24,19 @@ def loadFortranTestGeneratorConfiguration(configFile):
     if 'FCG_DIR' not in config or not config['FCG_DIR']:
         print >> sys.stderr, 'Missing config variable: FCG_DIR'
         configError = True
+        configError = True
+    else:
+        fcgDir = config['FCG_DIR']
+        if not os.path.isdir(fcgDir):
+            print >> sys.stderr, 'FortranCallGraph directory not found (FCG_DIR): ' + fcgDir
+            configError = True
+        else:
+            fcgBin = os.path.join(fcgDir, 'FortranCallGraph.py')
+            if not os.path.isfile(fcgBin):
+                print >> sys.stderr, 'FortranCallGraph not found in directory (FCG_DIR): ' + fcgDir
+                configError = True
+            else:
+                sys.path.append(config['FCG_DIR'])
 
     if 'TEMPLATE_DIR' not in config or not config['TEMPLATE_DIR']:
         print >> sys.stderr, 'Missing config variable: TEMPLATE_DIR'
