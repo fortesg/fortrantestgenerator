@@ -1,7 +1,7 @@
 import os
 from generator import CodeGenerator 
 from utils import assertType
-from source import SourceFiles, SourceFile
+from source import SourceFiles, SourceFile, SubroutineFullName
 from templatenamespace import CaptureTemplatesNameSpace, ExportNameSpace
 
 class CaptureCodeGenerator(CodeGenerator):
@@ -13,7 +13,7 @@ class CaptureCodeGenerator(CodeGenerator):
     BEFORE_END_TEMPLATE = 'capture.beforeend.tmpl'
     EXPORT_TEMPLATE = 'export.beforecontains.tmpl'
     
-    def __init__(self, sourceFiles, templateDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, modifySourceFiles, templateDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templateDir, 'templateDir', str)
         if not os.path.isdir(templateDir):
@@ -23,6 +23,7 @@ class CaptureCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir);
 
         super(CaptureCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        self.__modifySourceFiles = modifySourceFiles      
         
         self.__afterLastLineTemplate = templateDir + '/' + self.AFTER_LAST_LINE_TEMPLATE
         self.__beforeContainsTemplate = templateDir + '/' + self.BEFORE_CONTAINS_TEMPLATE
@@ -30,10 +31,9 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__afterLastSpecificationTemplate = templateDir + '/' + self.AFTER_LAST_SPECIFICATION_TEMPLATE
         self.__beforeEndTemplate = templateDir + '/' + self.BEFORE_END_TEMPLATE
         self.__exportTemplate = templateDir + '/' + self.EXPORT_TEMPLATE
-        
+
         self.__testDataDir = testDataDir
 
-        
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Add Code"
         
@@ -72,3 +72,8 @@ class CaptureCodeGenerator(CodeGenerator):
                     result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.__exportTemplate, exportTemplateNameSpace)
                     if backup and not result:
                         self._removeFileBackup(usedSourceFilePath)
+
+    def _findSubroutine(self, subroutineFullName):
+        assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
+        
+        return self.__modifySourceFiles.findSubroutine(subroutineFullName)
