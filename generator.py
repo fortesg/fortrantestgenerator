@@ -5,7 +5,7 @@ from Cheetah.Template import Template
 from utils import assertType, assertTypeAll
 from source import SourceFiles, SubroutineFullName
 from trackvariable import VariableTracker
-from globals import GlobalVariablesCallGraphAnalysis
+from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
 import re
@@ -55,7 +55,7 @@ class CodeGenerator(object):
         argumentTracker.setIgnoreRegex(ignoreRegex)
         typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callGraph)
         print "    Find References to Global Variables"
-        globalsTracker = GlobalVariablesCallGraphAnalysis(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
+        globalsTracker = GlobalVariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callGraph)
         
