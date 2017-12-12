@@ -37,10 +37,11 @@ class CaptureCodeGenerator(CodeGenerator):
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Add Code"
         
-        sourceFilePath = subroutine.getSourceFile().getPath()
+        originalSourceFile = subroutine.getSourceFile()
+        sourceFilePath = originalSourceFile.getPath()
         if sourceFilePath.endswith(self._backupSuffix):
             sourceFilePath = sourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
-            subroutine = SourceFile(sourceFilePath).getSubroutine(subroutine.getName())
+            subroutine = SourceFile(sourceFilePath, originalSourceFile.isPreprocessed()).getSubroutine(subroutine.getName())
                     
         print "    ...to Module under Test"
         self._createFileBackup(sourceFilePath)
@@ -61,12 +62,12 @@ class CaptureCodeGenerator(CodeGenerator):
         for refModule in refModules:
             refModuleName = refModule.getName() 
             if refModuleName != moduleName:
-                usedSourceFile = refModule.getSourceFile()
-                if not usedSourceFile.isPublic():
+                if not refModule.isPublic():
+                    usedSourceFile = refModule.getSourceFile()
                     usedSourceFilePath = usedSourceFile.getPath()
                     if usedSourceFilePath.endswith(self._backupSuffix):
                         usedSourceFilePath = usedSourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
-                        usedSourceFile = SourceFile(usedSourceFilePath)
+                        usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
                     backup = self._createFileBackup(usedSourceFilePath)
                     exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
                     result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.__exportTemplate, exportTemplateNameSpace)
