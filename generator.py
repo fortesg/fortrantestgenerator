@@ -4,7 +4,7 @@ import shutil
 from Cheetah.Template import Template
 from utils import assertType, assertTypeAll
 from source import SourceFiles, SubroutineFullName
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from globals import GlobalVariablesCallGraphAnalysis
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
@@ -51,7 +51,7 @@ class CodeGenerator(object):
 
         print "  Analyse Source Code"
         print "    Find References to Type Argument Members"
-        argumentTracker = TrackVariableCallGraphAnalysis(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
+        argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
         argumentTracker.setIgnoreRegex(ignoreRegex)
         typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callGraph)
         print "    Find References to Global Variables"
