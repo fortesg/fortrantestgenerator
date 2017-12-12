@@ -1,7 +1,7 @@
 import os
 import re
 from generator import CodeGenerator 
-from utils import assertType
+from assertions import assertType
 from source import SourceFiles
 from templatenamespace import ReplayTemplatesNameSpace
 

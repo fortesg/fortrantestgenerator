@@ -1,6 +1,6 @@
 import os
 from generator import CodeGenerator 
-from utils import assertType
+from assertions import assertType
 from source import SourceFiles, SourceFile, SubroutineFullName
 from templatenamespace import CaptureTemplatesNameSpace, ExportNameSpace
 

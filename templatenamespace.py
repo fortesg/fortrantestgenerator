@@ -1,4 +1,4 @@
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference
 from string import find
 import re

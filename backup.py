@@ -1,5 +1,5 @@
 import os
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 
 class BackupFileFinder(object):
     
