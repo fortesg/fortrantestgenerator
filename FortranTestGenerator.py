@@ -7,7 +7,8 @@ Created on 05.02.2016
 '''
 
 import argparse;
-from ftgconfigurator import loadFortranTestGeneratorConfiguration
+from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE_DIR, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
+    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
@@ -28,7 +29,8 @@ def main():
     if config is None:
         exit(3)
         
-    from fcgconfigurator import loadFortranCallGraphConfiguration
+    from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES, CFG_ASSEMBLER_DIRS,\
+    CFG_SPECIAL_MODULE_FILES, CFG_CACHE_DIR, CFG_SOURCE_DIRS, CFG_SOURCE_FILES_PREPROCESSED
     from source import SubroutineFullName, SourceFiles
     from capture import CaptureCodeGenerator
     from replay import ReplayCodeGenerator
@@ -40,25 +42,25 @@ def main():
     config.update(loadFortranCallGraphConfiguration(config['FCG_CONFIG_FILE']))
     config.update(loadFortranTestGeneratorConfiguration(args.configFile)) # Load again to overwrite variables from FCG config file
 
-    BACKUP_SUFFIX = config['BACKUP_SUFFIX']
-    FTG_PREFIX = config['FTG_PREFIX']
-    TEMPLATE_DIR = config['TEMPLATE_DIR']
-    TEST_SOURCE_DIR = config['TEST_SOURCE_DIR']
-    TEST_DATA_BASE_DIR = config['TEST_DATA_BASE_DIR']
-    EXCLUDE_MODULES = config['EXCLUDE_MODULES']
-    IGNORE_GLOBALS_FROM_MODULES = config['IGNORE_GLOBALS_FROM_MODULES']
-    IGNORE_DERIVED_TYPES = config['IGNORE_DERIVED_TYPES']
+    BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
+    FTG_PREFIX = config[CFG_FTG_PREFIX]
+    TEMPLATE_DIR = config[CFG_TEMPLATE_DIR]
+    TEST_SOURCE_DIR = config[CFG_TEST_SOURCE_DIR]
+    TEST_DATA_BASE_DIR = config[CFG_TEST_DATA_BASE_DIR]
+    EXCLUDE_MODULES = config[CFG_EXCLUDE_MODULES]
+    IGNORE_GLOBALS_FROM_MODULES = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
+    IGNORE_DERIVED_TYPES = config[CFG_IGNORE_DERIVED_TYPES]
     
-    GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config['ASSEMBLER_DIR'], config['SPECIAL_MODULE_FILES'])
-    if config['CACHE_DIR']:
-        GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config['CACHE_DIR'], GRAPH_BUILDER)
-    SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'], config['SOURCE_FILES_PREPROCESSED'])
-    if config['MODIFY_SOURCE_DIR'] is not None:
-        MODIFY_SOURCE_FILES = SourceFiles(config['MODIFY_SOURCE_DIR'], config['SPECIAL_MODULE_FILES'])
-        BACKUP_FINDER = BackupFileFinder(config['MODIFY_SOURCE_DIR'], BACKUP_SUFFIX) 
+    GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
+    if config[CFG_CACHE_DIR]:
+        GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], GRAPH_BUILDER)
+    SOURCE_FILES = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
+    if config[CFG_MODIFY_SOURCE_DIRS] is not None:
+        MODIFY_SOURCE_FILES = SourceFiles(config[CFG_MODIFY_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES])
+        BACKUP_FINDER = BackupFileFinder(config[CFG_MODIFY_SOURCE_DIRS], BACKUP_SUFFIX) 
     else:
         MODIFY_SOURCE_FILES = SOURCE_FILES
-        BACKUP_FINDER = BackupFileFinder(config['SOURCE_DIR'], BACKUP_SUFFIX) 
+        BACKUP_FINDER = BackupFileFinder(config[CFG_SOURCE_DIRS], BACKUP_SUFFIX) 
         
 
     if args.capture or args.replay:
