@@ -52,13 +52,14 @@ def main():
     GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config['ASSEMBLER_DIR'], config['SPECIAL_MODULE_FILES'])
     if config['CACHE_DIR']:
         GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config['CACHE_DIR'], GRAPH_BUILDER)
-    SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'])
+    SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'], config['SOURCE_FILES_PREPROCESSED'])
     if config['MODIFY_SOURCE_DIR'] is not None:
         MODIFY_SOURCE_FILES = SourceFiles(config['MODIFY_SOURCE_DIR'], config['SPECIAL_MODULE_FILES'])
+        BACKUP_FINDER = BackupFileFinder(config['MODIFY_SOURCE_DIR'], BACKUP_SUFFIX) 
     else:
         MODIFY_SOURCE_FILES = SOURCE_FILES
+        BACKUP_FINDER = BackupFileFinder(config['SOURCE_DIR'], BACKUP_SUFFIX) 
         
-    BACKUP_FINDER = BackupFileFinder(config['SOURCE_DIR'], BACKUP_SUFFIX) 
 
     if args.capture or args.replay:
         moduleName = args.module;
