@@ -2,7 +2,7 @@ import sys
 import os
 import shutil
 from Cheetah.Template import Template
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 from source import SourceFiles, SubroutineFullName
 from trackvariable import VariableTracker
 from globals import GlobalVariableTracker
