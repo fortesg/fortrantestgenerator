@@ -8,7 +8,7 @@ Created on 05.02.2016
 
 import argparse;
 from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE_DIR, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
-    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS
+    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
@@ -39,7 +39,7 @@ def main():
     from assembler import FromAssemblerCallGraphBuilder
     from treecache import CachedAssemblerCallGraphBuilder
     
-    config.update(loadFortranCallGraphConfiguration(config['FCG_CONFIG_FILE']))
+    config.update(loadFortranCallGraphConfiguration(CFG_FCG_CONFIG_FILE))
     config.update(loadFortranTestGeneratorConfiguration(args.configFile)) # Load again to overwrite variables from FCG config file
 
     BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
