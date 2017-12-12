@@ -83,17 +83,6 @@ class CodeGenerator(object):
         
         return self._sourceFiles.findModule(moduleName);
         
-    def _extractModulesFromVariableReferences(self, references):
-        modules = set()
-        for ref in references:
-            declaredIn = ref.getDeclaredIn() 
-            if declaredIn is not None:
-                module = declaredIn.getModule()
-                if module is not None:
-                    modules.add(module)
-        
-        return modules
-    
     def _createFileBackup(self, originalPath):
         print "      Create File Backup of " + originalPath,
         backupPath = originalPath.replace(CodeGenerator.DEFAULT_SUFFIX, self._backupSuffix)

@@ -57,7 +57,7 @@ class CaptureCodeGenerator(CodeGenerator):
         
         print "    ...to Used Modules"
         moduleName = subroutine.getModuleName()
-        refModules = list(self._extractModulesFromVariableReferences(globalsReferences))
+        refModules = list(self.__extractModulesFromVariableReferences(globalsReferences))
         refModules.sort(reverse = True)
         for refModule in refModules:
             refModuleName = refModule.getName() 
@@ -78,3 +78,17 @@ class CaptureCodeGenerator(CodeGenerator):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         
         return self.__modifySourceFiles.findSubroutine(subroutineFullName)
+    
+    def __extractModulesFromVariableReferences(self, references):
+        modules = set()
+        for ref in references:
+            declaredIn = ref.getDeclaredIn() 
+            if declaredIn is not None:
+                module = declaredIn.getModule()
+                if module is not None:
+                    if self.__modifySourceFiles != self._sourceFiles:
+                        module = self.__modifySourceFiles.findModule(module.getName())
+                    if module is not None:
+                        modules.add(module)
+        
+        return modules
