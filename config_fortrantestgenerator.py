@@ -20,12 +20,12 @@ TEMPLATE_DIR = FTG_DIR + '/templates/standalone'
 # REQUIRED
 TEST_SOURCE_DIR = ''
 
-# Location of the source files that will be modified by -c
+# List containing locations of the source files that will be modified by -c
 # OPTIONAL: When omitted or None same as SOURCE_DIRS from FortranCallGraph's configuration
 # Can be used for example, when preprocessed source files shall be analysed but original source files modified.
 # Handle with care! -c creates backups (see BACKUP_SUFFIX) of the unmodified source files for later analyses, 
 # but those are only used when SOURCE_DIRS and MODIFIY_SOURCE_DIRS are the same.
-MODIFY_SOURCE_DIRS = [] 
+MODIFY_SOURCE_DIRS = None
 
 # Suffix for backuped source files
 # Will used by later analyses, for example when you run first -c and later -r
