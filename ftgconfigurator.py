@@ -46,8 +46,6 @@ def loadFortranTestGeneratorConfiguration(configFile):
             if not os.path.isfile(fcgBin):
                 print >> sys.stderr, 'FortranCallGraph not found in directory (' + CFG_FCG_DIR + '): ' + fcgDir
                 configError = True
-            else:
-                sys.path.append(config[CFG_FCG_DIR])
 
     if CFG_TEMPLATE_DIR not in config or not config[CFG_TEMPLATE_DIR]:
         print >> sys.stderr, 'Missing config variable: ' + CFG_TEMPLATE_DIR

@@ -6,9 +6,10 @@ Created on 05.02.2016
 @author: Christian Hovy
 '''
 
+import sys
 import argparse;
 from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE_DIR, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
-    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE
+    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE, CFG_FCG_DIR
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
@@ -29,6 +30,15 @@ def main():
     if config is None:
         exit(3)
         
+    BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
+    FTG_PREFIX = config[CFG_FTG_PREFIX]
+    TEMPLATE_DIR = config[CFG_TEMPLATE_DIR]
+    TEST_SOURCE_DIR = config[CFG_TEST_SOURCE_DIR]
+    TEST_DATA_BASE_DIR = config[CFG_TEST_DATA_BASE_DIR]
+    MODIFY_SOURCE_DIRS = config[CFG_MODIFY_SOURCE_DIRS]
+        
+    sys.path.append(config[CFG_FCG_DIR])
+        
     from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES, CFG_ASSEMBLER_DIRS,\
     CFG_SPECIAL_MODULE_FILES, CFG_CACHE_DIR, CFG_SOURCE_DIRS, CFG_SOURCE_FILES_PREPROCESSED
     from source import SubroutineFullName, SourceFiles
@@ -47,22 +57,17 @@ def main():
         exit(3)
     config.update(configFTG)
 
-    BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
-    FTG_PREFIX = config[CFG_FTG_PREFIX]
-    TEMPLATE_DIR = config[CFG_TEMPLATE_DIR]
-    TEST_SOURCE_DIR = config[CFG_TEST_SOURCE_DIR]
-    TEST_DATA_BASE_DIR = config[CFG_TEST_DATA_BASE_DIR]
     EXCLUDE_MODULES = config[CFG_EXCLUDE_MODULES]
     IGNORE_GLOBALS_FROM_MODULES = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     IGNORE_DERIVED_TYPES = config[CFG_IGNORE_DERIVED_TYPES]
-    
+
     GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
         GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], GRAPH_BUILDER)
     SOURCE_FILES = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
-    if config[CFG_MODIFY_SOURCE_DIRS] is not None:
-        MODIFY_SOURCE_FILES = SourceFiles(config[CFG_MODIFY_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES])
-        BACKUP_FINDER = BackupFileFinder(config[CFG_MODIFY_SOURCE_DIRS], BACKUP_SUFFIX) 
+    if MODIFY_SOURCE_DIRS is not None:
+        MODIFY_SOURCE_FILES = SourceFiles(MODIFY_SOURCE_DIRS, config[CFG_SPECIAL_MODULE_FILES])
+        BACKUP_FINDER = BackupFileFinder(MODIFY_SOURCE_DIRS, BACKUP_SUFFIX) 
     else:
         MODIFY_SOURCE_FILES = SOURCE_FILES
         BACKUP_FINDER = BackupFileFinder(config[CFG_SOURCE_DIRS], BACKUP_SUFFIX) 
