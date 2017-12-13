@@ -9,6 +9,7 @@ FCG_DIR = FTG_DIR + '/../fortrancallgraph'
 # Configuration file to be used by FortranCallGraph
 # OPTIONAL: When omitted or None, config variables required by FortranCallGraph must be assigned here
 # When empty string (''), FortranCallGraph's default (config_fortrancallgraph.py) will be used.
+# Variables can always be overwritten here
 FCG_CONFIG_FILE = 'config_fortrancallgraph.py'
 
 # Location of the templates to be used 
