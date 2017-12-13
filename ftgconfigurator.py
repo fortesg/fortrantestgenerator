@@ -10,6 +10,7 @@ CFG_MODIFY_SOURCE_DIRS_LEGACY = 'MODIFY_SOURCE_DIR'
 CFG_BACKUP_SUFFIX = 'BACKUP_SUFFIX'
 CFG_FTG_PREFIX = 'FTG_PREFIX'
 CFG_FCG_CONFIG_FILE = 'FCG_CONFIG_FILE'
+CFG_FTG_CONFIG_FILE = 'FTG_CONFIG_FILE'
         
 def loadFortranTestGeneratorConfiguration(configFile):
     if configFile:
@@ -75,6 +76,8 @@ def loadFortranTestGeneratorConfiguration(configFile):
 
     if CFG_FCG_CONFIG_FILE not in config or not config[CFG_FCG_CONFIG_FILE]:
         config[CFG_FCG_CONFIG_FILE] = None
+        
+    config[CFG_FTG_CONFIG_FILE] = os.path.abspath(configFile)
     
     if configError:
         return None

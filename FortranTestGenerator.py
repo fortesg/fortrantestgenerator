@@ -8,7 +8,7 @@ Created on 05.02.2016
 
 import argparse;
 from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE_DIR, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
-    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE
+    CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
@@ -39,8 +39,12 @@ def main():
     from assembler import FromAssemblerCallGraphBuilder
     from treecache import CachedAssemblerCallGraphBuilder
     
-    config.update(loadFortranCallGraphConfiguration(config[CFG_FCG_CONFIG_FILE]))
-    config.update(loadFortranTestGeneratorConfiguration(args.configFile)) # Load again to overwrite variables from FCG config file
+    if config[CFG_FCG_CONFIG_FILE] is not None:
+        configFTG = loadFortranCallGraphConfiguration(config[CFG_FCG_CONFIG_FILE], incomplete=True)
+        configFTG = loadFortranCallGraphConfiguration(config[CFG_FTG_CONFIG_FILE], baseConfig=configFTG) # Overwrite variables from FCG config file
+        if configFTG is None:
+            exit(3)
+        config.update(configFTG)
 
     BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
     FTG_PREFIX = config[CFG_FTG_PREFIX]
@@ -50,6 +54,9 @@ def main():
     EXCLUDE_MODULES = config[CFG_EXCLUDE_MODULES]
     IGNORE_GLOBALS_FROM_MODULES = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     IGNORE_DERIVED_TYPES = config[CFG_IGNORE_DERIVED_TYPES]
+    
+    print str(EXCLUDE_MODULES)
+    exit()
     
     GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
