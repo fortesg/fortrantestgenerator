@@ -56,9 +56,6 @@ def main():
     IGNORE_GLOBALS_FROM_MODULES = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     IGNORE_DERIVED_TYPES = config[CFG_IGNORE_DERIVED_TYPES]
     
-    print str(EXCLUDE_MODULES)
-    exit()
-    
     GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
         GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], GRAPH_BUILDER)
