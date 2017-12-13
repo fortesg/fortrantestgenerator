@@ -28,7 +28,7 @@ TEST_SOURCE_DIR = ''
 MODIFY_SOURCE_DIRS = None
 
 # Suffix for backuped source files
-# Will used by later analyses, for example when you run first -c and later -r
+# Will used by later analyses, for example when you first run -c and later -r
 # OPTIONAL, default: 'ftg-backup'
 BACKUP_SUFFIX = 'ftg-backup'
 
