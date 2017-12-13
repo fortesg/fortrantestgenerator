@@ -25,12 +25,12 @@ class CaptureCodeGenerator(CodeGenerator):
         super(CaptureCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         self.__modifySourceFiles = modifySourceFiles      
         
-        self.__afterLastLineTemplate = templateDir + '/' + self.AFTER_LAST_LINE_TEMPLATE
-        self.__beforeContainsTemplate = templateDir + '/' + self.BEFORE_CONTAINS_TEMPLATE
-        self.__afterLastUseTemplate = templateDir + '/' + self.AFTER_LAST_USE_TEMPLATE
-        self.__afterLastSpecificationTemplate = templateDir + '/' + self.AFTER_LAST_SPECIFICATION_TEMPLATE
-        self.__beforeEndTemplate = templateDir + '/' + self.BEFORE_END_TEMPLATE
-        self.__exportTemplate = templateDir + '/' + self.EXPORT_TEMPLATE
+        self.__afterLastLineTemplate = os.path.join(templateDir, self.AFTER_LAST_LINE_TEMPLATE)
+        self.__beforeContainsTemplate = os.path.join(templateDir, self.BEFORE_CONTAINS_TEMPLATE)
+        self.__afterLastUseTemplate = os.path.join(templateDir, self.AFTER_LAST_USE_TEMPLATE)
+        self.__afterLastSpecificationTemplate = os.path.join(templateDir, self.AFTER_LAST_SPECIFICATION_TEMPLATE)
+        self.__beforeEndTemplate = os.path.join(templateDir, self.BEFORE_END_TEMPLATE)
+        self.__exportTemplate = os.path.join(templateDir, self.EXPORT_TEMPLATE)
 
         self.__testDataDir = testDataDir
 

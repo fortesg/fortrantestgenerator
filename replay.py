@@ -20,15 +20,15 @@ class ReplayCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir);
 
         super(ReplayCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
-        self.__testTemplate = templateDir.rstrip('/') + '/' + self.TEST_TEMPLATE
-        self.__testSourceDir = testSourceDir.rstrip('/')
+        self.__testTemplate = os.path.join(templateDir, self.TEST_TEMPLATE)
+        self.__testSourceDir = testSourceDir
         self.__testDataDir = testDataDir
         
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Create code"
         print "    ...in new test source file"
         
-        tempTestFile = self.__testSourceDir + '/' + self.TEMP_TEST_FILE
+        tempTestFile = os.path.join(self.__testSourceDir, self.TEMP_TEST_FILE)
         
         print "      Create file " + tempTestFile
         self._writeFile(tempTestFile, [])
@@ -38,7 +38,7 @@ class ReplayCodeGenerator(CodeGenerator):
         
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)
         if testModuleName is not None:
-            testFilePath = self.__testSourceDir + "/" + testModuleName + '.f90'
+            testFilePath = os.path.join(self.__testSourceDir, testModuleName + '.f90')
             print "      Rename file to " + testFilePath
             os.rename(tempTestFile, testFilePath)
         
