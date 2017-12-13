@@ -16,7 +16,7 @@
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), get_my_mpi_all_id()
     
     mkdirerr = ''
-    CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(basename), cmdmsg=mkdirerr)
+    CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdirerr)
     IF (TRIM(mkdirerr) /= '') THEN
       WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
     END IF 
