@@ -7,11 +7,18 @@
     TYPE(t_serializer), INTENT(INOUT) :: serializer
     CHARACTER(*), INTENT(IN) :: stage, dir
 
-    CHARACTER(len=1024) :: basename
+    CHARACTER(len=1024) :: basename, mkdirerr
     
     WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage)
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
+
+    mkdirerr = ''
+    CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(basename), cmdmsg=mkdirerr)
+    IF (TRIM(mkdirerr) /= '') THEN
+      WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
+    END IF 
+    
     CALL fs_create_serializer(TRIM(dir), TRIM(basename), 'w', serializer)
     CALL fs_add_serializer_metainfo(serializer, 'subroutine', '${subroutine.name}')
     CALL fs_add_serializer_metainfo(serializer, 'stage', stage)
