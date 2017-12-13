@@ -30,12 +30,12 @@ def main():
     if config is None:
         exit(3)
         
-    BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
-    FTG_PREFIX = config[CFG_FTG_PREFIX]
-    TEMPLATE_DIR = config[CFG_TEMPLATE_DIR]
-    TEST_SOURCE_DIR = config[CFG_TEST_SOURCE_DIR]
-    TEST_DATA_BASE_DIR = config[CFG_TEST_DATA_BASE_DIR]
-    MODIFY_SOURCE_DIRS = config[CFG_MODIFY_SOURCE_DIRS]
+    backupSuffix = config[CFG_BACKUP_SUFFIX]
+    ftgPrefix = config[CFG_FTG_PREFIX]
+    templateDir = config[CFG_TEMPLATE_DIR]
+    testSourceDir = config[CFG_TEST_SOURCE_DIR]
+    testDataBaseDir = config[CFG_TEST_DATA_BASE_DIR]
+    modifySourceDir = config[CFG_MODIFY_SOURCE_DIRS]
         
     sys.path.append(config[CFG_FCG_DIR])
         
@@ -57,20 +57,20 @@ def main():
         exit(3)
     config.update(configFTG)
 
-    EXCLUDE_MODULES = config[CFG_EXCLUDE_MODULES]
-    IGNORE_GLOBALS_FROM_MODULES = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
-    IGNORE_DERIVED_TYPES = config[CFG_IGNORE_DERIVED_TYPES]
+    excludeModules = config[CFG_EXCLUDE_MODULES]
+    ignoreGlobalsFromModuls = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
+    ignoreDerivedTypes = config[CFG_IGNORE_DERIVED_TYPES]
 
-    GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
+    graphBuilder = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
-        GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], GRAPH_BUILDER)
-    SOURCE_FILES = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
-    if MODIFY_SOURCE_DIRS is not None:
-        MODIFY_SOURCE_FILES = SourceFiles(MODIFY_SOURCE_DIRS, config[CFG_SPECIAL_MODULE_FILES])
-        BACKUP_FINDER = BackupFileFinder(MODIFY_SOURCE_DIRS, BACKUP_SUFFIX) 
+        graphBuilder = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], graphBuilder)
+    sourceFiles = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
+    if modifySourceDir is not None:
+        modifySourceFiles = SourceFiles(modifySourceDir, config[CFG_SPECIAL_MODULE_FILES])
+        backupFinder = BackupFileFinder(modifySourceDir, backupSuffix) 
     else:
-        MODIFY_SOURCE_FILES = SOURCE_FILES
-        BACKUP_FINDER = BackupFileFinder(config[CFG_SOURCE_DIRS], BACKUP_SUFFIX) 
+        modifySourceFiles = sourceFiles
+        backupFinder = BackupFileFinder(config[CFG_SOURCE_DIRS], backupSuffix) 
         
 
     if args.capture or args.replay:
@@ -91,26 +91,26 @@ def main():
         else:
             argParser.error('Invalid Module and/or Subroutine name!');
             
-        if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):
+        if subroutineFullName is not None and not sourceFiles.existsSubroutine(subroutineFullName):
             argParser.error('Subroutine ' + str(subroutineFullName) + ' not found!');
         
     if args.restore:
         print 'Restore Backup Files'
-        BACKUP_FINDER.restore()
-        SOURCE_FILES.clearCache()
+        backupFinder.restore()
+        sourceFiles.clearCache()
     else: 
-        SOURCE_FILES.setSpecialModuleFiles(BACKUP_FINDER.extendSpecialModuleFiles(SOURCE_FILES.getSpecialModuleFiles()))
+        sourceFiles.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(sourceFiles.getSpecialModuleFiles()))
 
     if args.capture or args.replay:
         if args.capture and args.replay:
             print 'Generate capture and replay code'
-            generator = CombinedCodeGenerator(SOURCE_FILES, TEMPLATE_DIR, TEST_SOURCE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)
+            generator = CombinedCodeGenerator(sourceFiles, templateDir, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         elif args.capture:
             print 'Generate capture code'
-            generator = CaptureCodeGenerator(SOURCE_FILES, MODIFY_SOURCE_FILES, TEMPLATE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)
+            generator = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templateDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         else:
             print 'Generate replay code'
-            generator = ReplayCodeGenerator(SOURCE_FILES, TEMPLATE_DIR, TEST_SOURCE_DIR, TEST_DATA_BASE_DIR, GRAPH_BUILDER, BACKUP_SUFFIX, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES, FTG_PREFIX)
+            generator = ReplayCodeGenerator(sourceFiles, templateDir, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         generator.generate(subroutineFullName)
         
 if __name__ == "__main__":
