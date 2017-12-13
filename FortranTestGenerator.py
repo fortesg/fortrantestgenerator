@@ -39,7 +39,7 @@ def main():
     from assembler import FromAssemblerCallGraphBuilder
     from treecache import CachedAssemblerCallGraphBuilder
     
-    config.update(loadFortranCallGraphConfiguration(CFG_FCG_CONFIG_FILE))
+    config.update(loadFortranCallGraphConfiguration(config[CFG_FCG_CONFIG_FILE]))
     config.update(loadFortranTestGeneratorConfiguration(args.configFile)) # Load again to overwrite variables from FCG config file
 
     BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
