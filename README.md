@@ -69,17 +69,7 @@ $> cd fortrantestgenerator
 
 #### 6. Fill out the configuration file [config_fortrantestgenerator.py](config_fortrantestgenerator.py)
 
-`FTG_DIR` : The location of FortranTestGenerator (usually `os.path.dirname(os.path.realpath(__file__))`)
-
-`FCG_DIR` : The location of FortranCallGraph (usually `FTG_DIR + '../fortrancallgraph'')
-
-`TEMPLATE_DIR` : The location of the templates to be used for code generation (`FTG_DIR + '/templates/standalone_nompi'` shall be a good start, or `FTG_DIR + '/templates/standalone'` if your application uses MPI)
-
-`TEST_SOURCE_DIR` : The folder where the generated test driver shall be put in.
-
-`TEST_DATA_BASE_DIR` : The folder where the captured data shall be put in.
-
-**Please note:** If you don't want to have the configuration spread over the two files of FortranCallGraph and FortranTestGenerator, you can put all the variables from config_fortrancallgraph.py into config_fortrantestgenerator.py instead of importing them.
+The meaning of the variables is documented in the [sample configuration file](config_fortrantestgenerator.py).
 
 #### 7. Create assembler files
 
@@ -230,82 +220,31 @@ I have done it like this:
   ```
 * Then, when I want to create the assembler files, I just run:
   ```
-  $> export FFLAGS='-S -g -O0'
-  $> ./configure
-  $> rm build/x86_64-unknown-linux-gnu/src/*.o
-  $> make
-  $> export FFLAGS=
+  $> make clean
+  $> export FFLAGS='-save-temps -g -O0' && ./configure && make
+  $> rm build/x86_64-unknown-linux-gnu/support/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/yac/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/tixi/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/mtime/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/self/src/*.f90 
+  $> export FFLAGS='' && ./configure && make
   ```
-  `make` will end up with an error, that an `*.o` file is missing, but that's fine.
+#### 3. Configuration
 
-#### 3. Compiling the tests
+[My FortranCallGraph configuration file for ICON](https://github.com/fortesg/config-examples/blob/master/icon/config_fortrancallgraph.py)
+
+[My FortranTestGenerator configuration file for ICON](https://github.com/fortesg/config-examples/blob/master/icon/config_fortrantestgenerator.py)
+
+#### 4. Compiling the tests
   
-* When using the `icon_standalone` template, just put the generated test files into the `src/tests` directory, see step 6 in the Quick Start Guide:
+* When using the `icon_standalone` template, just put the generated test files into the `src/tests` directory:
   ```
-  TEST_SOURCE_DIR = '<iconroot>/src/tests'
+  TEST_SOURCE_DIR = ICON_DIR + '/src/tests'
   ```
   `./configure` will then automatically add the test to the `Makefile` and you will get a binary in `build/.../bin`.
 * You can also generate tests for the *testbed* by using the `icon_testbed` templates, but this will be a bit more complicated. You will then have to integrate the generated modules manually into the testbed environment and create proper run scripts.
 
-#### 4. Configuration of FortranCallgraph
-
-The following configuration has shown to work pretty well:
-
-```
-ASSEMBLER_DIR = '<iconroot>/build/x86_64-unknown-linux-gnu/src'
-SOURCE_DIR = '<iconroot>/src'
-
-SPECIAL_MODULE_FILES = {'mo_mcrph_sb': 'mo_2mom_mcrph_driver.f90',
-                        'mo_lrtm': 'mo_lrtm_driver.f90', 'ppm_extents': 'mo_extents.f90',
-                        'ppm_distributed_array': 'mo_dist_array.f90',
-                        'psrad_rrsw_kg16': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg17': 'mo_psrad_srtm_kgs.f90', 
-                        'psrad_rrsw_kg18': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg19': 'mo_psrad_srtm_kgs.f90', 
-                        'psrad_rrsw_kg20': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg21': 'mo_psrad_srtm_kgs.f90', 
-                        'psrad_rrsw_kg22': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg23': 'mo_psrad_srtm_kgs.f90', 
-                        'psrad_rrsw_kg24': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg25': 'mo_psrad_srtm_kgs.f90', 
-                        'psrad_rrsw_kg26': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg27': 'mo_psrad_srtm_kgs.f90', 
-                        'psrad_rrsw_kg28': 'mo_psrad_srtm_kgs.f90', 'psrad_rrsw_kg29': 'mo_psrad_srtm_kgs.f90', 
-                        'rrlw_planck': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg01': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg02': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg03': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg04': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg05': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg06': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg07': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg08': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg09': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg10': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg11': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg12': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg13': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg14': 'mo_psrad_lrtm_kgs.f90', 'psrad_rrlw_kg15': 'mo_psrad_lrtm_kgs.f90', 
-                        'psrad_rrlw_kg16': 'mo_psrad_lrtm_kgs.f90', 
-                        'rrlw_kg01': 'mo_lrtm_kgs.f90', 'rrlw_kg02': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg03': 'mo_lrtm_kgs.f90', 'rrlw_kg04': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg05': 'mo_lrtm_kgs.f90', 'rrlw_kg06': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg07': 'mo_lrtm_kgs.f90', 'rrlw_kg08': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg09': 'mo_lrtm_kgs.f90', 'rrlw_kg10': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg11': 'mo_lrtm_kgs.f90', 'rrlw_kg12': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg13': 'mo_lrtm_kgs.f90', 'rrlw_kg14': 'mo_lrtm_kgs.f90', 
-                        'rrlw_kg15': 'mo_lrtm_kgs.f90', 'rrlw_kg16': 'mo_lrtm_kgs.f90', 
-                        'yoesrta16': 'mo_srtm_kgs.f90', 'yoesrta17': 'mo_srtm_kgs.f90', 
-                        'yoesrta18': 'mo_srtm_kgs.f90', 'yoesrta19': 'mo_srtm_kgs.f90', 
-                        'yoesrta20': 'mo_srtm_kgs.f90', 'yoesrta21': 'mo_srtm_kgs.f90', 
-                        'yoesrta22': 'mo_srtm_kgs.f90', 'yoesrta23': 'mo_srtm_kgs.f90', 
-                        'yoesrta24': 'mo_srtm_kgs.f90', 'yoesrta25': 'mo_srtm_kgs.f90', 
-                        'yoesrta26': 'mo_srtm_kgs.f90', 'yoesrta27': 'mo_srtm_kgs.f90', 
-                        'yoesrta28': 'mo_srtm_kgs.f90', 'yoesrta29': 'mo_srtm_kgs.f90'}
-
-EXCLUDE_MODULES = ['mpi', 'omp_lib', 'mo_io_units', 'mo_utilities', 'iso_c_binding', 
-                   'mod_prism_proto', 'ifcore', 'mo_cdi', 'mo_control', 'mo_submodel',
-                   'mtime', 'sct', 'ppm_distributed_array', 'data_parameters',
-                   'data_constants', 'data_runcontrol', 'data_modelconfig', 'data_fields',
-                   'data_parallel', 'data_soil', 'turbulence_data', 'data_1d_global',
-                   'mo_art_nml', 'mo_art_init_interface', 'mo_art_emission_interface', 
-                   'mo_art_washout_interface', 'mo_art_diagnostics_interface', 
-                   'mo_art_reaction_interface', 'mo_art_clouds_interface', 
-                   'mo_art_radiation_interface', 'mo_art_turbdiff_interface', 
-                   'mo_art_sedimentation_interface', 'mo_art_tools_interface', 
-                   'mo_art_tracer_interface', 'mo_art_config']
-
-IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + ['mo_mpi'] 
-
-IGNORE_DERIVED_TYPES = []
-```
 #### 5. Uninitialized pointer variables
 
 Please see the note on that above. Unfortunately, ICON contains a lot of such variables, especially in the derived types. Just add `=> NULL()` to all of the declarations if possible.
