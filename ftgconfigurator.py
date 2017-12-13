@@ -74,7 +74,7 @@ def loadFortranTestGeneratorConfiguration(configFile):
     if CFG_FTG_PREFIX not in config or not config[CFG_FTG_PREFIX]:
         config[CFG_FTG_PREFIX] = 'ftg_'
 
-    if CFG_FCG_CONFIG_FILE not in config or not config[CFG_FCG_CONFIG_FILE]:
+    if CFG_FCG_CONFIG_FILE not in config:
         config[CFG_FCG_CONFIG_FILE] = None
         
     config[CFG_FTG_CONFIG_FILE] = os.path.abspath(configFile)

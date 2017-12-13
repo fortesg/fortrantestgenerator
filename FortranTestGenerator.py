@@ -39,12 +39,13 @@ def main():
     from assembler import FromAssemblerCallGraphBuilder
     from treecache import CachedAssemblerCallGraphBuilder
     
+    configFTG = {}
     if config[CFG_FCG_CONFIG_FILE] is not None:
         configFTG = loadFortranCallGraphConfiguration(config[CFG_FCG_CONFIG_FILE], incomplete=True)
-        configFTG = loadFortranCallGraphConfiguration(config[CFG_FTG_CONFIG_FILE], baseConfig=configFTG) # Overwrite variables from FCG config file
-        if configFTG is None:
-            exit(3)
-        config.update(configFTG)
+    configFTG = loadFortranCallGraphConfiguration(config[CFG_FTG_CONFIG_FILE], baseConfig=configFTG) # Overwrite variables from FCG config file
+    if configFTG is None:
+        exit(3)
+    config.update(configFTG)
 
     BACKUP_SUFFIX = config[CFG_BACKUP_SUFFIX]
     FTG_PREFIX = config[CFG_FTG_PREFIX]
