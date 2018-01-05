@@ -33,8 +33,6 @@ CONTAINS
 
     ${arguments.all.specifications(allocatable = True, charLengthZero = True)}
   
-    TYPE(t_serializer) :: serializer
-
     CALL message('FTG', '*** Run test for ${subroutine.name} ***')
     
     ftg_${subroutine.name}_capture_input_enabled = .FALSE.
@@ -42,8 +40,8 @@ CONTAINS
     ftg_${subroutine.name}_output_dir = OUTPUT_DIR
     ftg_${subroutine.name}_capture_round = 1
 
-    CALL ftg_${subroutine.name}_init_for_replay(serializer, 'input')
-    CALL ftg_${subroutine.name}_replay_input(serializer, ${arguments.all.names})
+    CALL ftg_${subroutine.name}_init_for_replay('input')
+    CALL ftg_${subroutine.name}_replay_input(${arguments.all.names})
     CALL ftg_destroy_serializer()
 
     CALL ${subroutine.name}(${arguments.all.names})
@@ -51,9 +49,8 @@ CONTAINS
   END SUBROUTINE ftg_test_${subroutine.name}
 
   
-  SUBROUTINE ftg_${subroutine.name}_init_for_replay(serializer, stage)
+  SUBROUTINE ftg_${subroutine.name}_init_for_replay(stage)
 
-    TYPE(t_serializer), INTENT(INOUT)  :: serializer
     CHARACTER(*), INTENT(IN) :: stage
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
@@ -68,14 +65,10 @@ CONTAINS
 
   END SUBROUTINE ftg_${subroutine.name}_init_for_replay
   
-  SUBROUTINE ftg_${subroutine.name}_replay_input(serializer, ${arguments.all.names})
-    
-    TYPE(t_serializer), INTENT(in)  :: serializer
+  SUBROUTINE ftg_${subroutine.name}_replay_input(${arguments.all.names})
     
     ${arguments.all.specifications(intent = 'inout', allocatable = True)}
 
-    TYPE(t_savepoint)  :: savepoint
-    
     INTEGER, DIMENSION(4,2) :: ftg_bounds
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c

@@ -1,12 +1,11 @@
 ! ================= BEGIN FORTRAN TEST GENERATOR (FTG) =======================
   
-  SUBROUTINE ftg_${subroutine.name}_init_for_capture(serializer, stage, dir)
+  SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
     USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
     USE mo_mpi,            ONLY: get_my_mpi_all_id
-    USE m_ser_ftg,         ONLY: fs_set_serializer, fs_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
+    USE m_ser_ftg,         ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
 
-    TYPE(t_serializer), INTENT(INOUT) :: serializer
     CHARACTER(*), INTENT(IN) :: stage, dir
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
@@ -43,7 +42,7 @@
 
     USE mtime,     ONLY: calendarType
     USE mo_mpi,    ONLY: get_my_mpi_all_id
-    USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer, 
+    USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
     
     ${globals.imports}
 
@@ -54,7 +53,7 @@
 
     IF (ftg_${subroutine.name}_capture_input_active()) THEN
       
-      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'input', ftg_${subroutine.name}_input_dir)
+      CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
       CALL ftg_set_savepoint('input')
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
@@ -103,7 +102,7 @@
 
     USE mo_mpi, ONLY: work_mpi_barrier, get_my_mpi_all_id
     USE mo_exception, ONLY: finish
-    USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer,
+    USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
 
     ${globals.imports}
 
@@ -114,7 +113,7 @@
 
     IF (ftg_${subroutine.name}_capture_output_active()) THEN
 
-      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'output', ftg_${subroutine.name}_output_dir)
+      CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
       CALL ftg_set_savepoint('output')
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
@@ -172,9 +171,9 @@
               IF ($aa) THEN
             #end if
             #if $isArray($container)
-              CALL ftg_register_only("$container", $container, "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
+              CALL ftg_register_only("$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
             #else
-              CALL ftg_register_only("$container", $container, "$contType")$setRegistered($container)
+              CALL ftg_register_only("$container", "$contType")$setRegistered($container)
             #end if $setRegistered($container) 
             #if $aa
               END IF
@@ -214,9 +213,9 @@
             #end if
             $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
             #if ($d - 1) < $totalDim($container)
-              CALL ftg_register_only(ftg_c, $filledContainer, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
+              CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
             #else
-              CALL ftg_register_only(ftg_c, $filledContainer, "$contType")$setRegistered($container)
+              CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
             #end if 
             #if $caa
               END IF
@@ -256,9 +255,9 @@
           $writeVarNameWithFilledIndicesToString($container, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
           #if $mandDims < $totalDim($container)
             #set $filledContainer = $fillIndices($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-            CALL ftg_register_only(ftg_c, $filledContainer, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
+            CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
           #else
-            CALL ftg_register_only(ftg_c, $filledContainer, "$contType")$setRegistered($container)
+            CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
           #end if 
         #end if
       #end for
