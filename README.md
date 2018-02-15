@@ -16,6 +16,8 @@ FTG shall work with any kind of Fortran code up from Fortran90, but has not yet 
 So far, the documentation is not complete. If your interested in using `FortranTestGenerator`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
+**ATTENTION:** <span style="color:red">The latest version uses [Serialbox2](https://github.com/eth-cscs/serialbox2) instead of Serialbox-ftg.</span> 
+
 **Contents:** [In general it works as follows](#in-general-it-works-as-follows) | [Prerequisites](#prerequisites) | [Quick Start Guide](#quick-start-guide) | [Please Note](#please-note) | [Modifying the templates](#modifying-the-templates) | [Notes for ICON developers](#notes-for-icon-developers) | [License](#license)
 
 ## In general it works as follows
@@ -41,18 +43,19 @@ For the source code analysis, FTG uses the tool [FortranCallGraph](https://githu
 
 To run FTG, you will need the following software packages:
 
-* `Python 2.7` (Python 3+ is currently not supported, but all uncompatible stuff will be removed in the future)
-* The `Cheetah Template Engine`: https://github.com/cheetahtemplate/cheetah (Unfortunately, development and support here has stopped during the development of FTG, but there is now a fork on: https://github.com/CheetahTemplate3/cheetah3, which has not yet been tested with FTG though.)
-* This modified version of the `Serialbox` library: https://github.com/fortesg/serialbox-ftg
+* `Python 2.7` (Python 3+ is currently not supported)
+* `Cheetah Template Engine`: https://github.com/CheetahTemplate3/cheetah3
+* `Serialbox2`: https://github.com/eth-cscs/serialbox2
 * `FortranCallGraph`: https://github.com/fortesg/fortrancallgraph
 
 ## Quick Start Guide
 
-#### 1. Get and install `Serialbox-ftg`
-... from here: https://github.com/fortesg/serialbox-ftg and learn how to built your application with it. 
+#### 1. Get and install `Serialbox2`
+... from here: https://github.com/eth-cscs/serialbox2 and learn how to build your application with it. 
+Make sure that you build Serialbox2 with CMake options `SERIALBOX_ENABLE_FORTRAN` and `SERIALBOX_ENABLE_FTG` switched on.  
 
 #### 2. Get and install the `Cheetah Template Engine`
-...from here: https://github.com/cheetahtemplate/cheetah or here: https://github.com/CheetahTemplate3/cheetah3 or just look if your OS provides a package (e.g. Ubuntu does).
+...from here: https://github.com/CheetahTemplate3/cheetah3 or just look if your OS provides a package (e.g. Ubuntu does).
 
 #### 3. Get `FortranCallGraph` 
 ...from here: https://github.com/fortesg/fortrancallgraph
@@ -104,7 +107,7 @@ It is a little bit annoying that you have to create these folders manually, but 
 
 #### 11. Compile and run your application with the capture code
 
-This will only work if you have added the includes and libraries of SerialBox-ftg to your build configuration, see step 1.
+This will only work if you have added the includes and libraries of Serialbox2 to your build configuration, see step 1.
 
 When the capturing is taking place, there will be messages printed to `stdout` beginning with `FTG...`.
 
@@ -123,12 +126,12 @@ You have to run the test with the same numbers of MPI processes as you have done
 
 The original output is located in `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output` and the test output was put into `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output_test`.
 
-To compare the data, you can use `serialbox-compare`: https://github.com/fortesg/serialbox-compare.
+To compare the data, you can use the Python tool `compare.py` included in Serialbox2.
 
 Do the following:
 ```
 $> cd TEST_DATA_BASE_DIR/ftg_my_subroutine_test
-$> sbcompare output/ftg_my_subroutine_output_0.json output_test/ftg_my_subroutine_output_0.json
+$> <serialbox2_install_path>/python/compare/compare.py output/ftg_my_subroutine_output_0.json output_test/ftg_my_subroutine_output_0.json
 ```
 This compares the output for the first MPI process. Replace `_0` by `_1`, `_2`, etc. for comparing the output of the other processes. 
 
@@ -176,7 +179,7 @@ This only works for module variables that are private because the whole module i
 
 * The static source code analysis has the same limitations as every static analysis, it can only find out what can be found out by parsing the source code. So mainly, it can not handle runtime polymorphism. That means, the use of, for example, function pointers or inheritance can lead to wrong results.
 
-* The modified SerialBox library used by FTG contains code like
+* The FortranTestGenerator frontend of the SerialBox2 library contains code like
 
   ```fortran
   IF (ASSOCIATED(ptr)) THEN
@@ -199,15 +202,15 @@ Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## Notes for ICON developers
 
-#### 1. Building ICON with SerialBox-ftg
+#### 1. Build ICON with Serialbox2
 
 * For including the libraries, you can just use the `OTHER_LIBS` variable in your `mh-linux` file:
   ```
-  OTHER_LIBS  = ${OTHER_LIBS} -L${SERIALBOX_ROOT}/lib -lFortranSer -lSerialBoxWrapper -lSerialBox -lUtils -ljson -lstdc++ -lsha256
+  OTHER_LIBS  = ${OTHER_LIBS} -L$SERIALROOT/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
   ```
 * For including the includes, there is no such variable, so I have just addded them to the `FFLAGS` variable:
   ```
-  FFLAGS = ${FFLAGS} -I${SERIALBOX_ROOT}/include/fortran
+  FFLAGS = $FFLAGS -I$SERIALROOT/include
   ```
 
 #### 2. Create assembler files
