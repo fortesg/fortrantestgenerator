@@ -21,7 +21,7 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
 LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
-CALL start_mpi() !ICON
+CALL start_mpi('ftg_${subroutine.name}_test') !ICON
 
 CALL ftg_test_${subroutine.name}()
 
