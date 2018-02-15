@@ -1,14 +1,13 @@
 ! ================= BEGIN FORTRAN TEST GENERATOR (FTG) =======================
   
-  SUBROUTINE ftg_${subroutine.name}_init_for_capture(serializer, stage, dir)
+  SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
     USE mpi
-    USE m_serialize,       ONLY: t_serializer, fs_create_serializer, fs_add_serializer_metainfo
+    USE m_ser_ftg,         ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
 
-    TYPE(t_serializer), INTENT(INOUT) :: serializer
     CHARACTER(*), INTENT(IN) :: stage, dir
 
-    INTEGER (kind=4) my_mpi_id, error
+    INTEGER(kind=4) my_mpi_id, error
     CHARACTER(len=1024) :: basename, mkdirerr
     
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
@@ -23,10 +22,13 @@
       WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
     END IF 
     
-    CALL fs_create_serializer(TRIM(dir), TRIM(basename), 'w', serializer)
-    CALL fs_add_serializer_metainfo(serializer, 'subroutine', '${subroutine.name}')
-    CALL fs_add_serializer_metainfo(serializer, 'stage', stage)
-    CALL fs_add_serializer_metainfo(serializer, 'mpi_id', my_mpi_id)
+    ignore_bullshit_max_dim_size = 100000
+    ignore_bullshit_allow_negative_indices = .TRUE.
+    
+    CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
+    CALL ftg_add_serializer_metainfo('subroutine', '${subroutine.name}')
+    CALL ftg_add_serializer_metainfo('stage', stage)
+    CALL ftg_add_serializer_metainfo('mpi_id', my_mpi_id)
 
   END SUBROUTINE ftg_${subroutine.name}_init_for_capture
 
@@ -41,24 +43,21 @@
   SUBROUTINE ftg_${subroutine.name}_capture_input(${arguments.all.names})
 
     USE mpi
-    USE m_serialize, ONLY: t_serializer, t_savepoint, fs_create_savepoint, fs_add_savepoint_metainfo, fs_write_field, fs_destroy_savepoint, fs_destroy_serializer, fs_register_derived_type_field
+    USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
     
     ${globals.imports}
 
     ${arguments.all.specifications(intent = 'in')}
 
-    TYPE(t_serializer) :: serializer
-    TYPE(t_savepoint)  :: savepoint
-    
-    INTEGER (kind=4) my_mpi_id, error
+	INTEGER(kind=4) my_mpi_id, error
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
 
     IF (ftg_${subroutine.name}_capture_input_active()) THEN
       
       CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
-      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'input', ftg_${subroutine.name}_input_dir)
-      CALL fs_create_savepoint('input', savepoint)
+      CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
+      CALL ftg_set_savepoint('input')
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, my_mpi_id
       WRITE (0,*) 'FTG WRITE INPUT DATA ${subroutine.name}', my_mpi_id
@@ -81,11 +80,11 @@
       #for $var in $globals.usedVariables
       $ftg_write($var)#end for
 
-      CALL fs_write_field(serializer, savepoint, "ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
+      CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 
-      CALL fs_destroy_savepoint(savepoint)
+      CALL ftg_destroy_savepoint()
       WRITE (0,*) 'FTG FINALIZE INPUT DATA ${subroutine.name}', my_mpi_id
-      CALL fs_destroy_serializer(serializer)
+      CALL ftg_destroy_serializer()
 
     END IF
 
@@ -102,24 +101,21 @@
   SUBROUTINE ftg_${subroutine.name}_capture_output(${arguments.output.names})
 
     USE mpi
-    USE m_serialize, ONLY: t_serializer, t_savepoint, fs_create_savepoint, fs_add_savepoint_metainfo, fs_write_field, fs_destroy_savepoint, fs_destroy_serializer, fs_register_derived_type_field
+    USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
 
     ${globals.imports}
 
     ${arguments.output.specifications(intent = 'in')}
 
-    TYPE(t_serializer) :: serializer
-    TYPE(t_savepoint)  :: savepoint
-    
-    INTEGER (kind=4) my_mpi_id, error
+	INTEGER(kind=4) my_mpi_id, error
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
 
     IF (ftg_${subroutine.name}_capture_output_active()) THEN
 
       CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
-      CALL ftg_${subroutine.name}_init_for_capture(serializer, 'output', ftg_${subroutine.name}_output_dir)
-      CALL fs_create_savepoint('output', savepoint)
+      CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
+      CALL ftg_set_savepoint('output')
 
       WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, my_mpi_id
       WRITE (0,*) 'FTG WRITE output DATA ${subroutine.name}', my_mpi_id
@@ -143,11 +139,14 @@
       #for $var in $globals.usedVariables
       $ftg_write($var)#end for
       
-      CALL fs_write_field(serializer, savepoint, "ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
+      CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 
-      CALL fs_destroy_savepoint(savepoint)
+      CALL ftg_destroy_savepoint()
       WRITE (0,*) 'FTG FINALIZE output DATA ${subroutine.name}', my_mpi_id
-      CALL fs_destroy_serializer(serializer)
+      CALL ftg_destroy_serializer()
+      
+      CALL MPI_BARRIER (MPI_COMM_WORLD, error)
+      STOP 'FTG STOP'
 
     END IF
 
@@ -173,9 +172,9 @@
               IF ($aa) THEN
             #end if
             #if $isArray($container)
-              CALL fs_register_derived_type_field(serializer, "$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
+              CALL ftg_register_only("$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
             #else
-              CALL fs_register_derived_type_field(serializer, "$container", "$contType")$setRegistered($container)
+              CALL ftg_register_only("$container", "$contType")$setRegistered($container)
             #end if $setRegistered($container) 
             #if $aa
               END IF
@@ -188,9 +187,9 @@
         IF ($aa) THEN
       #end if
       #if $isArray($var)
-        CALL fs_write_field(serializer, savepoint, "$var", $var, LBOUND($var), UBOUND($var))
+        CALL ftg_write("$var", $var, LBOUND($var), UBOUND($var))
       #else
-        CALL fs_write_field(serializer, savepoint, "$var", $var)
+        CALL ftg_write("$var", $var)
       #end if  
       #if $aa
         END IF
@@ -215,9 +214,9 @@
             #end if
             $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
             #if ($d - 1) < $totalDim($container)
-              CALL fs_register_derived_type_field(serializer, ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
+              CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
             #else
-              CALL fs_register_derived_type_field(serializer, ftg_c, "$contType")$setRegistered($container)
+              CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
             #end if 
             #if $caa
               END IF
@@ -257,18 +256,18 @@
           $writeVarNameWithFilledIndicesToString($container, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
           #if $mandDims < $totalDim($container)
             #set $filledContainer = $fillIndices($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-            CALL fs_register_derived_type_field(serializer, ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
+            CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
           #else
-            CALL fs_register_derived_type_field(serializer, ftg_c, "$contType")$setRegistered($container)
+            CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
           #end if 
         #end if
       #end for
       $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #if $mandDims < $totalDim($var)
-        CALL fs_write_field(serializer, savepoint, ftg_c, $filled, LBOUND($filled), UBOUND($filled))
+        CALL ftg_write(ftg_c, $filled, LBOUND($filled), UBOUND($filled))
       #else
-        CALL fs_write_field(serializer, savepoint, ftg_c, $filled)
+        CALL ftg_write(ftg_c, $filled)
       #end if
       #for $level in sorted(set($levels($var)[:-1]) - set($levels($topContainer)))
         #if $ifCAA[-1] == '1'
