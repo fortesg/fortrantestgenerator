@@ -16,7 +16,7 @@ FTG shall work with any kind of Fortran code up from Fortran90, but has not yet 
 So far, the documentation is not complete. If your interested in using `FortranTestGenerator`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
-**ATTENTION:** <span style="color:red">The latest version uses [Serialbox2](https://github.com/eth-cscs/serialbox2) instead of Serialbox-ftg.</span> 
+**ATTENTION:** The latest version uses [Serialbox2](https://github.com/eth-cscs/serialbox2) instead of Serialbox-ftg.
 
 **Contents:** [In general it works as follows](#in-general-it-works-as-follows) | [Prerequisites](#prerequisites) | [Quick Start Guide](#quick-start-guide) | [Please Note](#please-note) | [Modifying the templates](#modifying-the-templates) | [Notes for ICON developers](#notes-for-icon-developers) | [License](#license)
 
