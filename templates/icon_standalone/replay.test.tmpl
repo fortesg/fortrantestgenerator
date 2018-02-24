@@ -84,29 +84,35 @@ CONTAINS
 
     ! BASIC ARGUMENTS
     #for $argument in $arguments.all.basic
-        #if $isArray($argument)
-          CALL ftg_allocate("$argument", $argument)
-        #end if
-        CALL ftg_read("$argument", $argument)
+   	  IF (ftg_field_exists('$argument')) THEN
+	    #if $isArray($argument)
+	       CALL ftg_allocate("$argument", $argument)
+	    #end if
+	    CALL ftg_read("$argument", $argument)
+      END IF
     #end for
 
     ! OPTIONAL ARGUMENTS
     #for $argument in $arguments.all.optional
-      IF (PRESENT($argument)) THEN
-        #if $isArray($argument)
-          CALL ftg_allocate("$argument", $argument)
-        #end if
+      IF (PRESENT($argument) .AND. ftg_field_exists('$argument')) THEN
+	    #if $isArray($argument)
+	      CALL ftg_allocate("$argument", $argument)
+	    #end if
         CALL ftg_read("$argument", $argument)
       END IF
     #end for
 
     ! TYPE MEMBERS
     #for $member in $arguments.all.usedTypeMembers
-    $ftg_read($member) #end for
-
+   	  IF (ftg_field_exists('$member')) THEN
+        $ftg_read($member)  END IF 
+    #end for
+    
     ! GLOBALS
     #for $globalVar in $globals.usedVariables
-    $ftg_read($globalVar) #end for
+   	  IF (ftg_field_exists('$argument')) THEN
+	    $ftg_read($globalVar)  END IF 
+    #end for
 
     CALL ftg_destroy_savepoint()
 
