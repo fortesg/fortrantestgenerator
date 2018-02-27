@@ -69,7 +69,7 @@ CONTAINS
     
     ${arguments.all.specifications(intent = 'inout', allocatable = True)}
 
-    INTEGER, DIMENSION(4,2) :: ftg_bounds
+    INTEGER, DIMENSION(8) :: ftg_bounds
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
     INTEGER ftg_mtime_calendar
@@ -128,7 +128,7 @@ END PROGRAM ftg_${subroutine.name}_test
         #if $needsAllocation($container)
           IF (ftg_field_exists("$container")) THEN
             ftg_bounds = ftg_get_bounds("$container")
-            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1 ,2)", "ftg_bounds(2 ,1):ftg_bounds(2 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(4 ,1):ftg_bounds(4 ,2)")
+            $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
           ELSE
             $alloc($container, $contDim, "0", "0", "0", "0")
           END IF
@@ -153,7 +153,7 @@ END PROGRAM ftg_${subroutine.name}_test
             $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
             IF (ftg_field_exists(ftg_c)) THEN
               ftg_bounds = ftg_get_bounds(ftg_c)
-              $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+              $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
             ELSE
               $alloc($container, $contDim, "0", "0", "0", "0")
             END IF
@@ -169,7 +169,7 @@ END PROGRAM ftg_${subroutine.name}_test
           $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
           IF (ftg_field_exists(ftg_c)) THEN
             ftg_bounds = ftg_get_bounds(ftg_c)
-            $alloc($container, $contDim, "ftg_bounds(1, 1):ftg_bounds(1, 2)", "ftg_bounds(2, 1):ftg_bounds(2, 2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)", "ftg_bounds(3 ,1):ftg_bounds(3 ,2)")
+            $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
           ELSE
             $alloc($container, $contDim, "0", "0", "0", "0")
           END IF
