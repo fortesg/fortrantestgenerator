@@ -8,7 +8,7 @@ PROGRAM ftg_${subroutine.name}_test
 
   USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_output_dir
 
-  USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate
+  USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read
   
   ${globals.imports}
   
@@ -85,18 +85,20 @@ CONTAINS
     ! BASIC ARGUMENTS
     #for $argument in $arguments.all.basic
         #if $isArray($argument)
-          CALL ftg_allocate("$argument", $argument)
+          CALL ftg_allocate_and_read("$argument", $argument)
+        #else
+          CALL ftg_read("$argument", $argument)
         #end if
-        CALL ftg_read("$argument", $argument)
     #end for
 
     ! OPTIONAL ARGUMENTS
     #for $argument in $arguments.all.optional
       IF (PRESENT($argument)) THEN
         #if $isArray($argument)
-          CALL ftg_allocate("$argument", $argument)
+          CALL ftg_allocate_and_read("$argument", $argument)
+        #else
+          CALL ftg_read("$argument", $argument)
         #end if
-        CALL ftg_read("$argument", $argument)
       END IF
     #end for
 
@@ -136,9 +138,10 @@ END PROGRAM ftg_${subroutine.name}_test
         #end if
       #end for
       #if $needsAllocation($var)
-        CALL ftg_allocate("$var", $var)
+        CALL ftg_allocate_and_read("$var", $var)
+      #else
+        CALL ftg_read("$var", $var)
       #end if
-      CALL ftg_read("$var", $var)
     #else
     
       #set $mandDims = $getNumberOfMandatoryDimensions($var)
@@ -178,9 +181,10 @@ END PROGRAM ftg_${subroutine.name}_test
       $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #if $isAllocatableOrPointer($var)
-	      CALL ftg_allocate(ftg_c, $filled)
+        CALL ftg_allocate_and_read(ftg_c, $filled)
+      #else
+        CALL ftg_read(ftg_c, $filled)
       #end if 
-      CALL ftg_read(ftg_c, $filled)
       #for $d in range(1, $getNumberOfMandatoryDimensions($var) + 1)
         END DO
       #end for
