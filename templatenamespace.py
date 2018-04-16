@@ -3,6 +3,7 @@ from source import Subroutine, SourceFile, VariableReference, Variable
 from string import find
 import re
 from symbol import argument
+from gtk._gtk import Separator
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -29,7 +30,8 @@ class TemplatesNameSpace(object):
             
         self.subroutine = SubroutineNameSpace(subroutine)
         self.module = ModuleNameSpace(subroutine.getModuleName())
-        self.arguments = ArgumentsNameSpace(subroutine, typeArgumentReferences)
+        #self.arguments = ArgumentsNameSpace(subroutine, typeArgumentReferences)
+        self.arguments = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
      
@@ -440,10 +442,6 @@ class ArgumentList():
     def input(self):
         return self.filter(lambda a : a.isInArgument())
     
-    def all(self):
-        '''DEPRECATED'''
-        return self
-    
     def optionals(self):
         return self.filter(lambda a : a.isOptionalArgument())
     
@@ -465,6 +463,35 @@ class ArgumentList():
     def allocatablesOrPointers(self):
         return self.filter(lambda a : a.isAllocatableOrPointer())
     
+    def names(self):
+        return map(Variable.getName, self.__arguments)
+    
+    def joinNames(self, sep = ', '):
+        return sep.join(self.names())
+    
+    def specifications(self, intent = '', allocatable = False, charLengthZero = False):
+        specs = []
+        for argument in self.__arguments:
+            argCopy = argument.getAlias(argument.getName())
+            argCopy.setIntent(intent)
+            if allocatable: 
+                if (argCopy.hasBuiltInType() and argCopy.getDimension() > 0) or (argCopy.hasClassType()):
+                    argCopy.setAllocatable(True)
+            else:
+                argCopy.setAllocatable(False)
+            if charLengthZero and argCopy.hasBuiltInType() and argCopy.getTypeName().startswith('CHARACTER'):
+                argCopy.setTypeName('CHARACTER(len=0)')
+            argCopy.setTarget(False)
+            specs.append(str(argCopy))
+            
+        return "\n".join(specs)
+    
+    def usedMembers(self):
+        usedTypeMembers = []
+        for reference in self._typeArgumentReferences:
+            if reference.getVariableName(0) in self.__names:
+                usedTypeMembers.append(reference.getExpression())
+        return usedTypeMembers
 
 class ArgumentsNameSpace(object):
     
