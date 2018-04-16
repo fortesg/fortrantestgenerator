@@ -1,5 +1,5 @@
 from assertions import assertType, assertTypeAll
-from source import Subroutine, SourceFile, VariableReference
+from source import Subroutine, SourceFile, VariableReference, Variable
 from string import find
 import re
 from symbol import argument
@@ -417,6 +417,54 @@ class ModuleNameSpace(object):
         assertType(moduleName, 'moduleName', str)
 
         self.name = moduleName
+
+class ArgumentList():
+    def __init__(self, arguments, typeArgumentReferences):
+        assertTypeAll(arguments, 'arguments', Variable)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        
+        self.__arguments = arguments
+        self.__typeArgumentReferences = typeArgumentReferences
+        
+    def __iter__(self):
+        return self.__arguments
+    
+    def filter(self, predicate):
+        arguments = filter(predicate, self.__arguments)
+        references = [r for r in self.__typeArgumentReferences if r.getLevel0Variable() in arguments]
+        return ArgumentList(arguments, references)
+    
+    def output(self):
+        return self.filter(lambda a : a.isOutArgument())
+    
+    def input(self):
+        return self.filter(lambda a : a.isInArgument())
+    
+    def all(self):
+        '''DEPRECATED'''
+        return self
+    
+    def optionals(self):
+        return self.filter(lambda a : a.isOptionalArgument())
+    
+    def requireds(self):
+        return self.filter(lambda a : a.isRequiredArgument())
+    
+    def builtInTypes(self):
+        return self.filter(lambda a : a.hasBuiltInType())
+    
+    def derivedTypes(self):
+        return self.filter(lambda a : a.hasDerivedType())
+    
+    def pointers(self):
+        return self.filter(lambda a : a.isPointer())
+    
+    def allocatables(self):
+        return self.filter(lambda a : a.isAllocatable())
+    
+    def allocatablesOrPointers(self):
+        return self.filter(lambda a : a.isAllocatableOrPointer())
+    
 
 class ArgumentsNameSpace(object):
     
