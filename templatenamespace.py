@@ -3,7 +3,6 @@ from source import Subroutine, SourceFile, VariableReference, Variable
 from string import find
 import re
 from symbol import argument
-from gtk._gtk import Separator
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -469,7 +468,7 @@ class ArgumentList():
     def joinNames(self, sep = ', '):
         return sep.join(self.names())
     
-    def specifications(self, intent = '', allocatable = False, charLengthZero = False):
+    def specs(self, intent = '', allocatable = False, charLengthZero = False):
         specs = []
         for argument in self.__arguments:
             argCopy = argument.getAlias(argument.getName())
