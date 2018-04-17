@@ -428,7 +428,7 @@ class ArgumentList():
         self.__typeArgumentReferences = typeArgumentReferences
         
     def __iter__(self):
-        return self.__arguments
+        return iter(self.__arguments)
     
     def filter(self, predicate):
         arguments = filter(predicate, self.__arguments)
