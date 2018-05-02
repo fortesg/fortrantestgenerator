@@ -10,16 +10,59 @@ sys.path.append(FTG_DIR)
 FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 
-from source import Variable
+from source import Variable, Subroutine, SubroutineFullName, Module, SourceFile
 from templatenamespace import ArgumentList
 
 class TestArgumentList(unittest.TestCase):
     def setUp(self):
-        self.arg0, self.arg1 = Variable.fromDeclarationStatement('INTEGER :: arg0, arg1(:)')
-        self.argList = ArgumentList([self.arg0, self.arg1], [])
+        self.arg0, self.arg1 = Variable.fromDeclarationStatement('INTEGER, INTENT(inout), ALLOCATABLE :: arg0, arg1(:)')
+        self.arg2, = Variable.fromDeclarationStatement('INTEGER, INTENT(in), POINTER :: arg2')
+        self.arg3, = Variable.fromDeclarationStatement('TYPE(test), INTENT(inout), OPTIONAL :: arg3')
+        self.arg4, = Variable.fromDeclarationStatement('INTEGER, INTENT(out), OPTIONAL :: arg4')
+        self.argList = ArgumentList([self.arg0, self.arg1, self.arg2, self.arg3, self.arg4], [])
+        
+        sourceFile = SourceFile('', False, True)
+        module = Module('testmod', [], sourceFile, 0)
+        subroutine = Subroutine(SubroutineFullName.fromParts('testmod', 'testsubr'), False, [], module)
+        for arg in self.argList:
+            arg.setDeclaredIn(subroutine)
         
     def testAll(self):
-        self.assertEqual(['arg0', 'arg1'], map(Variable.getName, self.argList))
+        self.assertEqual('arg0, arg1, arg2, arg3, arg4', self.argList.joinNames())
         
+    def testInput(self):
+        self.assertEqual('arg0, arg1, arg2, arg3', self.argList.input().joinNames())
+        
+    def testOutput(self):
+        self.assertEqual('arg0, arg1, arg3, arg4', self.argList.output().joinNames())
+        
+    def testOptionals(self):
+        self.assertEqual('arg3, arg4', self.argList.optionals().joinNames())
+        
+    def testRequired(self):
+        self.assertEqual('arg0, arg1, arg2', self.argList.requireds().joinNames())
+        
+    def testBuiltInTypes(self):
+        self.assertEqual('arg0, arg1, arg2, arg4', self.argList.builtInTypes().joinNames())
+        
+    def testDerivedTypes(self):
+        self.assertEqual('arg3', self.argList.derivedTypes().joinNames())
+        
+    def testPointers(self):
+        self.assertEqual('arg2', self.argList.pointers().joinNames())
+        
+    def testAllocatables(self):
+        self.assertEqual('arg0, arg1', self.argList.allocatables().joinNames())
+        
+    def testAllocatablesOrPointers(self):
+        self.assertEqual('arg0, arg1, arg2', self.argList.allocatablesOrPointers().joinNames())
+        
+    def testCombinations(self):
+        self.assertEqual('arg3', self.argList.input().optionals().joinNames())
+        self.assertEqual('arg3', self.argList.optionals().input().joinNames())
+        self.assertEqual('arg0, arg1', self.argList.output().allocatablesOrPointers().joinNames())
+        self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().output().joinNames())
+        self.assertEqual('', self.argList.allocatablesOrPointers().output().optionals().joinNames())
+
 if __name__ == "__main__":
     unittest.main()
