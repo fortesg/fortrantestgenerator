@@ -460,7 +460,7 @@ class ArgumentList():
         return self.filter(lambda a : a.isAllocatable())
     
     def allocatablesOrPointers(self):
-        return self.filter(lambda a : a.isAllocatableOrPointer())
+        return self.filter(lambda a : a.isAllocatable() or a.isPointer())
     
     def names(self):
         return map(Variable.getName, self.__arguments)
