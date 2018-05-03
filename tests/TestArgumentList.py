@@ -63,6 +63,52 @@ class TestArgumentList(unittest.TestCase):
         self.assertEqual('arg0, arg1', self.argList.output().allocatablesOrPointers().joinNames())
         self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().output().joinNames())
         self.assertEqual('', self.argList.allocatablesOrPointers().output().optionals().joinNames())
+        
+    def testSpecs(self):
+        expSpec = '''
+INTEGER, ALLOCATABLE, INTENT(inout) :: arg0
+INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: arg1
+INTEGER, POINTER, INTENT(in) :: arg2
+TYPE(test), INTENT(inout), OPTIONAL :: arg3
+INTEGER, INTENT(out), OPTIONAL :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs())
+        
+        expSpec = '''
+INTEGER, ALLOCATABLE, INTENT(in) :: arg0
+INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(in) :: arg1
+INTEGER, POINTER, INTENT(in) :: arg2
+TYPE(test), INTENT(in), OPTIONAL :: arg3
+INTEGER, INTENT(in), OPTIONAL :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs(intent='in'))
+        
+        expSpec = '''
+INTEGER, ALLOCATABLE :: arg0
+INTEGER, DIMENSION(:), ALLOCATABLE :: arg1
+INTEGER, POINTER :: arg2
+TYPE(test) :: arg3
+INTEGER :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs(intent=''))
+        
+        expSpec = '''
+INTEGER, ALLOCATABLE, INTENT(inout) :: arg0
+INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: arg1
+INTEGER, POINTER, INTENT(in) :: arg2
+TYPE(test), ALLOCATABLE, INTENT(inout), OPTIONAL :: arg3
+INTEGER, INTENT(out), OPTIONAL :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs(allocatable=True))
+        
+        expSpec = '''
+INTEGER, INTENT(inout) :: arg0
+INTEGER, DIMENSION(:), INTENT(inout) :: arg1
+INTEGER, POINTER, INTENT(in) :: arg2
+TYPE(test), INTENT(inout), OPTIONAL :: arg3
+INTEGER, INTENT(out), OPTIONAL :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs(allocatable=False))
 
 if __name__ == "__main__":
     unittest.main()
