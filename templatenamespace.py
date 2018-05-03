@@ -29,8 +29,7 @@ class TemplatesNameSpace(object):
             
         self.subroutine = SubroutineNameSpace(subroutine)
         self.module = ModuleNameSpace(subroutine.getModuleName())
-        #self.arguments = ArgumentsNameSpace(subroutine, typeArgumentReferences)
-        self.arguments = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
+        self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
      
@@ -419,7 +418,7 @@ class ModuleNameSpace(object):
 
         self.name = moduleName
 
-class ArgumentList():
+class ArgumentList(object):
     def __init__(self, arguments, typeArgumentReferences):
         assertTypeAll(arguments, 'arguments', Variable)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
@@ -435,10 +434,22 @@ class ArgumentList():
         references = [r for r in self.__typeArgumentReferences if r.getLevel0Variable() in arguments]
         return ArgumentList(arguments, references)
     
-    def output(self):
+    def intentIn(self):
+        return self.filter(lambda a : a.getIntent().lower() == 'in')
+    
+    def intentOut(self):
+        return self.filter(lambda a : a.getIntent().lower() == 'out')
+    
+    def intentInout(self):
+        return self.filter(lambda a : a.getIntent().lower() == 'inout')
+    
+    def allIn(self):
+        return self.filter(lambda a : a.isInArgument())
+    
+    def allOut(self):
         return self.filter(lambda a : a.isOutArgument())
     
-    def input(self):
+    def allIn(self):
         return self.filter(lambda a : a.isInArgument())
     
     def optionals(self):
@@ -488,70 +499,6 @@ class ArgumentList():
         return "\n".join(specs)
     
     def usedMembers(self):
-        usedTypeMembers = []
-        for reference in self._typeArgumentReferences:
-            if reference.getVariableName(0) in self.__names:
-                usedTypeMembers.append(reference.getExpression())
-        return usedTypeMembers
-
-class ArgumentsNameSpace(object):
-    
-    def __init__(self, subroutine, typeArgumentReferences):
-        assertType(subroutine, 'subroutine', Subroutine)
-        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
-        
-        self.input = ArgumentsSubNameSpace(subroutine.getInArguments(), typeArgumentReferences)
-        self.output = ArgumentsSubNameSpace(subroutine.getOutArguments(), typeArgumentReferences)
-        self.all = ArgumentsSubNameSpace(subroutine.getArguments(), typeArgumentReferences)
-
-class ArgumentsSubNameSpace(object):
-    def __init__(self, arguments, typeArgumentReferences):
-        self.__arguments = arguments
-        self._typeArgumentReferences = typeArgumentReferences
-        
-        self.__names = []
-        for argument in self.__arguments:
-            self.__names.append(argument.getName())
-        
-    def names(self):
-        return ', '.join(self.__names)
-    
-    def specifications(self, intent = '', allocatable = False, charLengthZero = False):
-        specs = []
-        for argument in self.__arguments:
-            argCopy = argument.getAlias(argument.getName())
-            argCopy.setIntent(intent)
-            if allocatable: 
-                if (argCopy.hasBuiltInType() and argCopy.getDimension() > 0) or (argCopy.hasClassType()):
-                    argCopy.setAllocatable(True)
-            else:
-                argCopy.setAllocatable(False)
-            if charLengthZero and argCopy.hasBuiltInType() and argCopy.getTypeName().startswith('CHARACTER'):
-                argCopy.setTypeName('CHARACTER(len=0)')
-            argCopy.setTarget(False)
-            specs.append(str(argCopy))
-            
-        return "\n".join(specs)
-    
-    def basic(self):
-        basic = []
-        for argument in self.__arguments:
-            if argument.hasBuiltInType():
-                name = argument.getName()
-                if not argument.isOptionalArgument():
-                    basic.append(name)
-        return basic
-    
-    def optional(self):
-        optional = []
-        for argument in self.__arguments:
-            if argument.hasBuiltInType():
-                name = argument.getName()
-                if argument.isOptionalArgument():
-                    optional.append(name)
-        return optional
-    
-    def usedTypeMembers(self):
         usedTypeMembers = []
         for reference in self._typeArgumentReferences:
             if reference.getVariableName(0) in self.__names:

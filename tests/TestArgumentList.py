@@ -30,11 +30,20 @@ class TestArgumentList(unittest.TestCase):
     def testAll(self):
         self.assertEqual('arg0, arg1, arg2, arg3, arg4', self.argList.joinNames())
         
-    def testInput(self):
-        self.assertEqual('arg0, arg1, arg2, arg3', self.argList.input().joinNames())
+    def testIntentIn(self):
+        self.assertEqual('arg2', self.argList.intentIn().joinNames())
         
-    def testOutput(self):
-        self.assertEqual('arg0, arg1, arg3, arg4', self.argList.output().joinNames())
+    def testIntentOut(self):
+        self.assertEqual('arg4', self.argList.intentOut().joinNames())
+        
+    def testIntentInout(self):
+        self.assertEqual('arg0, arg1, arg3', self.argList.intentInout().joinNames())
+        
+    def testAllIn(self):
+        self.assertEqual('arg0, arg1, arg2, arg3', self.argList.allIn().joinNames())
+        
+    def testAllOut(self):
+        self.assertEqual('arg0, arg1, arg3, arg4', self.argList.allOut().joinNames())
         
     def testOptionals(self):
         self.assertEqual('arg3, arg4', self.argList.optionals().joinNames())
@@ -58,11 +67,11 @@ class TestArgumentList(unittest.TestCase):
         self.assertEqual('arg0, arg1, arg2', self.argList.allocatablesOrPointers().joinNames())
         
     def testCombinations(self):
-        self.assertEqual('arg3', self.argList.input().optionals().joinNames())
-        self.assertEqual('arg3', self.argList.optionals().input().joinNames())
-        self.assertEqual('arg0, arg1', self.argList.output().allocatablesOrPointers().joinNames())
-        self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().output().joinNames())
-        self.assertEqual('', self.argList.allocatablesOrPointers().output().optionals().joinNames())
+        self.assertEqual('arg3', self.argList.allIn().optionals().joinNames())
+        self.assertEqual('arg3', self.argList.optionals().allIn().joinNames())
+        self.assertEqual('arg0, arg1', self.argList.allOut().allocatablesOrPointers().joinNames())
+        self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().allOut().joinNames())
+        self.assertEqual('', self.argList.allocatablesOrPointers().allOut().optionals().joinNames())
         
     def testSpecs(self):
         expSpec = '''
