@@ -468,16 +468,18 @@ class ArgumentList():
     def joinNames(self, sep = ', '):
         return sep.join(self.names())
     
-    def specs(self, intent = '', allocatable = False, charLengthZero = False):
+    def specs(self, intent = None, allocatable = None, charLengthZero = False):
         specs = []
         for argument in self.__arguments:
             argCopy = argument.getAlias(argument.getName())
-            argCopy.setIntent(intent)
-            if allocatable: 
-                if (argCopy.hasBuiltInType() and argCopy.getDimension() > 0) or (argCopy.hasClassType()):
-                    argCopy.setAllocatable(True)
-            else:
-                argCopy.setAllocatable(False)
+            if intent is not None:
+                argCopy.setIntent(intent)
+            if allocatable is not None:
+                if allocatable: 
+                    if argCopy.getDimension() > 0 or not argCopy.hasBuiltInType():
+                        argCopy.setAllocatable(True)
+                else:
+                    argCopy.setAllocatable(False)
             if charLengthZero and argCopy.hasBuiltInType() and argCopy.getTypeName().startswith('CHARACTER'):
                 argCopy.setTypeName('CHARACTER(len=0)')
             argCopy.setTarget(False)
