@@ -38,7 +38,7 @@
 
   END FUNCTION ftg_${subroutine.name}_capture_input_active
     
-  SUBROUTINE ftg_${subroutine.name}_capture_input(${arguments.all.names})
+  SUBROUTINE ftg_${subroutine.name}_capture_input(${args.joinNames})
 
     USE mtime,     ONLY: calendarType
     USE mo_mpi,    ONLY: get_my_mpi_all_id
@@ -46,7 +46,7 @@
     
     ${globals.imports}
 
-    ${arguments.all.specifications(intent = 'in')}
+    ${args.specs(intent = 'in')}
 
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
@@ -62,23 +62,30 @@
       ! MTIME CALENDAR TYPE --> Remove this line if mtime is not used
       CALL ftg_write("ftg_mtime_calendar", calendarType())
 
-      ! BASIC ARGUMENTS
-      #for $var in $arguments.all.basic
+      ! BUILT-IN-TYPE REQUIRED ARGUMENTS
+      #for $var in $args.builtInTypes.requireds.names
       $ftg_write($var)#end for
       
-      ! OPTIONAL ARGUMENTS
-      #for $var in $arguments.all.optional
-      IF (PRESENT($var)) THEN
-        $ftg_write($var) END IF 
+      ! BUILT-IN-TYPE OPTIONAL ARGUMENTS
+      #for $var in $args.builtInTypes.optionals.names
+          IF (PRESENT($var)) THEN
+            $ftg_write($var) END IF 
       #end for
       
-      ! TYPE MEMBERS
-      #for $var in $arguments.all.usedTypeMembers
-      $ftg_write($var)#end for
+      ! DERIVED-TYPE REQUIRED ARGUMENT MEMBERS
+      #for $var in $args.derivedTypes.requireds.references
+        $ftg_write($var)#end for
+      
+      ! DERIVED-TYPE REQUIRED ARGUMENT MEMBERS
+      #for $arg in $args.derivedTypes.optionals
+          IF (PRESENT($argm)) THEN
+          #for $var in $arg.references
+            $ftg_write($var)#end for END IF 
+      #end for
       
       ! GLOBALS
       #for $var in $globals.usedVariables
-      $ftg_write($var)#end for
+        $ftg_write($var)#end for
 
       CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 
@@ -98,7 +105,7 @@
 
   END FUNCTION ftg_${subroutine.name}_capture_output_active
     
-  SUBROUTINE ftg_${subroutine.name}_capture_output(${arguments.output.names})
+  SUBROUTINE ftg_${subroutine.name}_capture_output(${args.allOut.names})
 
     USE mo_mpi, ONLY: work_mpi_barrier, get_my_mpi_all_id
     USE mo_exception, ONLY: finish
@@ -106,7 +113,7 @@
 
     ${globals.imports}
 
-    ${arguments.output.specifications(intent = 'in')}
+    ${args.allOut.specs(intent = 'in')}
 
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
@@ -120,19 +127,26 @@
       WRITE (0,*) 'FTG WRITE output DATA ${subroutine.name}', get_my_mpi_all_id()
 
       $resetRegistrations
-      ! BASIC ARGUMENTS
-      #for $var in $arguments.output.basic
+      ! BUILT-IN-TYPE REQUIRED ARGUMENTS
+      #for $var in $args.allOut.builtInTypes.requireds.names
       $ftg_write($var)#end for
       
-      ! OPTIONAL ARGUMENTS
-      #for $var in $arguments.output.optional
-      IF (PRESENT($var)) THEN
-        $ftg_write($var) END IF 
+      ! BUILT-IN-TYPE OPTIONAL ARGUMENTS
+      #for $var in $args.allOut.builtInTypes.optionals.names
+          IF (PRESENT($var)) THEN
+            $ftg_write($var) END IF 
       #end for
       
-      ! TYPE MEMBERS
-      #for $var in $arguments.output.usedTypeMembers
-      $ftg_write($var)#end for
+      ! DERIVED-TYPE REQUIRED ARGUMENT MEMBERS
+      #for $var in $args.allOut.derivedTypes.requireds.references
+        $ftg_write($var)#end for
+      
+      ! DERIVED-TYPE REQUIRED ARGUMENT MEMBERS
+      #for $arg in $args.allOut.derivedTypes.optionals
+          IF (PRESENT($argm)) THEN
+          #for $var in $arg.references
+            $ftg_write($var)#end for END IF 
+      #end for
       
       ! GLOBALS
       #for $var in $globals.usedVariables

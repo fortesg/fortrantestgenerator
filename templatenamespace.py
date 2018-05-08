@@ -2,7 +2,6 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
 from string import find
 import re
-from symbol import argument
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -418,92 +417,143 @@ class ModuleNameSpace(object):
 
         self.name = moduleName
 
-class ArgumentList(object):
-    def __init__(self, arguments, typeArgumentReferences):
-        assertTypeAll(arguments, 'arguments', Variable)
-        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+class Argument(object):
+    
+    def __init__(self, variable, references):
+        assertType(variable, 'variable', Variable)
+        assert variable.isArgument()
+        assertTypeAll(references, 'references', VariableReference)
         
-        self.__arguments = arguments
-        self.__typeArgumentReferences = typeArgumentReferences
+        self.__var = variable
+        self.__refs = []
+        for ref in references:
+            if ref.getLevel0Variable() == self:
+                self.__refs.append(ref)
+
+    def intent(self):
+        return self.__var.getIntent().lower()
+    
+    def intentIn(self):
+        return self.intent() == 'in'
+    
+    def intentOut(self):
+        return self.intent() == 'out'
+    
+    def intentInout(self):
+        return self.intent() == 'inout'
+    
+    def isIn(self):
+        return self.intentIn() or self.intentInout()
+    
+    def isOut(self):
+        return self.intentOut() or self.intentInout()
+    
+    def optional(self):
+        return self.__var.isOptionalArgument()
+    
+    def required(self):
+        return not self.__var.isOptionalArgument()
+    
+    def builtInType(self):
+        return self.__var.hasBuiltInType()
+    
+    def derivedType(self):
+        return self.__var.hasDerivedType()
+    
+    def pointer(self):
+        return self.__var.isPointer()
+    
+    def allocatable(self):
+        return self.__var.isAllocatable()
+    
+    def allocatableOrPointer(self):
+        return self.allocatable() or self.pointer()
+    
+    def name(self):
+        return self.__var.getName()
+    
+    def spec(self, intent = None, allocatable = None, charLengthZero = False):
+        alias = self.__var.getAlias()
+        if intent is not None:
+            alias.setIntent(intent)
+        if allocatable is not None:
+            if allocatable: 
+                if alias.getDimension() > 0 or not alias.hasBuiltInType():
+                    alias.setAllocatable(True)
+            else:
+                alias.setAllocatable(False)
+        if charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
+            alias.setTypeName('CHARACTER(len=0)')
+        alias.setTarget(False)
+        return str(alias)
+    
+    def references(self):
+        return self.__refs
+    
+
+class ArgumentList(object):
+    def __init__(self, arguments, typeArgumentReferences = None):
+        if typeArgumentReferences is None:
+            assertTypeAll(arguments, 'arguments', Argument)
+            self.__arguments = arguments
+        else:
+            assertTypeAll(arguments, 'arguments', Variable)
+            assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+            self.__arguments = [Argument(var, typeArgumentReferences) for var in arguments]
         
     def __iter__(self):
         return iter(self.__arguments)
     
     def filter(self, predicate):
-        arguments = filter(predicate, self.__arguments)
-        references = [r for r in self.__typeArgumentReferences if r.getLevel0Variable() in arguments]
-        return ArgumentList(arguments, references)
+        return ArgumentList([arg for arg in self.__arguments if predicate(arg)])
     
     def intentIn(self):
-        return self.filter(lambda a : a.getIntent().lower() == 'in')
+        return self.filter(lambda a : a.intentIn())
     
     def intentOut(self):
-        return self.filter(lambda a : a.getIntent().lower() == 'out')
+        return self.filter(lambda a : a.intentOut())
     
     def intentInout(self):
-        return self.filter(lambda a : a.getIntent().lower() == 'inout')
+        return self.filter(lambda a : a.intentInout())
     
     def allIn(self):
-        return self.filter(lambda a : a.isInArgument())
+        return self.filter(lambda a : a.isIn())
     
     def allOut(self):
-        return self.filter(lambda a : a.isOutArgument())
-    
-    def allIn(self):
-        return self.filter(lambda a : a.isInArgument())
+        return self.filter(lambda a : a.isOut())
     
     def optionals(self):
-        return self.filter(lambda a : a.isOptionalArgument())
+        return self.filter(lambda a : a.optional())
     
     def requireds(self):
-        return self.filter(lambda a : a.isRequiredArgument())
+        return self.filter(lambda a : a.required())
     
     def builtInTypes(self):
-        return self.filter(lambda a : a.hasBuiltInType())
+        return self.filter(lambda a : a.builtInType())
     
     def derivedTypes(self):
-        return self.filter(lambda a : a.hasDerivedType())
+        return self.filter(lambda a : a.derivedType())
     
     def pointers(self):
-        return self.filter(lambda a : a.isPointer())
+        return self.filter(lambda a : a.pointer())
     
     def allocatables(self):
-        return self.filter(lambda a : a.isAllocatable())
+        return self.filter(lambda a : a.allocatable())
     
     def allocatablesOrPointers(self):
-        return self.filter(lambda a : a.isAllocatable() or a.isPointer())
+        return self.filter(lambda a : a.allocatableOrPointer())
     
     def names(self):
-        return map(Variable.getName, self.__arguments)
+        return [arg.name() for arg in self.__arguments]
     
     def joinNames(self, sep = ', '):
         return sep.join(self.names())
     
     def specs(self, intent = None, allocatable = None, charLengthZero = False):
-        specs = []
-        for argument in self.__arguments:
-            argCopy = argument.getAlias(argument.getName())
-            if intent is not None:
-                argCopy.setIntent(intent)
-            if allocatable is not None:
-                if allocatable: 
-                    if argCopy.getDimension() > 0 or not argCopy.hasBuiltInType():
-                        argCopy.setAllocatable(True)
-                else:
-                    argCopy.setAllocatable(False)
-            if charLengthZero and argCopy.hasBuiltInType() and argCopy.getTypeName().startswith('CHARACTER'):
-                argCopy.setTypeName('CHARACTER(len=0)')
-            argCopy.setTarget(False)
-            specs.append(str(argCopy))
-            
-        return "\n".join(specs)
+        return "\n".join([arg.spec(intent, allocatable, charLengthZero) for arg in self.__arguments])
     
-    def usedMembers(self):
-        usedTypeMembers = []
-        for reference in self._typeArgumentReferences:
-            if reference.getVariableName(0) in self.__names:
-                usedTypeMembers.append(reference.getExpression())
-        return usedTypeMembers
+    def references(self):
+        return sum([arg.references() for arg in self.__arguments], [])
 
 class GlobalsNameSpace(object):
     

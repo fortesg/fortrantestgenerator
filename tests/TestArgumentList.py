@@ -19,13 +19,15 @@ class TestArgumentList(unittest.TestCase):
         self.arg2, = Variable.fromDeclarationStatement('INTEGER, INTENT(in), POINTER :: arg2')
         self.arg3, = Variable.fromDeclarationStatement('TYPE(test), INTENT(inout), OPTIONAL :: arg3')
         self.arg4, = Variable.fromDeclarationStatement('INTEGER, INTENT(out), OPTIONAL :: arg4')
-        self.argList = ArgumentList([self.arg0, self.arg1, self.arg2, self.arg3, self.arg4], [])
+        args = [self.arg0, self.arg1, self.arg2, self.arg3, self.arg4]
         
         sourceFile = SourceFile('', False, True)
         module = Module('testmod', [], sourceFile, 0)
         subroutine = Subroutine(SubroutineFullName.fromParts('testmod', 'testsubr'), False, [], module)
-        for arg in self.argList:
+        for arg in args:
             arg.setDeclaredIn(subroutine)
+            
+        self.argList = ArgumentList(args, [])
         
     def testAll(self):
         self.assertEqual('arg0, arg1, arg2, arg3, arg4', self.argList.joinNames())
