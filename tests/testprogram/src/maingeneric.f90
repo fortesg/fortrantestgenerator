@@ -55,11 +55,11 @@ SUBROUTINE testsub(ra, rf, oa, oi)
   INTEGER, INTENT(out), OPTIONAL :: oi
 
   IF (rf) THEN
-    a%c%r2(:,:) = a%b(1)%i2 * a%b(1)%i0 + a%c%r2
+    ra%c%r2(:,:) = ra%b(1)%i2 * ra%b(1)%i0 + ra%c%r2
   END IF
 
   IF (PRESENT(oa)) THEN
-    a%c%r2(:,:) = a%b(1)%i2 * a%b(1)%i0 + a%c%r2
+    oa%c%r2(:,:) = oa%b(1)%i2 * oa%b(1)%i0 + oa%c%r2
   END IF
 
   IF (PRESENT(oi)) THEN
