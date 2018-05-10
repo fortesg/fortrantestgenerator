@@ -16,4 +16,4 @@ maingeneric: maingeneric.f90 types.o
 	$(FF) -c $(FFLAGS) $(INCLUDE) $(FPPFLAGS) $<	
 	
 clean:
-	rm -f maingeneric *.o
+	rm -f maingeneric *.o *.mod
