@@ -6,11 +6,13 @@ NODES = 4
 
 ######################################################
 
-all : maingeneric maingeneric.s types.s 
+all : maingeneric assembler
 
 maingeneric: maingeneric.f90 types.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(LIBS) $<
 	mpirun -n $(NODES) ./$@
+	
+assembler : maingeneric.s types.s
 
 %.s: %.f90
 	$(FF) -c -S $(FFLAGS) $(INCLUDE) $<	
