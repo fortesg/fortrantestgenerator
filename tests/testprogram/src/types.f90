@@ -1,5 +1,7 @@
 MODULE types
 
+IMPLICIT NONE
+
 TYPE testc
   REAL, ALLOCATABLE :: r2(:,:)
 END TYPE testc

@@ -1,7 +1,8 @@
 PROGRAM maingeneric
 
 USE types
-USE globals, ONLY : set, get
+USE globals, ONLY : set
+USE sub, ONLY : testsub
 
 IMPLICIT NONE
 
@@ -41,36 +42,12 @@ CALL set(109.0)
 IF (MOD(rank, 2) == 0) THEN
   CALL testsub(a, flag)
 ELSE
-  CALL testsub(a, flag, oreal = out)
+  CALL testsub(a, flag, out)
   PRINT*, 'node', rank, ': ', out
 END IF
 
 PRINT*, 'node', rank, ': ', a%c%r2
 
 CALL MPI_FINALIZE(ierror)
-
-CONTAINS
-
-SUBROUTINE testsub(ra, rlog, oa, oreal)
-
-  TYPE(testa), INTENT(inout) :: ra
-  LOGICAL, INTENT(in) :: rlog
-  TYPE(testa), INTENT(inout), OPTIONAL :: oa
-  REAL, INTENT(out), OPTIONAL :: oreal
-
-  IF (rlog) THEN
-    ra%c%r2(:,:) = ra%b(1)%i2 * ra%b(1)%i0 + ra%c%r2
-  END IF
-
-  IF (PRESENT(oa)) THEN
-    oa%c%r2(:,:) = oa%b(1)%i2 * oa%b(1)%i0 + oa%c%r2
-  END IF
-
-  CALL set(ra%c%r2(1,1))
-  IF (PRESENT(oreal)) THEN
-    oreal = get()
-  END IF
-
-END SUBROUTINE testsub
 
 END PROGRAM maingeneric

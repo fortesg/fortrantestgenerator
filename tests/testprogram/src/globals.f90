@@ -1,5 +1,7 @@
 MODULE globals
 
+IMPLICIT NONE
+
 PRIVATE
 
 INTEGER, PARAMETER :: base = 23
