@@ -1,15 +1,17 @@
 PROGRAM maingeneric
 
 USE types
+USE globals, ONLY : set, get
 
 IMPLICIT NONE
 
 include 'mpif.h'
 
-INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u, out
+INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u
 TYPE(testa) :: a
 TYPE(testb), TARGET :: b(42)
 LOGICAL :: flag
+REAL :: out
 
 CALL MPI_INIT(ierror)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
@@ -34,10 +36,12 @@ a%c%r2(2,2) = rank + 0.22
 
 flag = .TRUE.
 
+CALL set(109.0)
+
 IF (MOD(rank, 2) == 0) THEN
   CALL testsub(a, flag)
 ELSE
-  CALL testsub(a, flag, oi = out)
+  CALL testsub(a, flag, oreal = out)
   PRINT*, 'node', rank, ': ', out
 END IF
 
@@ -47,14 +51,14 @@ CALL MPI_FINALIZE(ierror)
 
 CONTAINS
 
-SUBROUTINE testsub(ra, rf, oa, oi)
+SUBROUTINE testsub(ra, rlog, oa, oreal)
 
   TYPE(testa), INTENT(inout) :: ra
-  LOGICAL, INTENT(in) :: rf
-  TYPE(testa), INTENT(in), OPTIONAL :: oa
-  INTEGER, INTENT(out), OPTIONAL :: oi
+  LOGICAL, INTENT(in) :: rlog
+  TYPE(testa), INTENT(inout), OPTIONAL :: oa
+  REAL, INTENT(out), OPTIONAL :: oreal
 
-  IF (rf) THEN
+  IF (rlog) THEN
     ra%c%r2(:,:) = ra%b(1)%i2 * ra%b(1)%i0 + ra%c%r2
   END IF
 
@@ -62,8 +66,9 @@ SUBROUTINE testsub(ra, rf, oa, oi)
     oa%c%r2(:,:) = oa%b(1)%i2 * oa%b(1)%i0 + oa%c%r2
   END IF
 
-  IF (PRESENT(oi)) THEN
-    oi = rank
+  CALL set(ra%c%r2(1,1))
+  IF (PRESENT(oreal)) THEN
+    oreal = get()
   END IF
 
 END SUBROUTINE testsub

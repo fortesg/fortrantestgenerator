@@ -8,11 +8,11 @@ NODES = 4
 
 all : maingeneric assembler
 
-maingeneric: maingeneric.f90 types.o
-	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(LIBS) $<
+maingeneric: maingeneric.f90 types.o globals.o
+	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(LIBS) $^
 	mpirun -n $(NODES) ./$@
 	
-assembler : maingeneric.s types.s
+assembler : maingeneric.s types.s globals.s
 
 %.s: %.f90
 	$(FF) -c -S $(FFLAGS) $(INCLUDE) $<	
