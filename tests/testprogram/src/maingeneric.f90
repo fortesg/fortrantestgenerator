@@ -10,7 +10,7 @@ include 'mpif.h'
 
 INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u
 TYPE(testa) :: a
-TYPE(testb), TARGET :: b(42)
+TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag
 REAL :: out
 
@@ -20,7 +20,7 @@ CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
 
 a%b => b
 
-DO u = 1, 42
+DO u = 1, 3
   a%b(u)%i0 = rank
   a%b(u)%i1(:) = rank * 10
   ALLOCATE(a%b(u)%i2(8, rank + 1))
