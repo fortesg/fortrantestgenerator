@@ -11,28 +11,24 @@ MPINODES = 4
 
 default: build run
 
-capture: clean assembler ftg build run 
-
-assembler: globals.s types.s sub.s maingeneric.s 
-
-build: maingeneric.f90 sub.o types.o globals.o
-	$(FF) -o maingeneric $(FFLAGS) $(INCLUDE) $^ $(LIBS)
-	
-run:	
+capture: clean ftg maingeneric 
 	-mpirun -n $(MPINODES) ./maingeneric
+
+maingeneric: maingeneric.f90 sub.o types.o globals.o
+	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 	
 sub.o : types.o globals.o
+
+ftg: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
+
+assembler: globals.s types.s sub.s maingeneric.s 
 
 %.s: %.f90
 	$(FF) -c -S $(FFLAGS) $<	
 	
-%.mod: %.o
-	
 %.o: %.f90
 	$(FF) -c $(FFLAGS) $(INCLUDE) $<
-
-ftg: 
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
 	
 clean:
 	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_standalone.py sub testsub

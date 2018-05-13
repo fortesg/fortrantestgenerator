@@ -14,4 +14,4 @@ clean:
 	$(MAKE) -C replay clean
 	rm -Rf data/*
 	
-.PHONY: test clean compare 
+.PHONY: test clean capture replay compare 
