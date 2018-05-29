@@ -1,3 +1,5 @@
+$COMPARE = $(HOME)/lib/serialbox2/python/compare/compare.py
+
 test: clean capture replay compare
 
 compare:

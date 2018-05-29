@@ -1,5 +1,5 @@
-FTGROOT = /home/christian/workspace/fortrantestgenerator
-SBROOT = /home/christian/lib/serialbox2
+FTGROOT = $(HOME)/workspace/fortrantestgenerator
+SBROOT = $(HOME)/lib/serialbox2
 
 FF = mpif90
 FFLAGS = -g -O0
