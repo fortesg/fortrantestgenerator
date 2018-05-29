@@ -31,7 +31,7 @@ assembler: globals.s types.s sub.s maingeneric.s
 	$(FF) -c $(FFLAGS) $(INCLUDE) $<
 	
 clean:
-	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
+	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_standalone.py
 	rm -f maingeneric *.o *.mod *.s
 	
 clean-o:
