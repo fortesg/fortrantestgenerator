@@ -9,10 +9,12 @@
 
     INTEGER(kind=4) my_mpi_id, error
     CHARACTER(len=1024) :: basename, mkdirerr
+    CHARACTER(len=16) :: my_mpi_id_char
     
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
+    WRITE (my_mpi_id_char, *) my_mpi_id
 
-    WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
+    WRITE (basename, *) 'ftg_${subroutine.name}_', TRIM(stage), '_', TRIM(my_mpi_id_char)
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), my_mpi_id
 
