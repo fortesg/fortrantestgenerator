@@ -5,7 +5,7 @@ FF = mpif90
 FFLAGS = -g -O0
 LIBS = -L$(SBROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
 INCLUDE = -I$(SBROOT)/include
-MPINODES = 4 
+MPINODES = 2 
 
 ######################################################
 
