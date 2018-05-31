@@ -58,7 +58,7 @@ CONTAINS
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
 
-    WRITE (basename,'(a,a,a,i1)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
+    WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
     CALL ftg_set_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r')
