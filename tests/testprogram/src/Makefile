@@ -9,8 +9,6 @@ MPINODES = 2
 
 ######################################################
 
-default: build run
-
 capture: clean ftg maingeneric 
 	-mpirun -n $(MPINODES) ./maingeneric
 
