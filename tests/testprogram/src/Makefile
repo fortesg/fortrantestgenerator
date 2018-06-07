@@ -15,6 +15,9 @@ capture-standalone: clean ftg-standalone maingeneric
 capture-standalone_nompi: clean ftg-standalone_nompi maingeneric 
 	./maingeneric
 
+capture-icon_standalone: clean ftg-icon_standalone maingeneric 
+	-mpirun -n $(MPINODES) ./maingeneric
+
 maingeneric: maingeneric.f90 sub.o types.o globals.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 	
@@ -25,6 +28,9 @@ ftg-standalone: assembler
 
 ftg-standalone_nompi: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone_nompi.py sub testsub
+
+ftg-icon_standalone: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone.py sub testsub
 
 assembler: globals.s types.s sub.s maingeneric.s 
 
