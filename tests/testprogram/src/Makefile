@@ -12,6 +12,9 @@ MPINODES = 2
 capture-standalone: clean ftg-standalone maingeneric 
 	-mpirun -n $(MPINODES) ./maingeneric
 
+capture-standalone_nompi: clean ftg-standalone_nompi maingeneric 
+	./maingeneric
+
 maingeneric: maingeneric.f90 sub.o types.o globals.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 	
@@ -19,6 +22,9 @@ sub.o : types.o globals.o
 
 ftg-standalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
+
+ftg-standalone_nompi: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone_nompi.py sub testsub
 
 assembler: globals.s types.s sub.s maingeneric.s 
 
