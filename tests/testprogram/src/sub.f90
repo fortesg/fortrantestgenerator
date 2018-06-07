@@ -34,8 +34,6 @@ SUBROUTINE testsub(ra, rlog, oreal, oa)
     oreal = get()
   END IF
 
-  WRITE (*,'(i0)') 2
-
 END SUBROUTINE testsub
 
 END MODULE sub
