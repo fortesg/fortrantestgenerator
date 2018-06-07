@@ -9,7 +9,7 @@ MPINODES = 2
 
 ######################################################
 
-capture: clean ftg maingeneric 
+capture-standalone: clean ftg-standalone maingeneric 
 	-mpirun -n $(MPINODES) ./maingeneric
 
 maingeneric: maingeneric.f90 sub.o types.o globals.o
@@ -17,7 +17,7 @@ maingeneric: maingeneric.f90 sub.o types.o globals.o
 	
 sub.o : types.o globals.o
 
-ftg: assembler
+ftg-standalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
 
 assembler: globals.s types.s sub.s maingeneric.s 
