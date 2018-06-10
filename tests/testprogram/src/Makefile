@@ -6,7 +6,8 @@ FF = mpif90
 FFLAGS = -g -O0
 LIBS = -L$(SBROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
 INCLUDE = -I$(SBROOT)/include
-ICONLIBS = -L$(ICONBUILDDIR)/src
+ICONINCLUDE = -I$(ICONBUILDDIR)/module 
+ICONMODULES = $(ICONBUILDDIR)/src/mo_mpi.o $(ICONBUILDDIR)/src/mo_exception.o $(ICONBUILDDIR)/support/util_backtrace.o $(ICONBUILDDIR)/support/util_system.o $(ICONBUILDDIR)/externals/mtime/src/*.o
 MPINODES = 2 
 
 ######################################################
@@ -17,14 +18,14 @@ capture-standalone: clean ftg-standalone maingeneric
 capture-standalone_nompi: clean ftg-standalone_nompi maingeneric 
 	./maingeneric
 
-capture-icon_standalone: ICONINCLUDE = -I$(ICONBUILDDIR)/module 
-capture-icon_standalone: ICONLIBS = 
-capture-icon_standalone: ICONMODULES = $(ICONBUILDDIR)/src/mo_mpi.o $(ICONBUILDDIR)/src/mo_exception.o $(ICONBUILDDIR)/support/util_backtrace.o $(ICONBUILDDIR)/support/util_system.o $(ICONBUILDDIR)/externals/mtime/src/*.o
-capture-icon_standalone: clean ftg-icon_standalone maingeneric 
-	-mpirun -n $(MPINODES) ./maingeneric
+capture-icon_standalone: clean ftg-icon_standalone mainicon 
+	-mpirun -n $(MPINODES) ./mainicon
 
 maingeneric: maingeneric.f90 sub.o types.o globals.o
-	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS) $(ICONLIBS)
+	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
+	
+mainicon: mainicon.f90 sub.o types.o globals.o
+	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS)
 	
 sub.o : types.o globals.o
 
