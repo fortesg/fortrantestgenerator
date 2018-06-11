@@ -22,6 +22,9 @@ capture-standalone_nompi: clean ftg-standalone_nompi maingeneric
 capture-icon_standalone: clean ftg-icon_standalone mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
+
+capture-icon_standalone_legacy: LIBS = -L$(SBROOT)/lib -lFortranSer -lSerialboxWrapper -lSerialbox -lUtils -ljson -lstdc++ -lsha256
+capture-icon_standalone_legacy: INCLUDE = -I$(SBROOT)/include/fortran
 capture-icon_standalone_legacy: clean ftg-icon_standalone_legacy mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
