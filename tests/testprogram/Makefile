@@ -53,7 +53,7 @@ compare-legacy:
 	$(COMPARELEGACY) data/ftg_testsub_test/output/ftg_testsub_output_1.json data/ftg_testsub_test/output_test/ftg_testsub_output_1.json
 	
 ok: 	
-	printf '\e[38;5;0m\e[48;5;10m*** OK ***\e[48;5;0m\n'
+	printf '\e[38;5;0m\e[48;5;10m*** OK ***\e[48;5;0m\n\e[38;5;15m'
 	
 clean: 
 	$(MAKE) -C src clean
