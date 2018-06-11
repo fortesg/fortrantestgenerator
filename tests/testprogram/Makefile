@@ -7,6 +7,8 @@ test-standalone_nompi: clean capture-standalone_nompi replay-standalone_nompi co
 
 test-icon_standalone: clean capture-icon_standalone replay-icon_standalone compare-mpi
 
+test-icon_testbed: clean capture-icon_testbed replay-icon_testbed compare-mpi
+
 test-icon_standalone_legacy: clean capture-icon_standalone_legacy replay-icon_standalone_legacy compare-legacy
 
 replay-standalone: 
@@ -17,6 +19,9 @@ replay-standalone_nompi:
 	
 replay-icon_standalone: 
 	$(MAKE) -C replay-icon_standalone replay
+	 
+replay-icon_testbed: 
+	$(MAKE) -C replay-icon_testbed replay
 	 
 replay-icon_standalone_legacy: 
 	$(MAKE) -C replay-icon_standalone_legacy replay
@@ -29,6 +34,9 @@ capture-standalone_nompi:
 	 
 capture-icon_standalone: 
 	$(MAKE) -C src capture-icon_standalone
+	 
+capture-icon_testbed: 
+	$(MAKE) -C src capture-icon_testbed
 	 
 capture-icon_standalone_legacy: 
 	$(MAKE) -C src capture-icon_standalone_legacy
@@ -55,4 +63,4 @@ clean:
 	$(MAKE) -C replay-icon_standalone_legacy clean
 	rm -Rf data/*
 	
-.PHONY: test clean replay-standalone replay-standalone_nompi replay-icon_standalone replay-icon_standalone_legacy compare 
+.PHONY: test clean replay-standalone replay-standalone_nompi replay-icon_standalone replay-icon_testbed replay-icon_standalone_legacy compare 

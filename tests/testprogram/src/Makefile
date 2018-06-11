@@ -22,6 +22,8 @@ capture-standalone_nompi: clean ftg-standalone_nompi maingeneric
 capture-icon_standalone: clean ftg-icon_standalone mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
+capture-icon_testbed: clean ftg-icon_testbed mainicon 
+	-mpirun -n $(MPINODES) ./mainicon
 
 capture-icon_standalone_legacy: LIBS = -L$(SBROOT)/lib -lFortranSer -lSerialboxWrapper -lSerialbox -lUtils -ljson -lstdc++ -lsha256
 capture-icon_standalone_legacy: INCLUDE = -I$(SBROOT)/include/fortran
@@ -44,6 +46,9 @@ ftg-standalone_nompi: assembler
 
 ftg-icon_standalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone.py sub testsub
+
+ftg-icon_testbed: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_testbed.py sub testsub
 
 ftg-icon_standalone_legacy: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone_legacy.py sub testsub
