@@ -26,6 +26,6 @@ mo_ftg_testsub_test.f90:
 	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_icon_testbed.py sub testsub
 	
 clean:
-	rm -f ftg_testsub_test *.f90
+	rm -f testbed mo_*
 	
 .PHONY: clean replay

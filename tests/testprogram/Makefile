@@ -60,6 +60,7 @@ clean:
 	$(MAKE) -C replay-standalone clean
 	$(MAKE) -C replay-standalone_nompi clean
 	$(MAKE) -C replay-icon_standalone clean
+	$(MAKE) -C replay-icon_testbed clean
 	$(MAKE) -C replay-icon_standalone_legacy clean
 	rm -Rf data/*
 	
