@@ -1,11 +1,12 @@
 FTGROOT = $(HOME)/workspace/fortrantestgenerator
-SBROOT = $(HOME)/lib/serialbox2
+SBROOT = $(HOME)/lib/serialbox
+SB2ROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 
 FF = mpif90
 FFLAGS = -g -O0
-LIBS = -L$(SBROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
-INCLUDE = -I$(SBROOT)/include
+LIBS = -L$(SB2ROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
+INCLUDE = -I$(SB2ROOT)/include
 ICONINCLUDE = -I$(ICONBUILDDIR)/module 
 ICONMODULES = $(ICONBUILDDIR)/src/mo_mpi.o $(ICONBUILDDIR)/src/mo_exception.o $(ICONBUILDDIR)/support/util_backtrace.o $(ICONBUILDDIR)/support/util_system.o $(ICONBUILDDIR)/externals/mtime/src/*.o
 MPINODES = 2 
@@ -19,6 +20,9 @@ capture-standalone_nompi: clean ftg-standalone_nompi maingeneric
 	./maingeneric
 
 capture-icon_standalone: clean ftg-icon_standalone mainicon 
+	-mpirun -n $(MPINODES) ./mainicon
+
+capture-icon_standalone_legacy: clean ftg-icon_standalone_legacy mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
 maingeneric: maingeneric.f90 sub.o types.o globals.o
@@ -37,6 +41,9 @@ ftg-standalone_nompi: assembler
 
 ftg-icon_standalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone.py sub testsub
+
+ftg-icon_standalone_legacy: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone_legacy.py sub testsub
 
 assembler: globals.s types.s sub.s maingeneric.s 
 
