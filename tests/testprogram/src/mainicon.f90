@@ -8,8 +8,6 @@ USE sub, ONLY : testsub
 
 IMPLICIT NONE
 
-include 'mpif.h'
-
 INTEGER rank, u
 TYPE(testa) :: a
 TYPE(testb), TARGET :: b(3)
