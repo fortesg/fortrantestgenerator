@@ -20,6 +20,9 @@ SUBROUTINE testsub(ra, rlog, oreal, oa)
   LOGICAL, INTENT(in) :: rlog
   REAL, INTENT(out), OPTIONAL :: oreal
   TYPE(testa), INTENT(inout), OPTIONAL :: oa
+#ifdef _OPENACC
+  LOGICAL :: openacc
+#endif
 
   IF (rlog) THEN
     ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:)
