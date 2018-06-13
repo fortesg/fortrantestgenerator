@@ -3,6 +3,7 @@ from generator import CodeGenerator
 from assertions import assertType
 from source import SourceFiles, SourceFile, SubroutineFullName
 from templatenamespace import CaptureTemplatesNameSpace, ExportNameSpace
+from linenumbers import LastSpecificationLineFinder
 
 class CaptureCodeGenerator(CodeGenerator):
     
@@ -52,7 +53,11 @@ class CaptureCodeGenerator(CodeGenerator):
         if lastLine < 0:
             lastLine = subroutine.getLastLineNumber()
         self._processTemplate(sourceFilePath, lastLine - 1, self.__beforeEndTemplate, templateNameSpace)
-        self._processTemplate(sourceFilePath, subroutine.getLastSpecificationLineNumber(), self.__afterLastSpecificationTemplate, templateNameSpace)
+        lastSpecificationLineNumber = subroutine.getLastSpecificationLineNumber()
+        print '*** DEBUG *** A : ' + str(lastSpecificationLineNumber)
+        lastSpecificationLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
+        print '*** DEBUG *** B : ' + str(lastSpecificationLineNumber)
+        self._processTemplate(sourceFilePath, lastSpecificationLineNumber, self.__afterLastSpecificationTemplate, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.__beforeContainsTemplate, templateNameSpace)
         
         print "    ...to Used Modules"
@@ -92,3 +97,21 @@ class CaptureCodeGenerator(CodeGenerator):
                         modules.add(module)
         
         return modules
+    
+    def __shiftLineNumberByPreprocesserorEndifs(self, subroutine, fromLineNumber):
+        found = False
+        toLineNumber = -1
+        for i, _, j in subroutine.getStatements():
+            if found:
+                toLineNumber = i
+            elif j == fromLineNumber:
+                found = True
+                toLineNumber = j
+        
+        shiftedLineNumber = fromLineNumber
+        for lineNumber in range(fromLineNumber, toLineNumber):
+            line = subroutine.getLine(lineNumber)
+            if line.strip() == '#endif':
+                shiftedLineNumber = lineNumber
+                
+        return shiftedLineNumber
