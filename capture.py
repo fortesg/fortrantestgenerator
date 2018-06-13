@@ -9,7 +9,6 @@ class CaptureCodeGenerator(CodeGenerator):
     
     AFTER_LAST_LINE_TEMPLATE = 'capture.aftersubroutine.tmpl'
     BEFORE_CONTAINS_TEMPLATE = 'capture.beforecontains.tmpl'
-    AFTER_LAST_USE_TEMPLATE = 'capture.afterlastuse.tmpl'
     AFTER_LAST_SPECIFICATION_TEMPLATE = 'capture.afterlastspecification.tmpl'
     BEFORE_END_TEMPLATE = 'capture.beforeend.tmpl'
     EXPORT_TEMPLATE = 'export.beforecontains.tmpl'
@@ -28,7 +27,6 @@ class CaptureCodeGenerator(CodeGenerator):
         
         self.__afterLastLineTemplate = os.path.join(templateDir, self.AFTER_LAST_LINE_TEMPLATE)
         self.__beforeContainsTemplate = os.path.join(templateDir, self.BEFORE_CONTAINS_TEMPLATE)
-        self.__afterLastUseTemplate = os.path.join(templateDir, self.AFTER_LAST_USE_TEMPLATE)
         self.__afterLastSpecificationTemplate = os.path.join(templateDir, self.AFTER_LAST_SPECIFICATION_TEMPLATE)
         self.__beforeEndTemplate = os.path.join(templateDir, self.BEFORE_END_TEMPLATE)
         self.__exportTemplate = os.path.join(templateDir, self.EXPORT_TEMPLATE)
