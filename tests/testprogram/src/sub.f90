@@ -37,6 +37,9 @@ SUBROUTINE testsub(ra, rlog, oreal, oa)
     oreal = get()
   END IF
 
+#ifdef _OPENACC
+  WRITE (*,*) 'OPENACC enabled'
+#endif
 END SUBROUTINE testsub
 
 END MODULE sub

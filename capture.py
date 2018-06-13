@@ -54,9 +54,7 @@ class CaptureCodeGenerator(CodeGenerator):
             lastLine = subroutine.getLastLineNumber()
         self._processTemplate(sourceFilePath, lastLine - 1, self.__beforeEndTemplate, templateNameSpace)
         lastSpecificationLineNumber = subroutine.getLastSpecificationLineNumber()
-        print '*** DEBUG *** A : ' + str(lastSpecificationLineNumber)
         lastSpecificationLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
-        print '*** DEBUG *** B : ' + str(lastSpecificationLineNumber)
         self._processTemplate(sourceFilePath, lastSpecificationLineNumber, self.__afterLastSpecificationTemplate, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.__beforeContainsTemplate, templateNameSpace)
         
@@ -104,7 +102,8 @@ class CaptureCodeGenerator(CodeGenerator):
         for i, _, j in subroutine.getStatements():
             if found:
                 toLineNumber = i
-            elif j == fromLineNumber:
+                break
+            elif j >= fromLineNumber:
                 found = True
                 toLineNumber = j
         
