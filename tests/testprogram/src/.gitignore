@@ -1,0 +1,6 @@
+*.mod
+*.o
+*.s
+*.ftg-backup
+maingeneric
+mainicon

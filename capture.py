@@ -3,12 +3,12 @@ from generator import CodeGenerator
 from assertions import assertType
 from source import SourceFiles, SourceFile, SubroutineFullName
 from templatenamespace import CaptureTemplatesNameSpace, ExportNameSpace
+from linenumbers import LastSpecificationLineFinder
 
 class CaptureCodeGenerator(CodeGenerator):
     
     AFTER_LAST_LINE_TEMPLATE = 'capture.aftersubroutine.tmpl'
     BEFORE_CONTAINS_TEMPLATE = 'capture.beforecontains.tmpl'
-    AFTER_LAST_USE_TEMPLATE = 'capture.afterlastuse.tmpl'
     AFTER_LAST_SPECIFICATION_TEMPLATE = 'capture.afterlastspecification.tmpl'
     BEFORE_END_TEMPLATE = 'capture.beforeend.tmpl'
     EXPORT_TEMPLATE = 'export.beforecontains.tmpl'
@@ -27,7 +27,6 @@ class CaptureCodeGenerator(CodeGenerator):
         
         self.__afterLastLineTemplate = os.path.join(templateDir, self.AFTER_LAST_LINE_TEMPLATE)
         self.__beforeContainsTemplate = os.path.join(templateDir, self.BEFORE_CONTAINS_TEMPLATE)
-        self.__afterLastUseTemplate = os.path.join(templateDir, self.AFTER_LAST_USE_TEMPLATE)
         self.__afterLastSpecificationTemplate = os.path.join(templateDir, self.AFTER_LAST_SPECIFICATION_TEMPLATE)
         self.__beforeEndTemplate = os.path.join(templateDir, self.BEFORE_END_TEMPLATE)
         self.__exportTemplate = os.path.join(templateDir, self.EXPORT_TEMPLATE)
@@ -52,7 +51,9 @@ class CaptureCodeGenerator(CodeGenerator):
         if lastLine < 0:
             lastLine = subroutine.getLastLineNumber()
         self._processTemplate(sourceFilePath, lastLine - 1, self.__beforeEndTemplate, templateNameSpace)
-        self._processTemplate(sourceFilePath, subroutine.getLastSpecificationLineNumber(), self.__afterLastSpecificationTemplate, templateNameSpace)
+        lastSpecificationLineNumber = subroutine.getLastSpecificationLineNumber()
+        lastSpecificationLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
+        self._processTemplate(sourceFilePath, lastSpecificationLineNumber, self.__afterLastSpecificationTemplate, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.__beforeContainsTemplate, templateNameSpace)
         
         print "    ...to Used Modules"
@@ -92,3 +93,22 @@ class CaptureCodeGenerator(CodeGenerator):
                         modules.add(module)
         
         return modules
+    
+    def __shiftLineNumberByPreprocesserorEndifs(self, subroutine, fromLineNumber):
+        found = False
+        toLineNumber = -1
+        for i, _, j in subroutine.getStatements():
+            if found:
+                toLineNumber = i
+                break
+            elif j >= fromLineNumber:
+                found = True
+                toLineNumber = j
+        
+        shiftedLineNumber = fromLineNumber
+        for lineNumber in range(fromLineNumber, toLineNumber):
+            line = subroutine.getLine(lineNumber)
+            if line.strip() == '#endif':
+                shiftedLineNumber = lineNumber
+                
+        return shiftedLineNumber
