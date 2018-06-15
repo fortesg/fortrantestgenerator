@@ -460,6 +460,9 @@ class Argument(object):
     def derivedType(self):
         return self.__var.hasDerivedType()
     
+    def array(self):
+        return self.__var.isArray()
+    
     def pointer(self):
         return self.__var.isPointer()
     
@@ -476,6 +479,8 @@ class Argument(object):
         alias = self.__var.getAlias()
         if intent is not None:
             alias.setIntent(intent)
+        else:
+            alias.setIntent('')
         if allocatable is not None:
             if allocatable: 
                 if alias.getDimension() > 0 or not alias.hasBuiltInType():
