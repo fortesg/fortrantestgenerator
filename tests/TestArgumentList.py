@@ -78,8 +78,8 @@ class TestArgumentList(unittest.TestCase):
         self.assertEqual('', self.argList.allocatablesOrPointers().allOut().optionals().joinNames())
     
     def testReferences(self):
-        self.assertEqual([], self.argList.intentIn().references())
-        self.assertEqual([self.ref3a], self.argList.allIn().references())
+        self.assertEqual(['arg2'], [ref.getExpression() for ref in self.argList.intentIn().references()])
+        self.assertEqual(['arg0', 'arg1', 'arg2', 'arg3%member1'], [ref.getExpression() for ref in self.argList.allIn().references()])
         
     def testSpecs(self):
         expSpec = '''
@@ -113,7 +113,7 @@ INTEGER :: arg4
 INTEGER, ALLOCATABLE, INTENT(inout) :: arg0
 INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: arg1
 INTEGER, POINTER, INTENT(in) :: arg2
-TYPE(test), ALLOCATABLE, INTENT(inout), OPTIONAL :: arg3
+TYPE(test), INTENT(inout), OPTIONAL :: arg3
 INTEGER, INTENT(out), OPTIONAL :: arg4
 '''.strip()
         self.assertEqual(expSpec, self.argList.specs(allocatable=True))

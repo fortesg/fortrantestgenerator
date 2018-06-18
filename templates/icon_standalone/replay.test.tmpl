@@ -82,18 +82,9 @@ CONTAINS
     CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
     CALL setCalendar(ftg_mtime_calendar)
 
-    ! BUILT-IN TYPE ARGUMENTS
-    #for $arg in $args.builtInTypes
-        #if $arg.array
-          CALL ftg_allocate_and_read_allocatable("$arg.name", $arg.name)
-        #else
-          CALL ftg_read("$arg.name", $arg.name)
-        #end if
-    #end for
-
-    ! DERIVED-TYPE ARGUMENT MEMBERS
-    #for $ref in $args.derivedTypes.references
-      $ftg_read($rf) #end for
+    ! ARGUMENTS
+    #for $ref in $args.references
+      $ftg_read($ref.getExpression()) #end for
 
     ! GLOBALS
     #for $var in $globals.usedVariables
@@ -115,6 +106,7 @@ END PROGRAM ftg_${subroutine.name}_test
       #set $d = 1
       #for $level in $levels($var)[:-1]
         #set $container = $getExpression($var, $level)
+        ! *** DEBUG *** $container $needsAllocation($container)
         #set $contDim = $dim($container)
         #if $needsAllocation($container)
           IF (ftg_field_exists("$container")) THEN

@@ -62,32 +62,23 @@
       ! MTIME CALENDAR TYPE --> Remove this line if mtime is not used
       CALL ftg_write("ftg_mtime_calendar", calendarType())
 
-      ! BUILT-IN-TYPE REQUIRED ARGUMENTS
-      #for $arg in $args.allOut.builtInTypes.requireds
-      $ftg_write($arg.name)#end for
+      ! REQUIRED ARGUMENTS
+      #for $ref in $args.requireds.references
+        $ftg_write($ref.getExpression())#end for
       
-      ! BUILT-IN-TYPE OPTIONAL ARGUMENTS
-      #for $arg in $args.allOut.builtInTypes.optionals
-          IF (PRESENT($arg.name)) THEN
-            $ftg_write($arg.name) END IF 
-      #end for
-      
-      ! DERIVED-TYPE REQUIRED ARGUMENT MEMBERS
-      #for $ref in $args.allOut.derivedTypes.requireds.references
-        $ftg_write($ref)#end for
-      
-      ! DERIVED-TYPE OPTIONAL ARGUMENT MEMBERS
-      #for $arg in $args.allOut.derivedTypes.optionals
+      ! OPTIONAL ARGUMENTS
+      #for $arg in $args.optionals
           #if $arg.references
               IF (PRESENT($arg.name)) THEN
               #for $ref in $arg.references
-                $ftg_write($ref)#end for END IF
+                $ftg_write($ref.getExpression())#end for 
+              END IF
           #end if 
       #end for
       
       ! GLOBALS
       #for $var in $globals.usedVariables
-      $ftg_write($var)#end for
+        $ftg_write($var)#end for
       
       CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 
@@ -129,26 +120,17 @@
       WRITE (0,*) 'FTG WRITE output DATA ${subroutine.name}', get_my_mpi_all_id()
 
       $resetRegistrations
-      ! BUILT-IN-TYPE REQUIRED ARGUMENTS
-      #for $arg in $args.allOut.builtInTypes.requireds
-      $ftg_write($arg.name)#end for
+      ! REQUIRED ARGUMENTS
+      #for $ref in $args.allOut.requireds.references
+        $ftg_write($ref.getExpression())#end for
       
-      ! BUILT-IN-TYPE OPTIONAL ARGUMENTS
-      #for $arg in $args.allOut.builtInTypes.optionals
-          IF (PRESENT($arg.name)) THEN
-            $ftg_write($arg.name) END IF 
-      #end for
-      
-      ! DERIVED-TYPE REQUIRED ARGUMENT MEMBERS
-      #for $ref in $args.allOut.derivedTypes.requireds.references
-        $ftg_write($ref)#end for
-      
-      ! DERIVED-TYPE OPTIONAL ARGUMENT MEMBERS
-      #for $arg in $args.allOut.derivedTypes.optionals
+      ! OPTIONAL ARGUMENTS
+      #for $arg in $args.allOut.optionals
           #if $arg.references
               IF (PRESENT($arg.name)) THEN
               #for $ref in $arg.references
-                $ftg_write($ref)#end for END IF
+                $ftg_write($ref.getExpression())#end for 
+              END IF
           #end if 
       #end for
       

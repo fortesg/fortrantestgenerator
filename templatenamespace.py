@@ -429,6 +429,8 @@ class Argument(object):
         for ref in references:
             if ref.getLevel0Variable() == self.__var:
                 self.__refs.append(ref)
+        if not self.__refs and variable.hasBuiltInType():
+            self.__refs.append(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable))
 
     def intent(self):
         return self.__var.getIntent().lower()
@@ -481,7 +483,7 @@ class Argument(object):
             alias.setIntent(intent)
         if allocatable is not None:
             if allocatable: 
-                if alias.getDimension() > 0 or not alias.hasBuiltInType():
+                if alias.getDimension() > 0 or alias.hasClassType():
                     alias.setAllocatable(True)
             else:
                 alias.setAllocatable(False)
