@@ -427,7 +427,7 @@ class Argument(object):
         self.__var = variable
         self.__refs = []
         for ref in references:
-            if ref.getLevel0Variable() == self:
+            if ref.getLevel0Variable() == self.__var:
                 self.__refs.append(ref)
 
     def intent(self):
