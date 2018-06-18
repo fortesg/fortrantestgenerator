@@ -31,7 +31,7 @@ CONTAINS
   
   SUBROUTINE ftg_test_${subroutine.name}()
 
-    ${args.specs(allocatable = True, charLengthZero = True)}
+    ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
   
     CALL message('FTG', '*** Run test for ${subroutine.name} ***')
     

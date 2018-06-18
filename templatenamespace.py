@@ -479,8 +479,6 @@ class Argument(object):
         alias = self.__var.getAlias()
         if intent is not None:
             alias.setIntent(intent)
-        else:
-            alias.setIntent('')
         if allocatable is not None:
             if allocatable: 
                 if alias.getDimension() > 0 or not alias.hasBuiltInType():
