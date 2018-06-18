@@ -106,7 +106,6 @@ END PROGRAM ftg_${subroutine.name}_test
       #set $d = 1
       #for $level in $levels($var)[:-1]
         #set $container = $getExpression($var, $level)
-        ! *** DEBUG *** $container $needsAllocation($container)
         #set $contDim = $dim($container)
         #if $needsAllocation($container)
           IF (ftg_field_exists("$container")) THEN
