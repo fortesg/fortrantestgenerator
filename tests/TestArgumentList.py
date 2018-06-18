@@ -10,7 +10,7 @@ sys.path.append(FTG_DIR)
 FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 
-from source import Variable, Subroutine, SubroutineFullName, Module, SourceFile
+from source import Variable, Subroutine, SubroutineFullName, Module, SourceFile, VariableReference
 from templatenamespace import ArgumentList
 
 class TestArgumentList(unittest.TestCase):
@@ -27,7 +27,9 @@ class TestArgumentList(unittest.TestCase):
         for arg in args:
             arg.setDeclaredIn(subroutine)
             
-        self.argList = ArgumentList(args, [])
+        self.ref3a = VariableReference('arg3%member1', subroutine.getName(), 42, self.arg3)
+            
+        self.argList = ArgumentList(args, [self.ref3a])
         
     def testAll(self):
         self.assertEqual('arg0, arg1, arg2, arg3, arg4', self.argList.joinNames())
@@ -74,6 +76,10 @@ class TestArgumentList(unittest.TestCase):
         self.assertEqual('arg0, arg1', self.argList.allOut().allocatablesOrPointers().joinNames())
         self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().allOut().joinNames())
         self.assertEqual('', self.argList.allocatablesOrPointers().allOut().optionals().joinNames())
+    
+    def testReferences(self):
+        self.assertEqual([], self.argList.intentIn().references())
+        self.assertEqual([self.ref3a], self.argList.allIn().references())
         
     def testSpecs(self):
         expSpec = '''
