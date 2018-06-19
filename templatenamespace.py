@@ -2,6 +2,7 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
 from string import find
 import re
+from twisted.spread.jelly import reference_atom
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -333,8 +334,14 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         var = self._findVariable(variableName)
         return var is not None and not self.alreadyRegistered(variableName)
     
-    def containerNeedsRegistration(self, variableName):
-        reference = self._findReference(variableName)
+    def containerNeedsRegistration(self, variable):
+        assertType(variable, 'variable', [str, UsedVariable])
+        
+        if isinstance(variable, UsedVariable):
+            reference = variable.getReference()
+        else:
+            reference = self._findReference(variable)
+            
         if reference is not None:
             for level in reference.getLevels(True):
                 variable = reference.getVariable(level)
@@ -417,6 +424,34 @@ class ModuleNameSpace(object):
 
         self.name = moduleName
 
+class UsedVariable(object):
+    
+    def __init__(self, reference):
+        assertType(reference, 'reference', VariableReference)
+        
+        self.__ref = reference
+    
+    def getReference(self):
+        return self.__ref
+    
+    def levels(self, decrementing = False):
+        return self.__ref.getLevels(decrementing)
+        
+    def dim(self):
+        return self.__ref.getLevelNDimension()
+    
+    def type(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return ''
+        return var.getTypeName()
+    
+    def referencable(self):
+        return self.__ref.isReferencable()
+    
+    def container(self, level):
+        return UsedVariable(self.__ref.getSubReference(level))
+
 class Argument(object):
     
     def __init__(self, variable, references):
@@ -425,12 +460,12 @@ class Argument(object):
         assertTypeAll(references, 'references', VariableReference)
         
         self.__var = variable
-        self.__refs = []
+        self.__used = []
         for ref in references:
             if ref.getLevel0Variable() == self.__var:
-                self.__refs.append(ref)
-        if not self.__refs and variable.hasBuiltInType():
-            self.__refs.append(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable))
+                self.__used.append(UsedVariable(ref))
+        if not self.__used and variable.hasBuiltInType():
+            self.__used.append(UsedVariable(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable)))
 
     def intent(self):
         return self.__var.getIntent().lower()
@@ -493,7 +528,7 @@ class Argument(object):
         return str(alias)
     
     def usedVariables(self):
-        return self.__refs
+        return self.__used
     
 
 class ArgumentList(object):
@@ -571,9 +606,9 @@ class GlobalsNameSpace(object):
         self.usedVariables = []
         variables = set()
         types = set()
-        for reference in globalsReferences:
-            self.usedVariables.append(reference.getExpression())
-            variable = reference.getLevel0Variable()
+        for ref in globalsReferences:
+            self.usedVariables.append(UsedVariable(ref))
+            variable = ref.getLevel0Variable()
             variables.add(variable)
             if variable.hasDerivedType() and variable.isTypeAvailable():
                 types.add(variable.getType())

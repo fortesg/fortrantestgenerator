@@ -63,15 +63,15 @@
       CALL ftg_write("ftg_mtime_calendar", calendarType())
 
       ! REQUIRED ARGUMENTS
-      #for $ref in $args.requireds.usedVariables
-        $ftg_write($ref.getExpression())#end for
+      #for $var in $args.requireds.usedVariables
+        $ftg_write($var)#end for
       
       ! OPTIONAL ARGUMENTS
       #for $arg in $args.optionals
           #if $arg.usedVariables
               IF (PRESENT($arg.name)) THEN
-              #for $ref in $arg.usedVariables
-                $ftg_write($ref.getExpression())#end for 
+              #for $var in $arg.usedVariables
+                $ftg_write($var)#end for 
               END IF
           #end if 
       #end for
@@ -121,15 +121,15 @@
 
       $resetRegistrations
       ! REQUIRED ARGUMENTS
-      #for $ref in $args.allOut.requireds.usedVariables
-        $ftg_write($ref.getExpression())#end for
+      #for $var in $args.allOut.requireds.usedVariables
+        $ftg_write($var)#end for
       
       ! OPTIONAL ARGUMENTS
       #for $arg in $args.allOut.optionals
           #if $arg.usedVariables
               IF (PRESENT($arg.name)) THEN
-              #for $ref in $arg.usedVariables
-                $ftg_write($ref.getExpression())#end for 
+              #for $var in $arg.usedVariables
+                $ftg_write($var)#end for 
               END IF
           #end if 
       #end for
@@ -154,17 +154,17 @@
   ! ================= END FORTRAN TEST GENERATOR (FTG) =========================
 ################################################################################    
 #def ftg_write($var)
-  #if $dim($var) > 4 or $type($var).upper().startswith('CHARACTER'):
+  #if $var.dim > 4 or $var.type.upper().startswith('CHARACTER'):
     ! *** WARNING: Type not supported by serialbox *** 
     !     $var 
     !     $type($var) | dimension: $dim($var)
   #else
-    #if $isReferencable($var)
+    #if $var.referencable
       #if $containerNeedsRegistration($var)
-        #for $level in $levels($var)[:-1]
-          #set $container = $getExpression($var, $level)
-          #set $contType = $type($container)
-          #set $contDim = $dim($container)
+        #for $level in $var.levels[:-1]
+          #set $container = $var.container($level)
+          #set $contType = $container.type
+          #set $contDim = $container.dim
           #if $needsRegistration($container)
             #set $aa = $allocatedOrAssociated($container, $contDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
             #if $aa
