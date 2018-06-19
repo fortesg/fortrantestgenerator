@@ -492,7 +492,7 @@ class Argument(object):
         alias.setTarget(False)
         return str(alias)
     
-    def references(self):
+    def usedVariables(self):
         return self.__refs
     
 
@@ -557,8 +557,8 @@ class ArgumentList(object):
     def specs(self, intent = None, allocatable = None, charLengthZero = False):
         return "\n".join([arg.spec(intent, allocatable, charLengthZero) for arg in self.__arguments])
     
-    def references(self):
-        return sum([arg.references() for arg in self.__arguments], [])
+    def usedVariables(self):
+        return sum([arg.usedVariables() for arg in self.__arguments], [])
 
 class GlobalsNameSpace(object):
     

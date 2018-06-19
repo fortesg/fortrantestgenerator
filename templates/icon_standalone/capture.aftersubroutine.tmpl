@@ -63,14 +63,14 @@
       CALL ftg_write("ftg_mtime_calendar", calendarType())
 
       ! REQUIRED ARGUMENTS
-      #for $ref in $args.requireds.references
+      #for $ref in $args.requireds.usedVariables
         $ftg_write($ref.getExpression())#end for
       
       ! OPTIONAL ARGUMENTS
       #for $arg in $args.optionals
-          #if $arg.references
+          #if $arg.usedVariables
               IF (PRESENT($arg.name)) THEN
-              #for $ref in $arg.references
+              #for $ref in $arg.usedVariables
                 $ftg_write($ref.getExpression())#end for 
               END IF
           #end if 
@@ -121,14 +121,14 @@
 
       $resetRegistrations
       ! REQUIRED ARGUMENTS
-      #for $ref in $args.allOut.requireds.references
+      #for $ref in $args.allOut.requireds.usedVariables
         $ftg_write($ref.getExpression())#end for
       
       ! OPTIONAL ARGUMENTS
       #for $arg in $args.allOut.optionals
-          #if $arg.references
+          #if $arg.usedVariables
               IF (PRESENT($arg.name)) THEN
-              #for $ref in $arg.references
+              #for $ref in $arg.usedVariables
                 $ftg_write($ref.getExpression())#end for 
               END IF
           #end if 
