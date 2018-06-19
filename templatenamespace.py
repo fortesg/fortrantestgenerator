@@ -330,12 +330,14 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.__registered = set()
         
-    def needsRegistration(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and not self.alreadyRegistered(variableName)
+    def needsRegistration(self, variable):
+        assertType(variable, 'variable', [str, UsedVariable]) #TODO Umbauen auf nur UsedVariable
+        
+        var = self._findVariable(variable)
+        return var is not None and not self.alreadyRegistered(variable)
     
     def containerNeedsRegistration(self, variable):
-        assertType(variable, 'variable', [str, UsedVariable])
+        assertType(variable, 'variable', [str, UsedVariable]) #TODO Umbauen auf nur UsedVariable
         
         if isinstance(variable, UsedVariable):
             reference = variable.getReference()
@@ -344,8 +346,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
             
         if reference is not None:
             for level in reference.getLevels(True):
-                variable = reference.getVariable(level)
-                if variable is not None and not self.alreadyRegistered(reference.getExpression(level)):
+                var = reference.getVariable(level)
+                if var is not None and not self.alreadyRegistered(reference.getExpression(level)):
                     return True
                 
         return False
