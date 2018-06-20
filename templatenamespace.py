@@ -77,21 +77,6 @@ class TemplatesNameSpace(object):
             return True
         
         return False
-    
-    def getNumberOfMandatoryDimensions(self, variableName):
-        if find(variableName, '%') > 0:
-            reference = self._findReference(variableName)
-            if reference is not None:
-                for level in reference.getLevels(True):
-                    variable = reference.getVariable(level)
-                    if variable is not None and (variable.isAllocatable() or variable.isPointer() or variable.isArray()):
-                        dims = 0
-                        for cLevel in range(level - 1, -1, -1):
-                            cVariable = reference.getVariable(cLevel)
-                            if cVariable is not None and cVariable.isArray():
-                                dims += cVariable.getDimension()
-                        return dims
-        return 0
         
     def lbound(self, variableName, dim, *placeholder):
         bound = self.__bound(variableName, dim, placeholder)
@@ -409,6 +394,17 @@ class UsedVariable(object):
     
     def referencable(self):
         return self.__ref.isReferencable()
+    
+    def mandatoryDimensions(self):
+        for level in self.__ref.getLevels(True):
+            variable = self.__ref.getVariable(level)
+            if variable is not None and (variable.isAllocatable() or variable.isPointer() or variable.isArray()):
+                dims = 0
+                for cLevel in range(level - 1, -1, -1):
+                    cVariable = self.__ref.getVariable(cLevel)
+                    if cVariable is not None and cVariable.isArray():
+                        dims += cVariable.getDimension()
+                return dims
     
     def container(self, level):
         return UsedVariable(self.__ref.getSubReference(level))
