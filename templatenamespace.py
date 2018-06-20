@@ -31,25 +31,7 @@ class TemplatesNameSpace(object):
         self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
-    
-    def isInArgument(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            var = reference.getVariable()
-            if var is not None:
-                return var.isInArgument()
-            
-        return False
-    
-    def isOutArgument(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            var = reference.getVariable()
-            if var is not None:
-                return var.isOutArgument()
-            
-        return False
-    
+
     def lbound(self, variable, dim, *placeholder):
         assertType(variable, 'variable', UsedVariable)
         assertType(dim, 'dim', int)
