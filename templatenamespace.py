@@ -32,24 +32,6 @@ class TemplatesNameSpace(object):
         self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
-     
-    def getExpression(self, variableName, level):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getExpression(level)
-        return ''    
-        
-    def levels(self, variableName, decrementing = False):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getLevels(decrementing)
-        return []
-    
-    def dim(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getLevelNDimension()
-        return -1
     
     def totalDim(self, variableName):
         reference = self._findReference(variableName)
@@ -57,12 +39,6 @@ class TemplatesNameSpace(object):
             return reference.getTotalDimensions()
         return -1
     
-    def type(self, variableName):
-        var = self._findVariable(variableName)
-        if var is None:
-            return ''
-        return var.getTypeName()
-
     def isAllocatable(self, variableName):
         var = self._findVariable(variableName)
         return var is not None and var.isAllocatable()
