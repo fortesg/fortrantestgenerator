@@ -69,15 +69,6 @@ class TemplatesNameSpace(object):
             
         return False
     
-    def isReferencable(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            if find(variableName, '%') > 0:
-                return reference.isReferencable()
-            return True
-        
-        return False
-        
     def lbound(self, variableName, dim, *placeholder):
         bound = self.__bound(variableName, dim, placeholder)
         if bound != '':
