@@ -2,7 +2,6 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
 from string import find
 import re
-from twisted.spread.jelly import reference_atom
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -63,41 +62,45 @@ class TemplatesNameSpace(object):
             
         return False
     
-    def lbound(self, variableName, dim, *placeholder):
-        bound = self.__bound(variableName, dim, placeholder)
+    def lbound(self, variable, dim, *placeholder):
+        assertType(variable, 'variable', UsedVariable)
+        bound = self.__bound(variable, dim, placeholder)
         if bound != '':
             return 'L' + bound
         return ''
     
-    def ubound(self, variableName, dim, *placeholder):
-        bound = self.__bound(variableName, dim, placeholder)
+    def ubound(self, variable, dim, *placeholder):
+        assertType(variable, 'variable', UsedVariable)
+        bound = self.__bound(variable, dim, placeholder)
         if bound != '':
             return 'U' + bound
         return ''
 
-    def __bound(self, variableName, dim, placeholder):
+    def __bound(self, variable, dim, placeholder):
+        assertType(variable, 'variable', UsedVariable)
+        
         noDim = False
         if dim <= 0:
             noDim = True
         
-        reference = self._findReference(variableName)
-        if reference is not None and reference.isOneVariableArray():
+        ref = variable.getReference()
+        if ref.isOneVariableArray():
             if noDim:
-                dim = reference.getTotalDimensions()
-            elif dim > reference.getTotalDimensions():
+                dim = ref.getTotalDimensions()
+            elif dim > ref.getTotalDimensions():
                 return ''
             
             top = 0
             perc = ''
             bound = 'BOUND('
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
+            for level in ref.getLevels():
+                var = ref.getVariable(level)
+                if var is None:
                     return ''
-                bound += perc + variable.getName()
+                bound += perc + var.getName()
                 perc = '%'
                 bot = top 
-                top += variable.getDimension()
+                top += var.getDimension()
                 if top < dim:
                     if top > bot:
                         bound += '('
@@ -130,16 +133,16 @@ class TemplatesNameSpace(object):
         totalAllocatablesAndPointers = ref.getNumberOfPointerAndAllocatableLevels()
         allocatablesAndPointers = 0
         for level in ref.getLevels():
-            variable = ref.getVariable(level)
-            if variable is None:
+            var = ref.getVariable(level)
+            if var is None:
                 return ''
-            aa += perc + variable.getName()
+            aa += perc + var.getName()
             perc = '%'
-            pointer = variable.isPointer()
-            allocatable = variable.isAllocatable()
+            pointer = var.isPointer()
+            allocatable = var.isAllocatable()
             allocatablesAndPointers += (pointer or allocatable)
             bot = top 
-            top += variable.getDimension()
+            top += var.getDimension()
             if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
                 if top > bot:
                     aa += '('
@@ -158,6 +161,8 @@ class TemplatesNameSpace(object):
         return ''
     
     def fillIndices(self, variable, dim, *indices):
+        assertType(variable, 'variable', UsedVariable)
+        
         ref = variable.getReference()
         perc = ''
         d = 0
@@ -183,6 +188,8 @@ class TemplatesNameSpace(object):
         return filled
     
     def writeVarNameWithFilledIndicesToString(self, variable, destination, dim, *indices):
+        assertType(variable, 'variable', UsedVariable)
+        
         parts = []
         for index in indices:
             parts.append("', " + index + ", '") 
