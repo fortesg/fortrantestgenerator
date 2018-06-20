@@ -51,13 +51,6 @@ class TemplatesNameSpace(object):
         var = self._findVariable(variableName)
         return var is not None and (var.isAllocatable() or var.isPointer())
     
-    def isArray(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.isOneVariableArray()
-            
-        return False
-    
     def isInArgument(self, variableName):
         reference = self._findReference(variableName)
         if reference is not None:
@@ -410,6 +403,9 @@ class UsedVariable(object):
         if var is None:
             return ''
         return var.getTypeName()
+    
+    def containsArray(self):
+        return self.__ref.isOneVariableArray()
     
     def referencable(self):
         return self.__ref.isReferencable()

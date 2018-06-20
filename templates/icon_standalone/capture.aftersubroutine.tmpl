@@ -170,7 +170,7 @@
             #if $aa
               IF ($aa) THEN
             #end if
-            #if $isArray($container)
+            #if $container.containsArray
               CALL ftg_register_only("$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
             #else
               CALL ftg_register_only("$container", "$contType")$setRegistered($container)
@@ -185,7 +185,7 @@
       #if $aa
         IF ($aa) THEN
       #end if
-      #if $isArray($var)
+      #if $var.containsArray
         CALL ftg_write("$var", $var, LBOUND($var), UBOUND($var))
       #else
         CALL ftg_write("$var", $var)
@@ -194,8 +194,7 @@
         END IF
       #end if
     #else
-    
-      #set $mandDims = $getNumberOfMandatoryDimensions($var)
+      #set $mandDims = $var.mandatoryDimensions
       #set $topContainer = $var
       #set $aa = '' 
       #set $ifAA = ''
