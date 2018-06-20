@@ -97,16 +97,16 @@ CONTAINS
 END PROGRAM ftg_${subroutine.name}_test
 ################################################################################
 #def ftg_read($var)
-  #if $dim($var) > 4 or $type($var).upper().startswith('CHARACTER'):
+  #if $var.dim > 4 or $var.type.upper().startswith('CHARACTER'):
     ! *** WARNING: Type not supported by serialbox *** 
     !     $var 
     !     $type($var) | dimension: $dim($var)
   #else 
-    #if $isReferencable($var)
+    #if $var.referencable
       #set $d = 1
-      #for $level in $levels($var)[:-1]
-        #set $container = $getExpression($var, $level)
-        #set $contDim = $dim($container)
+      #for $level in $var.levels[:-1]
+        #set $container = $var.container($level)
+        #set $contDim = $container.dim
         #if $needsAllocation($container)
           IF (ftg_field_exists("$container")) THEN
             ftg_bounds = ftg_get_bounds("$container")
@@ -148,7 +148,7 @@ END PROGRAM ftg_${subroutine.name}_test
         #end for
         DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #end for
-      #for $level in sorted(set($levels($var)[:-1]) - set($levels($topContainer)))
+      #for $level in sorted(set($var.levels[:-1]) - set($levels($topContainer)))
         #set $container = $getExpression($var, $level)
         #set $contDim = $dim($container)
         #if $needsAllocationFilled($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
