@@ -33,12 +33,6 @@ class TemplatesNameSpace(object):
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
     
-    def totalDim(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getTotalDimensions()
-        return -1
-    
     def isAllocatable(self, variableName):
         var = self._findVariable(variableName)
         return var is not None and var.isAllocatable()
@@ -163,47 +157,44 @@ class TemplatesNameSpace(object):
             return 'ASSOCIATED' + aa
         return ''
     
-    def fillIndices(self, variableName, dim, *indices):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            perc = ''
-            d = 0
-            filled = ''
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
-                    return variableName
-                filled += perc + variable.getName()
-                perc = '%'
-                if variable.isArray() and d < dim:
-                    filled += '('
-                    sep = ''
-                    for _ in range(0, variable.getDimension()):
-                        filled += sep
-                        if d < dim and d < len(indices):
-                            filled += indices[d]
-                        else:
-                            filled += ':'
-                        sep = ', '
-                        d += 1
-                    filled += ')'
-            return filled
-        
-        return ''
+    def fillIndices(self, variable, dim, *indices):
+        ref = variable.getReference()
+        perc = ''
+        d = 0
+        filled = ''
+        for level in ref.getLevels():
+            var = ref.getVariable(level)
+            if var is None:
+                return variable.expression()
+            filled += perc + var.getName()
+            perc = '%'
+            if var.isArray() and d < dim:
+                filled += '('
+                sep = ''
+                for _ in range(0, var.getDimension()):
+                    filled += sep
+                    if d < dim and d < len(indices):
+                        filled += indices[d]
+                    else:
+                        filled += ':'
+                    sep = ', '
+                    d += 1
+                filled += ')'
+        return filled
     
-    def writeVarNameWithFilledIndicesToString(self, variableName, destination, dim, *indices):
+    def writeVarNameWithFilledIndicesToString(self, variable, destination, dim, *indices):
         parts = []
         for index in indices:
             parts.append("', " + index + ", '") 
         
-        filled = self.fillIndices(variableName, dim, *parts)
+        filled = self.fillIndices(variable, dim, *parts)
         if not filled:
             return ''
-        if filled == variableName.lower():
-            return destination + ' = "' + variableName + '"'
+        if filled == variable.expression():
+            return destination + ' = "' + variable.expression() + '"'
         
         write = "WRITE (" + destination + ",'("
-        write += 'A,I0,' * min(dim, len(indices), self.totalDim(variableName))
+        write += 'A,I0,' * min(dim, len(indices), variable.totalDim())
         write += "A)') '" + filled + "'"
         
         return write
@@ -363,10 +354,19 @@ class UsedVariable(object):
         return hash(self.__ref);
         
     def __str__(self):
-        return self.__ref.getExpression()
+        return self.expression()
     
     def getReference(self):
         return self.__ref
+    
+    def type(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return ''
+        return var.getTypeName()
+    
+    def expression(self):
+        return self.__ref.getExpression().lower()
     
     def levels(self, decrementing = False):
         return self.__ref.getLevels(decrementing)
@@ -374,11 +374,8 @@ class UsedVariable(object):
     def dim(self):
         return self.__ref.getLevelNDimension()
     
-    def type(self):
-        var = self.__ref.getLevelNVariable()
-        if var is None:
-            return ''
-        return var.getTypeName()
+    def totalDim(self):
+        return self.__ref.getTotalDimensions()
     
     def containsArray(self):
         return self.__ref.isOneVariableArray()
