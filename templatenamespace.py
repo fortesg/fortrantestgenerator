@@ -152,26 +152,6 @@ class TemplatesNameSpace(object):
                 
         return ''
     
-        
-    def getContainer(self, variableName, dim):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            top = 0
-            perc = ''
-            cont = ''
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
-                    return ''
-                cont += perc + variable.getName()
-                perc = '%'
-                top += variable.getDimension()
-                if top >= dim:
-                    break
-            return cont
-                
-        return ''
-    
     def allocatedOrAssociated(self, variable, dim, *placeholder):
         assertType(variable, 'variable', UsedVariable)
         
