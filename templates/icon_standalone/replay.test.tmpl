@@ -83,8 +83,8 @@ CONTAINS
     CALL setCalendar(ftg_mtime_calendar)
 
     ! ARGUMENTS
-    #for $ref in $args.usedVariables
-      $ftg_read($ref.getExpression()) #end for
+    #for $var in $args.usedVariables
+      $ftg_read($var) #end for
 
     ! GLOBALS
     #for $var in $globals.usedVariables
