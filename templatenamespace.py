@@ -32,18 +32,6 @@ class TemplatesNameSpace(object):
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
     
-    def isAllocatable(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and var.isAllocatable()
-    
-    def isPointer(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and var.isPointer()
-    
-    def isAllocatableOrPointer(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and (var.isAllocatable() or var.isPointer())
-    
     def isInArgument(self, variableName):
         reference = self._findReference(variableName)
         if reference is not None:
@@ -64,6 +52,9 @@ class TemplatesNameSpace(object):
     
     def lbound(self, variable, dim, *placeholder):
         assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
+        
         bound = self.__bound(variable, dim, placeholder)
         if bound != '':
             return 'L' + bound
@@ -71,6 +62,9 @@ class TemplatesNameSpace(object):
     
     def ubound(self, variable, dim, *placeholder):
         assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
+        
         bound = self.__bound(variable, dim, placeholder)
         if bound != '':
             return 'U' + bound
@@ -78,6 +72,8 @@ class TemplatesNameSpace(object):
 
     def __bound(self, variable, dim, placeholder):
         assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
         
         noDim = False
         if dim <= 0:
@@ -120,6 +116,8 @@ class TemplatesNameSpace(object):
     
     def allocatedOrAssociated(self, variable, dim, *placeholder):
         assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
         
         ref = variable.getReference()
         totalDim = ref.getTotalDimensions()
@@ -162,6 +160,8 @@ class TemplatesNameSpace(object):
     
     def fillIndices(self, variable, dim, *indices):
         assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(indices, 'indices', str)
         
         ref = variable.getReference()
         perc = ''
@@ -207,7 +207,6 @@ class TemplatesNameSpace(object):
         return write
     
     def _findVariable(self, variableName):
-        # TODO Kann man hier nicht _findReference benutzen?
         variableName = variableName.lower()
         if not variableName:
             return None
@@ -249,7 +248,6 @@ class TemplatesNameSpace(object):
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
     def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
-        
         super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.__registered = set()
         
@@ -280,39 +278,45 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
 class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
     def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
-        
         super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)        
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
         self.__allocated = set()
         
-    def needsAllocationFilled(self, variableName, dim, *indices): 
-        var = self._findVariable(variableName)
-        filled = self.fillIndices(variableName, dim, *indices)
-        return var is not None and (var.isAllocatable() or var.isPointer() or var.hasClassType()) and not self.alreadyAllocated(filled)
+    def needsAllocationFilled(self, variable, dim, *indices): 
+        assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(indices, 'indices', str)
+        
+        filled = self.fillIndices(variable, dim, *indices)
+        return (variable.allocatableOrPointer() or variable.hasClassType()) and not self.alreadyAllocated(filled)
 
-    def needsAllocation(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and (var.isAllocatable() or var.isPointer() or var.hasClassType()) and not self.alreadyAllocated(variableName)
+    def needsAllocation(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        return (variable.allocatableOrPointer() or variable.hasClassType()) and not self.alreadyAllocated(variable)
     
-    def containerNeedsAllocation(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            for level in reference.getLevels(True):
-                variable = reference.getVariable(level)
-                if variable is not None and (variable.isAllocatable() or variable.isPointer() or variable.hasClassType()) and not self.alreadyAllocated(reference.getExpression(level)):
-                    return True
-                
+    def containerNeedsAllocation(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        for level in variable.levels(True):
+            container = variable.container(level)
+            if self.needsAllocation(container):
+                return True
         return False
     
-    def setAllocated(self, variableName):
-        self.__allocated.add(variableName)
+    def setAllocated(self, variable):
+        assertType(variable, 'variable', [UsedVariable, str])
+        self.__allocated.add(variable)
         
-    def alreadyAllocated(self, variableName):
-        return variableName in self.__allocated
+    def alreadyAllocated(self, variable):
+        assertType(variable, 'variable', [UsedVariable, str])
+        return variable in self.__allocated
 
-    def alloc(self, variableName, dim, *dimSizes):
-        alloc = 'ALLOCATE(' + variableName
+    def alloc(self, variable, dim, *dimSizes): 
+        assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(dimSizes, 'dimSizes', str)
+        
+        alloc = 'ALLOCATE(' + variable.expression()
         if dim > 0:
             alloc += '('
             sep = ''
@@ -322,7 +326,7 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
             alloc += ')'
         alloc += ')'
         
-        self.setAllocated(variableName)
+        self.setAllocated(variable)
             
         return alloc
     
@@ -372,6 +376,12 @@ class UsedVariable(object):
             return ''
         return var.getTypeName()
     
+    def hasClassType(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return ''
+        return var.hasClassType()
+    
     def expression(self):
         return self.__ref.getExpression().lower()
     
@@ -380,6 +390,24 @@ class UsedVariable(object):
         
     def dim(self):
         return self.__ref.getLevelNDimension()
+    
+    def allocatable(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return False
+        return var.isAllocatable()
+    
+    def pointer(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return False
+        return var.isPointer()
+    
+    def allocatableOrPointer(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return False
+        return var.isAllocatable() or var.isPointer()
     
     def totalDim(self):
         return self.__ref.getTotalDimensions()

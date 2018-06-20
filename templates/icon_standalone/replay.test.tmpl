@@ -118,7 +118,7 @@ END PROGRAM ftg_${subroutine.name}_test
         #end if
       #end for
       #if $needsAllocation($var)
-        #if $isPointer($var)
+        #if $var.pointer
             CALL ftg_allocate_and_read_pointer("$var", $var)
         #else
             CALL ftg_allocate_and_read_allocatable("$var", $var)
@@ -128,13 +128,13 @@ END PROGRAM ftg_${subroutine.name}_test
       #end if
     #else
     
-      #set $mandDims = $getNumberOfMandatoryDimensions($var)
+      #set $mandDims = $var.mandatoryDimensions
       #set $topContainer = $var
       #for $d in range(1, $mandDims + 1)
-        #set $topContainer = $getContainer($var, $d)
-        #for $level in $levels($topContainer)
-          #set $container = $getExpression($topContainer, $level)
-          #set $contDim = $dim($container)
+        #set $topContainer = $var.container($d)
+        #for $level in $topContainer.levels
+          #set $container = $topContainer.container($level)
+          #set $contDim = $container.dim
           #if $needsAllocation($container)
             #set $container = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
             $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
@@ -148,9 +148,9 @@ END PROGRAM ftg_${subroutine.name}_test
         #end for
         DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #end for
-      #for $level in sorted(set($var.levels[:-1]) - set($levels($topContainer)))
-        #set $container = $getExpression($var, $level)
-        #set $contDim = $dim($container)
+      #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
+        #set $container = $var.container($level)
+        #set $contDim = $container.dim
         #if $needsAllocationFilled($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
           #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
           $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
@@ -164,14 +164,14 @@ END PROGRAM ftg_${subroutine.name}_test
       #end for
       $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
       #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-      #if $isPointer($var)
+      #if $var.pointer
         CALL ftg_allocate_and_read_pointer(ftg_c, $filled)
-      #else if $isAllocatable($var)
+      #else if $var.allocatable
         CALL ftg_allocate_and_read_allocatable(ftg_c, $filled)
       #else
         CALL ftg_read(ftg_c, $filled)
       #end if 
-      #for $d in range(1, $getNumberOfMandatoryDimensions($var) + 1)
+      #for $d in range(1, $var.mandatoryDimensions + 1)
         END DO
       #end for
     #end if
