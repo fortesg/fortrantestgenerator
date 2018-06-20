@@ -172,46 +172,46 @@ class TemplatesNameSpace(object):
                 
         return ''
     
-    def allocatedOrAssociated(self, variableName, dim, *placeholder):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            totalDim = reference.getTotalDimensions()
-            if dim > totalDim:
-                dim = totalDim
-            top = 0
-            pointer = False
-            allocatable = False
-            perc = ''
-            aa = '('
-            totalAllocatablesAndPointers = reference.getNumberOfPointerAndAllocatableLevels()
-            allocatablesAndPointers = 0
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
-                    return ''
-                aa += perc + variable.getName()
-                perc = '%'
-                pointer = variable.isPointer()
-                allocatable = variable.isAllocatable()
-                allocatablesAndPointers += (pointer or allocatable)
-                bot = top 
-                top += variable.getDimension()
-                if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
-                    if top > bot:
-                        aa += '('
-                        sep = ''
-                        for i in range(bot, top):
-                            aa += sep + placeholder[i]
-                            sep = ', '
-                        aa += ')'
-                else:
-                    break
-            aa += ')'
-            if allocatable:
-                return 'ALLOCATED' + aa
-            elif pointer:
-                return 'ASSOCIATED' + aa
+    def allocatedOrAssociated(self, variable, dim, *placeholder):
+        assertType(variable, 'variable', UsedVariable)
         
+        ref = variable.getReference()
+        totalDim = ref.getTotalDimensions()
+        if dim > totalDim:
+            dim = totalDim
+        top = 0
+        pointer = False
+        allocatable = False
+        perc = ''
+        aa = '('
+        totalAllocatablesAndPointers = ref.getNumberOfPointerAndAllocatableLevels()
+        allocatablesAndPointers = 0
+        for level in ref.getLevels():
+            variable = ref.getVariable(level)
+            if variable is None:
+                return ''
+            aa += perc + variable.getName()
+            perc = '%'
+            pointer = variable.isPointer()
+            allocatable = variable.isAllocatable()
+            allocatablesAndPointers += (pointer or allocatable)
+            bot = top 
+            top += variable.getDimension()
+            if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
+                if top > bot:
+                    aa += '('
+                    sep = ''
+                    for i in range(bot, top):
+                        aa += sep + placeholder[i]
+                        sep = ', '
+                    aa += ')'
+            else:
+                break
+        aa += ')'
+        if allocatable:
+            return 'ALLOCATED' + aa
+        elif pointer:
+            return 'ASSOCIATED' + aa
         return ''
     
     def fillIndices(self, variableName, dim, *indices):
@@ -307,7 +307,7 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         self.__registered = set()
         
     def needsRegistration(self, variable):
-        assertType(variable, 'variable', UsedVariable) #TODO Umbauen auf nur UsedVariable
+        assertType(variable, 'variable', UsedVariable)
         return not self.alreadyRegistered(variable)
     
     def containerNeedsRegistration(self, variable):
