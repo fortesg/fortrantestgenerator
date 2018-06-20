@@ -328,6 +328,147 @@ class ModuleNameSpace(object):
 
         self.name = moduleName
 
+
+
+class GlobalsNameSpace(object):
+    
+    def __init__(self, subroutine, sourceFile, globalsReferences, includeTestModule):
+        assertType(subroutine, 'subroutine', Subroutine)
+        assertType(sourceFile, 'sourceFile', SourceFile)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        assertType(includeTestModule, 'includeTestModule', bool)
+
+        self.usedVariables = []
+        variables = set()
+        types = set()
+        for ref in globalsReferences:
+            self.usedVariables.append(UsedVariable(ref))
+            variable = ref.getLevel0Variable()
+            variables.add(variable)
+            if variable.hasDerivedType() and variable.isTypeAvailable():
+                types.add(variable.getType())
+        
+        testModule = subroutine.getName().getModuleName()
+        modules = dict()    
+        for variable in variables:
+            moduleName = variable.getDeclaredInName()
+            if moduleName != testModule or includeTestModule:
+                if moduleName not in modules:
+                    modules[moduleName] = []
+                varName = variable.getName() 
+                if varName != variable.getOriginalName():
+                    varName += ' => ' + variable.getOriginalName()
+                modules[moduleName].append(varName)
+        for typE in types:
+            moduleName = typE.getDeclaredInName()
+            if isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
+                if moduleName not in modules:
+                    modules[moduleName] = []
+                modules[moduleName].append(typE.getName())
+         
+        self.imports = ''
+        for module, elements in modules.iteritems():
+            self.imports += 'USE ' + module + ', ONLY: '
+            for element in elements:
+                self.imports += element
+                #TODO alias
+                self.imports += ', '
+            self.imports  = self.imports.strip(', ')
+            self.imports += "\n"
+        self.imports = self.imports.strip("\n")
+        
+        exportGlobals = ExportGlobalsNameSpace(testModule, sourceFile, globalsReferences)
+        self.exports = exportGlobals.exports
+
+class TypesNameSpace(object):
+    
+    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, includeTestModule):
+        assertType(subroutine, 'subroutine', Subroutine)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        assertType(includeTestModule, 'includeTestModule', bool)
+        
+        variables = set(subroutine.getDerivedTypeArguments())
+        for reference in globalsReferences:
+            variables.add(reference.getLevel0Variable())
+
+        self.__types = dict()
+        for variable in variables:
+            if variable.hasDerivedType() and variable.isTypeAvailable():
+                typE = variable.getType()
+                if typE.getName() not in self.__types:
+                    self.__types[typE.getName()] = typE
+                    #self.__addMemberTypesToTypSet(typE)
+                    
+        testModule = subroutine.getName().getModuleName()
+        modules = dict()    
+        for typE in self.__types.values():
+            moduleName = typE.getDeclaredInName()
+            if  isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
+                if moduleName not in modules:
+                    modules[moduleName] = []
+                modules[moduleName].append(typE.getName())
+         
+        self.imports = ''
+        for module, typeNames in modules.iteritems():
+            self.imports += '  USE ' + module + ', ONLY: '
+            for typeName in typeNames:
+                self.imports += typeName + ', '
+            self.imports  = self.imports.strip(', ')
+            self.imports += "\n"
+        self.imports = self.imports.strip("\n")
+        
+    def __addMemberTypesToTypSet(self, typE):
+        for member in typE.getMembers():
+            if member.hasDerivedType() and member.isPointer() and member.isTypeAvailable():
+                memberType = member.getType()
+                if memberType.getName() not in self.__types:
+                    self.__types[memberType.getName] = memberType 
+                    self.__addMemberTypesToTypSet(memberType)
+        
+class ExportNameSpace(object):
+    
+    def __init__(self, moduleName, sourceFile, globalsReferences):
+        assertType(moduleName, 'moduleName', str)
+        assertType(sourceFile, 'sourceFile', SourceFile)
+        assertType(globalsReferences, 'globalsReferences', list)
+        
+        self.module = ModuleNameSpace(moduleName)
+        self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
+        
+class ExportGlobalsNameSpace(object):
+    
+    def __init__(self, moduleName, sourceFile, globalsReferences):
+        assertType(moduleName, 'moduleName', str)
+        assertType(sourceFile, 'sourceFile', SourceFile)
+        assertType(globalsReferences, 'globalsReferences', list)
+        
+        publicElements = sourceFile.getPublicElements()
+        
+        self.exports = 'PUBLIC :: '
+        variables = set()
+        types = set()
+        for ref in globalsReferences:
+            variable = ref.getLevel0Variable()
+            refModule = variable.getDeclaredInName()
+            if refModule == moduleName:
+                variableName = variable.getOriginalName().lower()
+                if variableName not in variables and not variable.isPublic() and variableName not in publicElements:
+                    self.exports += variableName + ", "
+                    variables.add(variableName)
+            if variable.hasDerivedType() and variable.isTypeAvailable():
+                typE = variable.getType()
+                refModule = typE.getDeclaredInName()
+                if refModule == moduleName:
+                    typeName = typE.getName().lower()
+                    if typeName not in types and typeName not in publicElements:
+                        self.exports += typeName + ", "
+                        types.add(typeName)
+        self.exports = self.exports.strip(', ')
+        
+        if self.exports == 'PUBLIC ::':
+            self.exports = ''
+            
 class UsedVariable(object):
     
     def __init__(self, reference):
@@ -491,7 +632,6 @@ class Argument(object):
     
     def usedVariables(self):
         return self.__used
-    
 
 class ArgumentList(object):
     def __init__(self, arguments, typeArgumentReferences = None):
@@ -555,144 +695,4 @@ class ArgumentList(object):
         return "\n".join([arg.spec(intent, allocatable, charLengthZero) for arg in self.__arguments])
     
     def usedVariables(self):
-        return sum([arg.usedVariables() for arg in self.__arguments], [])
-
-class GlobalsNameSpace(object):
-    
-    def __init__(self, subroutine, sourceFile, globalsReferences, includeTestModule):
-        assertType(subroutine, 'subroutine', Subroutine)
-        assertType(sourceFile, 'sourceFile', SourceFile)
-        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
-        assertType(includeTestModule, 'includeTestModule', bool)
-
-        self.usedVariables = []
-        variables = set()
-        types = set()
-        for ref in globalsReferences:
-            self.usedVariables.append(UsedVariable(ref))
-            variable = ref.getLevel0Variable()
-            variables.add(variable)
-            if variable.hasDerivedType() and variable.isTypeAvailable():
-                types.add(variable.getType())
-        
-        testModule = subroutine.getName().getModuleName()
-        modules = dict()    
-        for variable in variables:
-            moduleName = variable.getDeclaredInName()
-            if moduleName != testModule or includeTestModule:
-                if moduleName not in modules:
-                    modules[moduleName] = []
-                varName = variable.getName() 
-                if varName != variable.getOriginalName():
-                    varName += ' => ' + variable.getOriginalName()
-                modules[moduleName].append(varName)
-        for typE in types:
-            moduleName = typE.getDeclaredInName()
-            if isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
-                if moduleName not in modules:
-                    modules[moduleName] = []
-                modules[moduleName].append(typE.getName())
-         
-        self.imports = ''
-        for module, elements in modules.iteritems():
-            self.imports += 'USE ' + module + ', ONLY: '
-            for element in elements:
-                self.imports += element
-                #TODO alias
-                self.imports += ', '
-            self.imports  = self.imports.strip(', ')
-            self.imports += "\n"
-        self.imports = self.imports.strip("\n")
-        
-        exportGlobals = ExportGlobalsNameSpace(testModule, sourceFile, globalsReferences)
-        self.exports = exportGlobals.exports
-
-class TypesNameSpace(object):
-    
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, includeTestModule):
-        assertType(subroutine, 'subroutine', Subroutine)
-        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
-        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
-        assertType(includeTestModule, 'includeTestModule', bool)
-        
-        variables = set(subroutine.getDerivedTypeArguments())
-        for reference in globalsReferences:
-            variables.add(reference.getLevel0Variable())
-
-        self.__types = dict()
-        for variable in variables:
-            if variable.hasDerivedType() and variable.isTypeAvailable():
-                typE = variable.getType()
-                if typE.getName() not in self.__types:
-                    self.__types[typE.getName()] = typE
-                    #self.__addMemberTypesToTypSet(typE)
-                    
-        testModule = subroutine.getName().getModuleName()
-        modules = dict()    
-        for typE in self.__types.values():
-            moduleName = typE.getDeclaredInName()
-            if  isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
-                if moduleName not in modules:
-                    modules[moduleName] = []
-                modules[moduleName].append(typE.getName())
-         
-        self.imports = ''
-        for module, typeNames in modules.iteritems():
-            self.imports += '  USE ' + module + ', ONLY: '
-            for typeName in typeNames:
-                self.imports += typeName + ', '
-            self.imports  = self.imports.strip(', ')
-            self.imports += "\n"
-        self.imports = self.imports.strip("\n")
-        
-    def __addMemberTypesToTypSet(self, typE):
-        for member in typE.getMembers():
-            if member.hasDerivedType() and member.isPointer() and member.isTypeAvailable():
-                memberType = member.getType()
-                if memberType.getName() not in self.__types:
-                    self.__types[memberType.getName] = memberType 
-                    self.__addMemberTypesToTypSet(memberType)
-        
-class ExportNameSpace(object):
-    
-    def __init__(self, moduleName, sourceFile, globalsReferences):
-        assertType(moduleName, 'moduleName', str)
-        assertType(sourceFile, 'sourceFile', SourceFile)
-        assertType(globalsReferences, 'globalsReferences', list)
-        
-        self.module = ModuleNameSpace(moduleName)
-        self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
-        
-        
-class ExportGlobalsNameSpace(object):
-    
-    def __init__(self, moduleName, sourceFile, globalsReferences):
-        assertType(moduleName, 'moduleName', str)
-        assertType(sourceFile, 'sourceFile', SourceFile)
-        assertType(globalsReferences, 'globalsReferences', list)
-        
-        publicElements = sourceFile.getPublicElements()
-        
-        self.exports = 'PUBLIC :: '
-        variables = set()
-        types = set()
-        for ref in globalsReferences:
-            variable = ref.getLevel0Variable()
-            refModule = variable.getDeclaredInName()
-            if refModule == moduleName:
-                variableName = variable.getOriginalName().lower()
-                if variableName not in variables and not variable.isPublic() and variableName not in publicElements:
-                    self.exports += variableName + ", "
-                    variables.add(variableName)
-            if variable.hasDerivedType() and variable.isTypeAvailable():
-                typE = variable.getType()
-                refModule = typE.getDeclaredInName()
-                if refModule == moduleName:
-                    typeName = typE.getName().lower()
-                    if typeName not in types and typeName not in publicElements:
-                        self.exports += typeName + ", "
-                        types.add(typeName)
-        self.exports = self.exports.strip(', ')
-        
-        if self.exports == 'PUBLIC ::':
-            self.exports = ''
+        return sum([arg.usedVariables() for arg in self.__arguments], [])            
