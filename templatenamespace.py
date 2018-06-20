@@ -331,32 +331,25 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         self.__registered = set()
         
     def needsRegistration(self, variable):
-        assertType(variable, 'variable', [str, UsedVariable]) #TODO Umbauen auf nur UsedVariable
-        
-        var = self._findVariable(variable)
-        return var is not None and not self.alreadyRegistered(variable)
+        assertType(variable, 'variable', UsedVariable) #TODO Umbauen auf nur UsedVariable
+        return not self.alreadyRegistered(variable)
     
     def containerNeedsRegistration(self, variable):
-        assertType(variable, 'variable', [str, UsedVariable]) #TODO Umbauen auf nur UsedVariable
+        assertType(variable, 'variable', UsedVariable)
         
-        if isinstance(variable, UsedVariable):
-            reference = variable.getReference()
-        else:
-            reference = self._findReference(variable)
-            
-        if reference is not None:
-            for level in reference.getLevels(True):
-                var = reference.getVariable(level)
-                if var is not None and not self.alreadyRegistered(reference.getExpression(level)):
-                    return True
+        for level in variable.levels(True):
+            if not self.alreadyRegistered(variable.container(level)):
+                return True
                 
         return False
     
-    def setRegistered(self, variableName):
-        self.__registered.add(variableName)
+    def setRegistered(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        self.__registered.add(variable)
         
-    def alreadyRegistered(self, variableName):
-        return variableName in self.__registered
+    def alreadyRegistered(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        return variable in self.__registered
     
     def resetRegistrations(self):
         self.__registered = set()
@@ -430,8 +423,22 @@ class UsedVariable(object):
     
     def __init__(self, reference):
         assertType(reference, 'reference', VariableReference)
-        
         self.__ref = reference
+        
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, UsedVariable)):
+            return False;
+        else:
+            return self.__ref == other.__ref
+    
+    def __ne__(self, other):
+        return not self == other
+        
+    def __hash__(self):
+        return hash(self.__ref);
+        
+    def __str__(self):
+        return self.__ref.getExpression()
     
     def getReference(self):
         return self.__ref
