@@ -6,12 +6,12 @@ from templatenamespace import TemplatesNameSpace
 class FTGTemplate(Template):
     
     class Part(Enum):
-        CAPTURE_AFTER_LAST_LINE = 'captureAfterLastLine'
-        CAPTURE_BEFORE_CONTAINS = 'captureBeforeContains'
-        CAPTURE_AFTER_LAST_SPECIFICATION = 'captureAfterLastSpecification'
-        CAPTURE_BEFORE_END = 'captureBeforeEnd'
-        EXPORT = 'export'
-        REPLAY = 'replay'
+        CAPTURE_AFTER_LAST_LINE = '$captureAfterLastLine'
+        CAPTURE_BEFORE_CONTAINS = '$captureBeforeContains'
+        CAPTURE_AFTER_LAST_SPECIFICATION = '$captureAfterLastSpecification'
+        CAPTURE_BEFORE_END = '$captureBeforeEnd'
+        EXPORT = '$export'
+        REPLAY = '$replay'
         
     def __init__(self, part, namespace):
         assertType(part, 'part', FTGTemplate.Part)
