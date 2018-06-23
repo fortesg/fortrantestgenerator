@@ -9,7 +9,7 @@ IMPLICIT NONE
 include 'mpif.h'
 
 INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u
-TYPE(testa) :: a
+TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag
 REAL :: out
