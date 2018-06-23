@@ -1,7 +1,5 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
-from string import find
-import re
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -187,45 +185,6 @@ class TemplatesNameSpace(object):
         write += "A)') '" + filled + "'"
         
         return write
-    
-    def _findVariable(self, variableName):
-        variableName = variableName.lower()
-        if not variableName:
-            return None
-        elif find(variableName, '%') < 0:
-            if self.__subroutine.hasVariable(variableName):
-                return self.__subroutine.getVariable(variableName)
-        for reference in (self._typeArgumentReferences + self._globalsReferences):
-            expression = reference.getExpression().lower()
-            if expression == variableName:
-                return reference.getLevelNVariable()
-            elif expression.startswith(variableName + '%'):
-                return reference.getVariable(variableName.count('%'))
-
-        return None
-    
-    def _findReference(self, expression):
-        expression = expression.lower()
-        expression = self.__removeBrackets(expression)
-        if not expression:
-            return None
-        elif find(expression, '%') < 0:
-            if self.__subroutine.hasVariable(expression):
-                return VariableReference(expression, self.__subroutine.getName(), 0, self.__subroutine.getVariable(expression))
-        for reference in self._typeArgumentReferences + self._globalsReferences:
-            refExpression = reference.getExpression().lower()
-            if refExpression == expression:
-                return reference
-            elif refExpression.startswith(expression + "%"):
-                return reference.getSubReference(expression.count('%'))
-        return None   
-    
-    def __removeBrackets(self, text):
-        regEx = re.compile(r'.*\([^\(\)]*\).*')
-        while regEx.match(text) is not None:
-            text = re.sub(r'\([^\(\)]*\)', '', text)
-        return text
-
 
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
