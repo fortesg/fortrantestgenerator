@@ -28,9 +28,9 @@ SUBROUTINE testsub(ra, rlog, oreal, oa)
     ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:)
   END IF
 
-!  IF (PRESENT(oa)) THEN
-!    oa%c%r2(:,:) = oa%b(1)%i2 * oa%b(1)%i0 + oa%c%r2
-!  END IF
+  IF (PRESENT(oa)) THEN
+    oa%c%r2(:,:) = oa%b(1)%i2(1:2, 1:2) * oa%b(1)%i0 + oa%c%r2(:,:)
+  END IF
 
   CALL set(ra%c%r2(1,1))
   IF (PRESENT(oreal)) THEN
