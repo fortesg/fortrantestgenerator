@@ -17,21 +17,30 @@ class TestTemplate(unittest.TestCase):
     def setUpClass(cls):
         ImportHooks.install()
     
-#     def setUp(self):
-#         class DummyTemplatesNameSpace(TemplatesNameSpace):
-#             def __init__(self):
-#                 pass
-#         self.namespace = DummyTemplatesNameSpace() 
-        
     def testPlain(self):
-        self.assertEqual('', str(Template(file=FTG_DIR + '/FTGTemplate.tmpl')).strip())
+        template = Template(file=FTG_DIR + '/FTGTemplate.tmpl')
+        template.part = 'captureBeforeContains'
+        self.assertEqual('', str(template).strip())
 
     def testSubclass(self):
-        self.assertEqual('', str(Template('#extends FTGTemplate')).strip())
+        template = Template('#extends FTGTemplate')
+        template.part = 'captureAfterLastSpecification'
+        self.assertEqual('', str(template).strip())
 
     def testTestTemplate(self):
-        self.assertEqual('', str(Template(file=TEST_DIR + '/TestTemplate.tmpl')).strip())
-        
+        template = Template(file=TEST_DIR + '/TestTemplate.tmpl')
+        template.part = 'captureBeforeContains'
+        self.assertEqual('CAPTURE BEFORE CONTAINS', str(template).strip())
+        template.part = 'captureAfterLastSpecification'
+        self.assertEqual('CAPTURE AFTER LAST SPECIFICATION', str(template).strip())
+        template.part = 'captureBeforeEnd'
+        self.assertEqual('CAPTURE BEFORE END', str(template).strip())
+        template.part = 'captureAfterSubroutine'
+        self.assertEqual('CAPTURE AFTER SUBROUTINE', str(template).strip())
+        template.part = 'export'
+        self.assertEqual('EXPORT', str(template).strip())
+        template.part = 'replay'
+        self.assertEqual('REPLAY', str(template).strip())
         
 if __name__ == "__main__":
     unittest.main()
