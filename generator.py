@@ -124,7 +124,7 @@ class CodeGenerator(object):
     def _processTemplate(self, sourceFilePath, lineNumber, part, templateNameSpace):
         print "      Process Template " + os.path.basename(self.__templatePath) + "[" + part + "]" + " on file " + sourceFilePath, 
         source = self._readFile(sourceFilePath)
-        codeToAdd = self._loadTemplate(part, templateNameSpace)
+        codeToAdd = self.__loadTemplate(part, templateNameSpace)
         
         if codeToAdd:
             source = source[:lineNumber] + ["\n"] + [codeToAdd] + ["\n", "\n"] + source[lineNumber:]
@@ -135,7 +135,7 @@ class CodeGenerator(object):
             print " >>> EMPTY"
             return False
         
-    def _loadTemplate(self, part, templateNameSpace):
+    def __loadTemplate(self, part, templateNameSpace):
         template = Template(file=self.__templatePath, searchList=[templateNameSpace])
         template.part = part
         return self._breakLines(self._indent(str(template).strip()))
