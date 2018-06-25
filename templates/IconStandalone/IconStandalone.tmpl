@@ -17,7 +17,7 @@
 #end def captureAfterSubroutine
 
 #def ftgWrite($var)
-    #set global $var = $var
+    #set global $ftgWrite_var = $var
     $includeFromThisDirectory('capture.ftgWrite.tmpl')
 #end def ftgWrite
 
@@ -30,6 +30,6 @@
 #end def replay
 
 #def ftgRead($var)
-    #set global $var = $var
+    #set global $ftgRead_var = $var
     $includeFromThisDirectory('replay.ftgRead.tmpl')
 #end def ftgRead
