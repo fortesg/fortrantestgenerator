@@ -12,6 +12,8 @@ sys.path.append(FTG_DIR)
 FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 
+from templatenamespace import ArgumentList
+
 class TestTemplate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -41,6 +43,37 @@ class TestTemplate(unittest.TestCase):
         self.assertEqual('EXPORT', str(template).strip())
         template.part = 'replay'
         self.assertEqual('REPLAY', str(template).strip())
+        
+    def testSubSubClass(self):
+        template = Template('#extends TestTemplate')
+        template.part = 'replay'
+        self.assertEqual('REPLAY', str(template).strip())
+        
+
+    def testIconStandalone(self):
+        class DummySubnamespace(object):
+            def __init__(self):
+                self.exports = 'EXPORTS'
+                self.export = 'EXPORT'
+                self.name = 'NAME'
+                self.joinNames = 'NAMES'
+        
+        class DummyNamespace(object):
+            def __init__(self):
+                self.subroutine = DummySubnamespace()
+                self.globals = DummySubnamespace()
+                self.args = ArgumentList([])
+                self.dataDir = 'DATADIR'
+        
+        template = Template(file=FTG_DIR + '/templates/IconStandalone/IconStandalone.tmpl', searchList=[DummyNamespace()])
+        template.part = 'captureBeforeContains'
+        self.assertTrue(str(template).strip())
+        template.part = 'captureAfterLastSpecification'
+        self.assertTrue(str(template).strip())
+        template.part = 'captureBeforeEnd'
+        self.assertTrue(str(template).strip())
+        template.part = 'export'
+        self.assertTrue(str(template).strip())
         
 if __name__ == "__main__":
     unittest.main()

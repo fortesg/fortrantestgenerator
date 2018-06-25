@@ -1,0 +1,25 @@
+#extends FTGTemplate
+
+#def captureBeforeContains
+    $includeFromThisDirectory('capture.beforecontains.tmpl')
+#end def captureBeforeContains
+
+#def captureAfterLastSpecification
+    $includeFromThisDirectory('capture.afterlastspecification.tmpl')
+#end def captureAfterLastSpecification
+
+#def captureBeforeEnd
+    $includeFromThisDirectory('capture.beforeend.tmpl')
+#end def captureBeforeEnd
+
+#def captureAfterSubroutine
+    $includeFromThisDirectory('capture.aftersubroutine.tmpl')
+#end def captureAfterSubroutine
+
+#def export
+    $includeFromThisDirectory('export.beforecontains.tmpl')
+#end def export
+
+#def replay
+    $includeFromThisDirectory('replay.test.tmpl')
+#end def replay

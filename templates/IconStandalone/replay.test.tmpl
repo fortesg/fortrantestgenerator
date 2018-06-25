@@ -1,0 +1,181 @@
+PROGRAM ftg_${subroutine.name}_test
+
+  USE mtime
+  USE mo_kind
+  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+  USE mo_exception,      ONLY: message
+  USE mo_mpi,            ONLY: get_my_mpi_all_id, start_mpi, stop_mpi !ICON
+
+  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_output_dir
+
+  USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
+  
+  ${globals.imports}
+  
+  ${types.imports}
+  
+IMPLICIT NONE
+
+CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output_test'
+LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
+LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
+
+CALL start_mpi('ftg_${subroutine.name}_test') !ICON
+
+CALL ftg_test_${subroutine.name}()
+
+CALL stop_mpi() !ICON
+
+CONTAINS
+  
+  SUBROUTINE ftg_test_${subroutine.name}()
+
+    ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+  
+    CALL message('FTG', '*** Run test for ${subroutine.name} ***')
+    
+    ftg_${subroutine.name}_capture_input_enabled = .FALSE.
+    ftg_${subroutine.name}_capture_output_enabled = OUTPUT_ENABLED
+    ftg_${subroutine.name}_output_dir = OUTPUT_DIR
+    ftg_${subroutine.name}_capture_round = 1
+
+    CALL ftg_${subroutine.name}_init_for_replay('input')
+    CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
+    CALL ftg_destroy_serializer()
+
+    CALL ${subroutine.name}(${args.joinNames})
+
+  END SUBROUTINE ftg_test_${subroutine.name}
+
+  
+  SUBROUTINE ftg_${subroutine.name}_init_for_replay(stage)
+
+    CHARACTER(*), INTENT(IN) :: stage
+
+    CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+
+    WRITE (basename,'(a,a,a,i1)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+
+    WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
+    CALL ftg_set_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r')
+    IF (SERIALBOX_DEBUG) THEN
+      CALL ftg_print_serializer_debuginfo()
+    END IF
+
+  END SUBROUTINE ftg_${subroutine.name}_init_for_replay
+  
+  SUBROUTINE ftg_${subroutine.name}_replay_input(${args.joinNames})
+    
+    ${args.specs(intent = 'inout', allocatable = True)}
+
+    INTEGER, DIMENSION(8) :: ftg_bounds
+    INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+    CHARACTER(len=256) :: ftg_c
+    INTEGER ftg_mtime_calendar
+
+    CALL ftg_set_savepoint('input')
+  
+    WRITE (0,'(a,i1,a)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    
+    ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
+    CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
+    CALL setCalendar(ftg_mtime_calendar)
+
+    ! ARGUMENTS
+    #for $var in $args.usedVariables
+      $ftgRead($var) #end for
+
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgRead($var) #end for
+
+    CALL ftg_destroy_savepoint()
+
+  END SUBROUTINE ftg_${subroutine.name}_replay_input
+  
+END PROGRAM ftg_${subroutine.name}_test
+#
+################################################################################
+#
+#def ftgRead($var)
+  #if $var.dim > 4 or $var.type.upper().startswith('CHARACTER'):
+    ! *** WARNING: Type not supported by serialbox *** 
+    !     $var 
+    !     $type($var) | dimension: $dim($var)
+  #else 
+    #if $var.referencable
+      #set $d = 1
+      #for $level in $var.levels[:-1]
+        #set $container = $var.container($level)
+        #set $contDim = $container.dim
+        #if $needsAllocation($container)
+          IF (ftg_field_exists("$container")) THEN
+            ftg_bounds = ftg_get_bounds("$container")
+            $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
+          ELSE
+            $alloc($container, $contDim, "0", "0", "0", "0")
+          END IF
+          #set $d = $d + $contDim
+        #end if
+      #end for
+      #if $needsAllocation($var)
+        #if $var.pointer
+            CALL ftg_allocate_and_read_pointer("$var", $var)
+        #else
+            CALL ftg_allocate_and_read_allocatable("$var", $var)
+        #end if
+      #else
+        CALL ftg_read("$var", $var)
+      #end if
+    #else
+    
+      #set $mandDims = $var.mandatoryDimensions
+      #set $topContainer = $var
+      #for $d in range(1, $mandDims + 1)
+        #set $topContainer = $var.container($d)
+        #for $level in $topContainer.levels
+          #set $container = $topContainer.container($level)
+          #set $contDim = $container.dim
+          #if $needsAllocation($container)
+            #set $container = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+            $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+            IF (ftg_field_exists(ftg_c)) THEN
+              ftg_bounds = ftg_get_bounds(ftg_c)
+              $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
+            ELSE
+              $alloc($container, $contDim, "0", "0", "0", "0")
+            END IF
+          #end if
+        #end for
+        DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+      #end for
+      #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
+        #set $container = $var.container($level)
+        #set $contDim = $container.dim
+        #if $needsAllocationFilled($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          IF (ftg_field_exists(ftg_c)) THEN
+            ftg_bounds = ftg_get_bounds(ftg_c)
+            $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
+          ELSE
+            $alloc($container, $contDim, "0", "0", "0", "0")
+          END IF
+        #end if
+      #end for
+      $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+      #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+      #if $var.pointer
+        CALL ftg_allocate_and_read_pointer(ftg_c, $filled)
+      #else if $var.allocatable
+        CALL ftg_allocate_and_read_allocatable(ftg_c, $filled)
+      #else
+        CALL ftg_read(ftg_c, $filled)
+      #end if 
+      #for $d in range(1, $var.mandatoryDimensions + 1)
+        END DO
+      #end for
+    #end if
+  #end if
+#end def ftgRead
