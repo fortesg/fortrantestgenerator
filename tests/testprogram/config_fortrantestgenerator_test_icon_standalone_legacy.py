@@ -1,4 +1,4 @@
-#import os
+import os
 
 FTG_DIR = os.path.dirname(os.path.realpath(__file__))
 FCG_DIR = FTG_DIR + '/../fortrancallgraph'
