@@ -16,6 +16,11 @@
     $includeFromThisDirectory('capture.aftersubroutine.tmpl')
 #end def captureAfterSubroutine
 
+#def ftgWrite($var)
+    #set global $var = $var
+    $includeFromThisDirectory('capture.ftgWrite.tmpl')
+#end def ftgWrite
+
 #def export
     $includeFromThisDirectory('export.beforecontains.tmpl')
 #end def export
@@ -23,3 +28,8 @@
 #def replay
     $includeFromThisDirectory('replay.test.tmpl')
 #end def replay
+
+#def ftgRead($var)
+    #set global $var = $var
+    $includeFromThisDirectory('replay.ftgRead.tmpl')
+#end def ftgRead
