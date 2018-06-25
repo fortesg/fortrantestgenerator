@@ -122,7 +122,7 @@ class CodeGenerator(object):
         
         print "      Process Template " + os.path.basename(templatePath) + " on file " + sourceFilePath, 
         source = self._readFile(sourceFilePath)
-        codeToAdd = self._breakLines(self._indent((str(Template(file=templatePath, searchList=[templateNameSpace])))))
+        codeToAdd = self._loadTemplate(templatePath, templateNameSpace)
         
         if codeToAdd:
             source = source[:lineNumber] + ["\n"] + [codeToAdd] + ["\n", "\n"] + source[lineNumber:]
@@ -132,9 +132,12 @@ class CodeGenerator(object):
         else:
             print " >>> EMPTY"
             return False
+        
+    def _loadTemplate(self, templatePath, templateNameSpace):
+        return self._breakLines(self._indent((str(Template(file=templatePath, searchList=[templateNameSpace]))).strip()))
     
     def _indent(self, text):
-        if not text.strip():
+        if not text:
             return text
         
         beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ')
