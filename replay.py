@@ -7,20 +7,19 @@ from templatenamespace import ReplayTemplatesNameSpace
 
 class ReplayCodeGenerator(CodeGenerator):
     
-    TEST_TEMPLATE = 'replay.test.tmpl'
+    TEST_TEMPLATE_PART = 'replay'
     TEMP_TEST_FILE = 'ftg_temp_test.f90'
     
-    def __init__(self, sourceFiles, templateDir, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
-        assertType(templateDir, 'templateDir', str)
-        if not os.path.isdir(templateDir):
-            raise IOError("Not a directory: " + templateDir);
+        assertType(templatePath, 'templatePath', str)
+        if not os.path.isfile(templatePath):
+            raise IOError("Template file not found: " + templatePath)
         assertType(testDataDir, 'testDataDir', str)
         if not os.path.isdir(testDataDir):
             raise IOError("Not a directory: " + testDataDir);
 
-        super(ReplayCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
-        self.__testTemplate = os.path.join(templateDir, self.TEST_TEMPLATE)
+        super(ReplayCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
         self.__testSourceDir = testSourceDir
         self.__testDataDir = testDataDir
         
@@ -34,7 +33,7 @@ class ReplayCodeGenerator(CodeGenerator):
         self._writeFile(tempTestFile, [])
         
         templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
-        self._processTemplate(tempTestFile, 0, self.__testTemplate, templateNameSpace)
+        self._processTemplate(tempTestFile, 0, self.TEST_TEMPLATE_PART, templateNameSpace)
         
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)
         if testModuleName is not None:
