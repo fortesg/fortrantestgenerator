@@ -1,35 +1,9 @@
-#extends FTGTemplate
-
-#def captureBeforeContains
-    $includeFromThisDirectory('capture.beforecontains.tmpl')
-#end def captureBeforeContains
-
-#def captureAfterLastSpecification
-    $includeFromThisDirectory('capture.afterlastspecification.tmpl')
-#end def captureAfterLastSpecification
-
-#def captureBeforeEnd
-    $includeFromThisDirectory('capture.beforeend.tmpl')
-#end def captureBeforeEnd
+#extends Standalone
 
 #def captureAfterSubroutine
     $includeFromThisDirectory('capture.aftersubroutine.tmpl')
 #end def captureAfterSubroutine
 
-#def ftgWrite($var)
-    #set global $ftgWrite_var = $var
-    $includeFromThisDirectory('capture.ftgWrite.tmpl')
-#end def ftgWrite
-
-#def export
-    $includeFromThisDirectory('export.beforecontains.tmpl')
-#end def export
-
 #def replay
     $includeFromThisDirectory('replay.test.tmpl')
 #end def replay
-
-#def ftgRead($var)
-    #set global $ftgRead_var = $var
-    $includeFromThisDirectory('replay.ftgRead.tmpl')
-#end def ftgRead
