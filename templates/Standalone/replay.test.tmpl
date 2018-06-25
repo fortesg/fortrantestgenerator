@@ -32,7 +32,7 @@ CONTAINS
   
   SUBROUTINE ftg_test_${subroutine.name}()
 
-    ${arguments.all.specifications(allocatable = True, charLengthZero = True)}
+    ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
   
     IF (my_mpi_id == 0) THEN
       WRITE(*,*) ('*** FTG: Run test for ${subroutine.name} ***')
@@ -44,10 +44,10 @@ CONTAINS
     ftg_${subroutine.name}_capture_round = 1
 
     CALL ftg_${subroutine.name}_init_for_replay('input')
-    CALL ftg_${subroutine.name}_replay_input(${arguments.all.names})
+    CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
     CALL ftg_destroy_serializer()
 
-    CALL ${subroutine.name}(${arguments.all.names})
+    CALL ${subroutine.name}(${args.joinNames})
 
   END SUBROUTINE ftg_test_${subroutine.name}
 
@@ -68,9 +68,9 @@ CONTAINS
 
   END SUBROUTINE ftg_${subroutine.name}_init_for_replay
   
-  SUBROUTINE ftg_${subroutine.name}_replay_input(${arguments.all.names})
+  SUBROUTINE ftg_${subroutine.name}_replay_input(${args.joinNames})
     
-    ${arguments.all.specifications(intent = 'inout', allocatable = True)}
+    ${args.specs(intent = 'inout', allocatable = True)}
 
     INTEGER, DIMENSION(8) :: ftg_bounds
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
@@ -80,33 +80,13 @@ CONTAINS
   
     WRITE (0,'(a,i1,a)') 'FTG READ INPUT DATA ${subroutine.name} (', my_mpi_id, ')'
 
-    ! BASIC ARGUMENTS
-    #for $argument in $arguments.all.basic
-        #if $isArray($argument)
-          CALL ftg_allocate_and_read_allocatable("$argument", $argument)
-        #else
-          CALL ftg_read("$argument", $argument)
-        #end if
-    #end for
-
-    ! OPTIONAL ARGUMENTS
-    #for $argument in $arguments.all.optional
-      IF (PRESENT($argument)) THEN
-        #if $isArray($argument)
-          CALL ftg_allocate_and_read_allocatable("$argument", $argument)
-        #else
-          CALL ftg_read("$argument", $argument)
-        #end if
-      END IF
-    #end for
-
-    ! TYPE MEMBERS
-    #for $member in $arguments.all.usedTypeMembers
-    $ftgRead($member) #end for
+    ! ARGUMENTS
+    #for $var in $args.usedVariables
+      $ftgRead($var) #end for
 
     ! GLOBALS
-    #for $globalVar in $globals.usedVariables
-    $ftgRead($globalVar) #end for
+    #for $var in $globals.usedVariables
+      $ftgRead($var) #end for
 
     CALL ftg_destroy_savepoint()
 
