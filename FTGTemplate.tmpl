@@ -1,3 +1,4 @@
+#import os
 #def captureBeforeContains
 #end def captureBeforeContains
 ##
@@ -16,7 +17,15 @@
 #def replay
 #end def replay
 ##
+#def includeFromThisDirectory(file)
+#include os.path.dirname(self._CHEETAH_src) + '/' + file
+#end def includeFromThisDirectory
+##
 #attr part = ''
+##
+#attr prologue = '! ================= BEGIN FORTRAN TEST GENERATOR (FTG) ======================='
+##
+#attr epilogue = '! ================= END FORTRAN TEST GENERATOR (FTG) ========================='
 ##
 #if $part == 'captureBeforeContains'
     $captureBeforeContains
