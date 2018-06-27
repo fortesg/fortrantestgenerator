@@ -1,5 +1,9 @@
 #extends FTGTemplate
 
+#attr prologue = '! ================= BEGIN FORTRAN TEST GENERATOR (FTG) ======================='
+
+#attr epilogue = '! ================= END FORTRAN TEST GENERATOR (FTG) ========================='
+
 #def captureBeforeContains
     $include('Standalone/capture.beforecontains.tmpl')
 #end def captureBeforeContains
@@ -33,7 +37,3 @@
     #set global $ftgRead_var = $var
     $include('Standalone/replay.ftgRead.tmpl')
 #end def ftgRead
-
-#attr prologue = '! ================= BEGIN FORTRAN TEST GENERATOR (FTG) ======================='
-
-#attr epilogue = '! ================= END FORTRAN TEST GENERATOR (FTG) ========================='
