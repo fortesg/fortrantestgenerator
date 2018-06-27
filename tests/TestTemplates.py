@@ -9,6 +9,8 @@ from Cheetah import ImportHooks
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 FTG_DIR = TEST_DIR + '/..'
 sys.path.append(FTG_DIR)
+sys.path.append(FTG_DIR + '/templates')
+sys.path.append(FTG_DIR + '/templates/Standalone')
 FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 

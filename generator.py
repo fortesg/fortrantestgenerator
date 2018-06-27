@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 from Cheetah.Template import Template
 from Cheetah import ImportHooks
@@ -36,6 +37,12 @@ class CodeGenerator(object):
         self.__ignoredTypes = ignoredTypes;
         self.__ignorePrefix = ignorePrefix; 
         
+        templateDir = os.path.dirname(os.path.realpath(self.__templatePath))
+        templateDirParent = os.path.abspath(os.path.join(templateDir, os.pardir))
+        for name in os.listdir(templateDirParent):
+            templateDirSibling = os.path.join(templateDirParent, name)
+            if os.path.isdir(templateDirSibling):
+                sys.path.append(templateDirSibling)
         ImportHooks.install()
         
     def generate(self, subroutineFullName):
@@ -122,7 +129,7 @@ class CodeGenerator(object):
             return False
 
     def _processTemplate(self, sourceFilePath, lineNumber, part, templateNameSpace):
-        print "      Process Template " + os.path.basename(self.__templatePath) + "[" + part + "]" + " on file " + sourceFilePath, 
+        print "      Process Template " + os.path.basename(self.__templatePath) + " [" + part + "]" + " on file " + sourceFilePath, 
         source = self._readFile(sourceFilePath)
         codeToAdd = self.__loadTemplate(part, templateNameSpace)
         
