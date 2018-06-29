@@ -13,7 +13,7 @@ MPINODES = 2
 
 ######################################################
 
-capture-standalone: clean ftg-standalone maingeneric 
+capture-Standalone: clean ftg-Standalone maingeneric 
 	-mpirun -n $(MPINODES) ./maingeneric
 
 capture-StandaloneNoMPI: clean ftg-StandaloneNoMPI maingeneric 
@@ -38,8 +38,8 @@ mainicon: mainicon.f90 sub.o types.o globals.o
 	
 sub.o : types.o globals.o
 
-ftg-standalone: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
+ftg-Standalone: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
 
 ftg-StandaloneNoMPI: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub

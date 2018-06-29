@@ -1,7 +1,7 @@
 COMPARE = $(HOME)/lib/serialbox2/python/compare/compare.py
 COMPARELEGACY = $(HOME)/workspace/serialbox-compare/sbcompare
 
-test-standalone: clean capture-standalone replay-standalone compare-mpi ok
+test-Standalone: clean capture-Standalone replay-Standalone compare-mpi ok
 
 test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI compare-nompi ok
 
@@ -11,8 +11,8 @@ test-IconTestbed: clean capture-IconTestbed replay-IconTestbed compare-mpi ok
 
 test-icon_standalone_legacy: clean capture-icon_standalone_legacy replay-icon_standalone_legacy compare-legacy ok
 
-replay-standalone: 
-	$(MAKE) -C replay-standalone replay
+replay-Standalone: 
+	$(MAKE) -C replay-Standalone replay
 	 
 replay-StandaloneNoMPI: 
 	$(MAKE) -C replay-StandaloneNoMPI replay
@@ -26,8 +26,8 @@ replay-IconTestbed:
 replay-icon_standalone_legacy: 
 	$(MAKE) -C replay-icon_standalone_legacy replay
 	 
-capture-standalone: 
-	$(MAKE) -C src capture-standalone
+capture-Standalone: 
+	$(MAKE) -C src capture-Standalone
 	 
 capture-StandaloneNoMPI: 
 	$(MAKE) -C src capture-StandaloneNoMPI
@@ -57,11 +57,11 @@ ok:
 	
 clean: 
 	$(MAKE) -C src clean
-	$(MAKE) -C replay-standalone clean
+	$(MAKE) -C replay-Standalone clean
 	$(MAKE) -C replay-StandaloneNoMPI clean
 	$(MAKE) -C replay-IconStandalone clean
 	$(MAKE) -C replay-IconTestbed clean
 	$(MAKE) -C replay-icon_standalone_legacy clean
 	rm -Rf data/*
 	
-.PHONY: test clean replay-standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-icon_standalone_legacy 
+.PHONY: test clean replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-icon_standalone_legacy 

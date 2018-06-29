@@ -1,6 +1,6 @@
 #! /bin/bash
 
-make test-standalone &&
+make test-Standalone &&
 make test-StandaloneNoMPI &&
 make test-IconStandalone &&
 make test-IconTestbed &&
