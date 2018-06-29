@@ -23,7 +23,7 @@ mo_ftg_testsub_test.o: mo_ftg_testsub_test.f90
 	$(FF) -c $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^
 
 mo_ftg_testsub_test.f90: 
-	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_icon_testbed.py sub testsub
+	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_IconTestbed.py sub testsub
 	
 clean:
 	rm -f testbed mo_*
