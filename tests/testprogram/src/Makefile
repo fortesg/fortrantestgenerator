@@ -19,7 +19,7 @@ capture-standalone: clean ftg-standalone maingeneric
 capture-standalone_nompi: clean ftg-standalone_nompi maingeneric 
 	./maingeneric
 
-capture-icon_standalone: clean ftg-icon_standalone mainicon 
+capture-IconStandalone: clean ftg-IconStandalone mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
 capture-icon_testbed: clean ftg-icon_testbed mainicon 
@@ -44,8 +44,8 @@ ftg-standalone: assembler
 ftg-standalone_nompi: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone_nompi.py sub testsub
 
-ftg-icon_standalone: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone.py sub testsub
+ftg-IconStandalone: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
 
 ftg-icon_testbed: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_testbed.py sub testsub

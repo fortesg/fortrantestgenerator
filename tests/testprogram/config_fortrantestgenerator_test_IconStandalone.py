@@ -7,5 +7,5 @@ TEMPLATE = FTG_DIR + '/templates/IconStandalone/IconStandalone.tmpl'
 TEST_DIR = FTG_DIR + '/tests/testprogram'
 
 FCG_CONFIG_FILE = TEST_DIR + '/config_fortrancallgraph_test.py'
-TEST_SOURCE_DIR = TEST_DIR + '/replay-icon_standalone'
+TEST_SOURCE_DIR = TEST_DIR + '/replay-IconStandalone'
 TEST_DATA_BASE_DIR = TEST_DIR + '/data'
