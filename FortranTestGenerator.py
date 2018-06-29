@@ -8,7 +8,7 @@ Created on 05.02.2016
 
 import sys
 import argparse;
-from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE_DIR, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
+from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
     CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE, CFG_FCG_DIR
 
 def parseArguments(argParser):
@@ -32,7 +32,7 @@ def main():
         
     backupSuffix = config[CFG_BACKUP_SUFFIX]
     ftgPrefix = config[CFG_FTG_PREFIX]
-    templateDir = config[CFG_TEMPLATE_DIR]
+    templatePath = config[CFG_TEMPLATE]
     testSourceDir = config[CFG_TEST_SOURCE_DIR]
     testDataBaseDir = config[CFG_TEST_DATA_BASE_DIR]
     modifySourceDir = config[CFG_MODIFY_SOURCE_DIRS]
@@ -104,13 +104,13 @@ def main():
     if args.capture or args.replay:
         if args.capture and args.replay:
             print 'Generate capture and replay code'
-            generator = CombinedCodeGenerator(sourceFiles, modifySourceFiles, templateDir, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
+            generator = CombinedCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         elif args.capture:
             print 'Generate capture code'
-            generator = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templateDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
+            generator = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         else:
             print 'Generate replay code'
-            generator = ReplayCodeGenerator(sourceFiles, templateDir, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
+            generator = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         generator.generate(subroutineFullName)
         
 if __name__ == "__main__":
