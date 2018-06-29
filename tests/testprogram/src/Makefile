@@ -62,7 +62,7 @@ assembler: globals.s types.s sub.s maingeneric.s
 	$(FF) -c $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $<
 	
 clean:
-	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_standalone.py
+	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_Standalone.py
 	rm -f maingeneric mainicon *.o *.mod *.s
 	
 clean-o:

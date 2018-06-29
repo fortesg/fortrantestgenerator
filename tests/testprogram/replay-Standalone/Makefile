@@ -16,7 +16,7 @@ ftg_testsub_test: ftg_testsub_test.f90 ../src/sub.o ../src/types.o ../src/global
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 
 ftg_testsub_test.f90: 
-	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
+	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
 	
 clean:
 	rm -f ftg_testsub_test *.f90
