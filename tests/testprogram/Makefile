@@ -3,7 +3,7 @@ COMPARELEGACY = $(HOME)/workspace/serialbox-compare/sbcompare
 
 test-standalone: clean capture-standalone replay-standalone compare-mpi ok
 
-test-standalone_nompi: clean capture-standalone_nompi replay-standalone_nompi compare-nompi ok
+test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI compare-nompi ok
 
 test-IconStandalone: clean capture-IconStandalone replay-IconStandalone compare-mpi ok
 
@@ -14,8 +14,8 @@ test-icon_standalone_legacy: clean capture-icon_standalone_legacy replay-icon_st
 replay-standalone: 
 	$(MAKE) -C replay-standalone replay
 	 
-replay-standalone_nompi: 
-	$(MAKE) -C replay-standalone_nompi replay
+replay-StandaloneNoMPI: 
+	$(MAKE) -C replay-StandaloneNoMPI replay
 	
 replay-IconStandalone: 
 	$(MAKE) -C replay-IconStandalone replay
@@ -29,8 +29,8 @@ replay-icon_standalone_legacy:
 capture-standalone: 
 	$(MAKE) -C src capture-standalone
 	 
-capture-standalone_nompi: 
-	$(MAKE) -C src capture-standalone_nompi
+capture-StandaloneNoMPI: 
+	$(MAKE) -C src capture-StandaloneNoMPI
 	 
 capture-IconStandalone: 
 	$(MAKE) -C src capture-IconStandalone
@@ -58,10 +58,10 @@ ok:
 clean: 
 	$(MAKE) -C src clean
 	$(MAKE) -C replay-standalone clean
-	$(MAKE) -C replay-standalone_nompi clean
+	$(MAKE) -C replay-StandaloneNoMPI clean
 	$(MAKE) -C replay-IconStandalone clean
 	$(MAKE) -C replay-IconTestbed clean
 	$(MAKE) -C replay-icon_standalone_legacy clean
 	rm -Rf data/*
 	
-.PHONY: test clean replay-standalone replay-standalone_nompi replay-IconStandalone replay-IconTestbed replay-icon_standalone_legacy 
+.PHONY: test clean replay-standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-icon_standalone_legacy 

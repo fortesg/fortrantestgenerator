@@ -7,5 +7,5 @@ TEMPLATE = FTG_DIR + '/templates/StandaloneNoMPI/StandaloneNoMPI.tmpl'
 TEST_DIR = FTG_DIR + '/tests/testprogram'
 
 FCG_CONFIG_FILE = TEST_DIR + '/config_fortrancallgraph_test.py'
-TEST_SOURCE_DIR = TEST_DIR + '/replay-standalone_nompi'
+TEST_SOURCE_DIR = TEST_DIR + '/replay-StandaloneNoMPI'
 TEST_DATA_BASE_DIR = TEST_DIR + '/data'
