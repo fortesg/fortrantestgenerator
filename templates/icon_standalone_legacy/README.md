@@ -1,1 +1,0 @@
-This is the old version of the `icon_standalone` template still using [Serialbox-ftg](https://github.com/fortesg/serialbox-ftg) instead of Serialbox2.
