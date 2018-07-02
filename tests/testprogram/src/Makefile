@@ -1,5 +1,4 @@
 FTGROOT = $(HOME)/workspace/fortrantestgenerator
-SBROOT = $(HOME)/lib/serialbox
 SB2ROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 
@@ -25,11 +24,6 @@ capture-IconStandalone: clean ftg-IconStandalone mainicon
 capture-IconTestbed: clean ftg-IconTestbed mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
-capture-icon_standalone_legacy: LIBS = -L$(SBROOT)/lib -lFortranSer -lSerialboxWrapper -lSerialbox -lUtils -ljson -lstdc++ -lsha256
-capture-icon_standalone_legacy: INCLUDE = -I$(SBROOT)/include/fortran
-capture-icon_standalone_legacy: clean ftg-icon_standalone_legacy mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
-
 maingeneric: maingeneric.f90 sub.o types.o globals.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 	
@@ -49,9 +43,6 @@ ftg-IconStandalone: assembler
 
 ftg-IconTestbed: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconTestbed.py sub testsub
-
-ftg-icon_standalone_legacy: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone_legacy.py sub testsub
 
 assembler: globals.s types.s sub.s maingeneric.s 
 
