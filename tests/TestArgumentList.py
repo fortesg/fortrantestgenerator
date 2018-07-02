@@ -77,9 +77,9 @@ class TestArgumentList(unittest.TestCase):
         self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().allOut().joinNames())
         self.assertEqual('', self.argList.allocatablesOrPointers().allOut().optionals().joinNames())
     
-    def testReferences(self):
-        self.assertEqual(['arg2'], [ref.getExpression() for ref in self.argList.intentIn().references()])
-        self.assertEqual(['arg0', 'arg1', 'arg2', 'arg3%member1'], [ref.getExpression() for ref in self.argList.allIn().references()])
+    def testUsedVariables(self):
+        self.assertEqual(['arg2'], [ref.expression() for ref in self.argList.intentIn().usedVariables()])
+        self.assertEqual(['arg0', 'arg1', 'arg2', 'arg3%member1'], [ref.expression() for ref in self.argList.allIn().usedVariables()])
         
     def testSpecs(self):
         expSpec = '''
