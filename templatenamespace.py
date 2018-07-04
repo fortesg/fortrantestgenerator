@@ -620,6 +620,9 @@ class ArgumentList(object):
     def __iter__(self):
         return iter(self.__arguments)
     
+    def __nonzero__(self):
+        return bool(self.__arguments)
+    
     def filter(self, predicate):
         return ArgumentList([arg for arg in self.__arguments if predicate(arg)])
     
