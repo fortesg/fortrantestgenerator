@@ -31,7 +31,7 @@ class TemplatesNameSpace(object):
         self.dataDir = testDataDir.rstrip('/');
 
     def lbound(self, variable, dim, *placeholder):
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(placeholder, 'placeholder', str)
         
@@ -41,7 +41,7 @@ class TemplatesNameSpace(object):
         return ''
     
     def ubound(self, variable, dim, *placeholder):
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(placeholder, 'placeholder', str)
         
@@ -51,9 +51,12 @@ class TemplatesNameSpace(object):
         return ''
 
     def __bound(self, variable, dim, placeholder):
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(placeholder, 'placeholder', str)
+        
+        if variable is None:
+            return ''
         
         noDim = False
         if dim <= 0:
@@ -95,9 +98,12 @@ class TemplatesNameSpace(object):
         return ''
     
     def allocatedOrAssociated(self, variable, dim, *placeholder):
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(placeholder, 'placeholder', str)
+        
+        if variable is None:
+            return ''
         
         ref = variable.getReference()
         totalDim = ref.getTotalDimensions()
@@ -139,9 +145,12 @@ class TemplatesNameSpace(object):
         return ''
     
     def fillIndices(self, variable, dim, *indices):
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(indices, 'indices', str)
+        
+        if variable is None:
+            return ''
         
         ref = variable.getReference()
         perc = ''
@@ -168,7 +177,10 @@ class TemplatesNameSpace(object):
         return filled
     
     def writeVarNameWithFilledIndicesToString(self, variable, destination, dim, *indices):
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
+        
+        if variable is None:
+            return ''
         
         parts = []
         for index in indices:
@@ -253,9 +265,12 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
         return variable in self.__allocated
 
     def alloc(self, variable, dim, *dimSizes): 
-        assertType(variable, 'variable', UsedVariable)
+        assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(dimSizes, 'dimSizes', str)
+        
+        if variable is None:
+            return ''
         
         alloc = 'ALLOCATE(' + variable.expression()
         if dim > 0:
