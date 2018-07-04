@@ -459,7 +459,7 @@ class UsedVariable(object):
         return not self == other
         
     def __hash__(self):
-        return hash(self.__ref);
+        return hash(self.__ref)
         
     def __str__(self):
         return self.expression()
@@ -543,6 +543,21 @@ class Argument(object):
                 self.__used.append(UsedVariable(ref))
         if not self.__used and variable.hasBuiltInType():
             self.__used.append(UsedVariable(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable)))
+            
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, Argument)):
+            return False;
+        else:
+            return self.__var == other.__var
+    
+    def __ne__(self, other):
+        return not self == other
+        
+    def __hash__(self):
+        return hash(self.__var)
+        
+    def __str__(self):
+        return self.name()
 
     def intent(self):
         return self.__var.getIntent().lower()
@@ -616,12 +631,24 @@ class ArgumentList(object):
             assertTypeAll(arguments, 'arguments', Variable)
             assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
             self.__arguments = [Argument(var, typeArgumentReferences) for var in arguments]
+    
+    def __nonzero__(self):
+        return bool(self.__arguments)
+    
+    def __len__(self):
+        return len(self.__arguments)
+    
+    def __getitem__(self, key):
+        return self.__arguments[key]
         
     def __iter__(self):
         return iter(self.__arguments)
     
-    def __nonzero__(self):
-        return bool(self.__arguments)
+    def __reversed__(self):
+        return reversed(self.__arguments)
+    
+    def __contains__(self, item):
+        return item in self.__arguments
     
     def filter(self, predicate):
         return ArgumentList([arg for arg in self.__arguments if predicate(arg)])

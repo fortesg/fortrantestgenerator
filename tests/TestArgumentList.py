@@ -11,7 +11,7 @@ FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 
 from source import Variable, Subroutine, SubroutineFullName, Module, SourceFile, VariableReference
-from templatenamespace import ArgumentList
+from templatenamespace import Argument, ArgumentList
 
 class TestArgumentList(unittest.TestCase):
     def setUp(self):
@@ -76,7 +76,24 @@ class TestArgumentList(unittest.TestCase):
         self.assertEqual('arg0, arg1', self.argList.allOut().allocatablesOrPointers().joinNames())
         self.assertEqual('arg0, arg1', self.argList.allocatablesOrPointers().allOut().joinNames())
         self.assertEqual('', self.argList.allocatablesOrPointers().allOut().optionals().joinNames())
-    
+        
+    def testMagicMethods(self):
+        #__nonzero__
+        self.assertTrue(self.argList)
+        self.assertTrue(self.argList.allIn().optionals())
+        self.assertFalse(self.argList.allocatablesOrPointers().allOut().optionals())
+        #__len__
+        self.assertEquals(5, len(self.argList))
+        #__getitem__
+        self.assertEquals('arg2', self.argList[2].name())
+        #__iter__
+        self.assertEquals(['arg0', 'arg1', 'arg2', 'arg3', 'arg4'], [arg.name() for arg in self.argList])
+        #__reversed__
+        self.assertEquals(['arg4', 'arg3', 'arg2', 'arg1', 'arg0'], [arg.name() for arg in reversed(self.argList)])
+        #__contains__
+        arg2 = Argument(self.arg2, [])
+        self.assertIn(arg2, self.argList)
+        
     def testUsedVariables(self):
         self.assertEqual(['arg2'], [ref.expression() for ref in self.argList.intentIn().usedVariables()])
         self.assertEqual(['arg0', 'arg1', 'arg2', 'arg3%member1'], [ref.expression() for ref in self.argList.allIn().usedVariables()])
