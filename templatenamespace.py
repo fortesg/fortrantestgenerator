@@ -482,6 +482,9 @@ class UsedVariable(object):
     def expression(self):
         return self.__ref.getExpression().lower()
     
+    def level(self):
+        return self.__ref.getLevel()
+    
     def levels(self, decrementing = False):
         return self.__ref.getLevels(decrementing)
         
@@ -525,8 +528,14 @@ class UsedVariable(object):
                     if cVariable is not None and cVariable.isArray():
                         dims += cVariable.getDimension()
                 return dims
+        return 0
     
-    def container(self, level):
+    def container(self, level = -1):
+        if level < 0:
+            level = level + self.level()
+        level = min(level, self.level())
+        level = max(level, 0)
+
         return UsedVariable(self.__ref.getSubReference(level))
 
 class Argument(object):
