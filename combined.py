@@ -11,13 +11,13 @@ class CombinedCodeGenerator(CodeGenerator):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(modifySourceFiles, 'modifySourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
-        if not os.path.isdir(templatePath):
-            raise IOError("Not a directory: " + templatePath);
+        if not os.path.isfile(templatePath):
+            raise IOError("Template file not found: " + templatePath)
         assertType(testDataDir, 'testDataDir', str)
         if not os.path.isdir(testDataDir):
             raise IOError("Not a directory: " + testDataDir);
 
-        super(CombinedCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
         self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
         
