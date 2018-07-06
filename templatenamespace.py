@@ -246,7 +246,7 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
 
     def needsAllocation(self, variable):
         assertType(variable, 'variable', UsedVariable)
-        return (variable.allocatableOrPointer() or variable.hasClassType()) and not self.alreadyAllocated(variable)
+        return (variable.allocatableOrPointer() or variable.hasClassType() or (variable.fromArgument() and variable.level() == 0 and variable.dim() > 0)) and not self.alreadyAllocated(variable)
     
     def containerNeedsAllocation(self, variable):
         assertType(variable, 'variable', UsedVariable)
@@ -537,6 +537,12 @@ class UsedVariable(object):
         level = max(level, 0)
 
         return UsedVariable(self.__ref.getSubReference(level))
+    
+    def fromArgument(self):
+        return self.__ref.getLevel0Variable().isArgument()
+    
+    def fromGlobal(self):
+        return self.__ref.getLevel0Variable().isModuleVar()
 
 class Argument(object):
     
