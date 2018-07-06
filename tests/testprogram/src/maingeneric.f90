@@ -11,7 +11,7 @@ include 'mpif.h'
 INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u
 TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
-LOGICAL :: flag
+LOGICAL :: flag(4)
 REAL :: out
 
 CALL MPI_INIT(ierror)
@@ -42,7 +42,7 @@ oa%c%r2(1,2) = rank + 0.12
 oa%c%r2(2,1) = rank + 0.21
 oa%c%r2(2,2) = rank + 0.22
 
-flag = .TRUE.
+flag(:) = .TRUE.
 
 CALL set(109.0)
 

@@ -17,14 +17,14 @@ CONTAINS
 SUBROUTINE testsub(ra, rlog, oreal, oa)
 
   TYPE(testa), INTENT(inout) :: ra
-  LOGICAL, INTENT(in) :: rlog
+  LOGICAL, INTENT(in) :: rlog(4)
   REAL, INTENT(out), OPTIONAL :: oreal
   TYPE(testa), INTENT(inout), OPTIONAL :: oa
 #ifdef _OPENACC
   LOGICAL :: openacc
 #endif
 
-  IF (rlog) THEN
+  IF (rlog(1)) THEN
     ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:)
   END IF
 
