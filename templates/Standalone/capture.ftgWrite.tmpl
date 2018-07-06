@@ -2,7 +2,7 @@
 #if $var.dim > 4 or $var.type.upper().startswith('CHARACTER'):
   ! *** WARNING: Type not supported by serialbox *** 
   !     $var 
-  !     $type($var) | dimension: $dim($var)
+  !     $var.type, DIMENSION($var.dim)
 #else
   #if $var.referencable
     #if $containerNeedsRegistration($var)
