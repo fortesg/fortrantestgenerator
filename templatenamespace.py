@@ -538,6 +538,16 @@ class UsedVariable(object):
 
         return UsedVariable(self.__ref.getSubReference(level))
     
+    def containerByDimension(self, dim):
+        cDims = 0
+        for level in self.__ref.getLevels():
+            variable = self.__ref.getVariable(level)
+            if variable is not None and variable.isArray():
+                cDims += variable.getDimension()
+                if cDims >= dim:
+                    return UsedVariable(self.__ref.getSubReference(level)) 
+        return self
+    
     def fromArgument(self):
         return self.__ref.getLevel0Variable().isArgument()
     

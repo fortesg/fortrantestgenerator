@@ -44,7 +44,7 @@
     #set $aa = '' 
     #set $ifAA = ''
     #for $d in range(1, $mandDims + 1)
-      #set $topContainer = $var.container($d)
+      #set $topContainer = $var.containerByDimension($d)
       #for $level in $topContainer.levels
         #set $container = $topContainer.container($level)
         #set $contType = $container.type
