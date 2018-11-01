@@ -167,7 +167,9 @@ class CodeGenerator(object):
             lineUpper = line.upper()
             if lineUpper.startswith(endWords) or lineUpper.startswith(borderWords):
                 indent = max(baseIndent, indent - CodeGenerator.INDENT_LENGTH)
-            lines.append((' ' * indent) + line)
+            if not line.startswith('#'):
+                line = (' ' * indent) + line
+            lines.append(line)
             if lineUpper.startswith(beginWords) or lineUpper.endswith(beginWordsBack) or lineUpper.startswith(borderWords):
                 indent = indent + CodeGenerator.INDENT_LENGTH
                 
