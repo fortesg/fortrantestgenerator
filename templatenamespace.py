@@ -417,7 +417,7 @@ class ExportGlobalsNameSpace(object):
         assertType(sourceFile, 'sourceFile', SourceFile)
         assertType(globalsReferences, 'globalsReferences', list)
         
-        publicElements = sourceFile.getPublicElements()
+        publicElements = sourceFile.getModule(moduleName).getPublicElements()
         
         self.exports = 'PUBLIC :: '
         variables = set()
