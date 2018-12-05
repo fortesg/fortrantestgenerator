@@ -149,32 +149,39 @@ class TemplatesNameSpace(object):
         assertType(dim, 'dim', int)
         assertTypeAll(indices, 'indices', str)
         
-        if variable is None:
-            return ''
-        
-        ref = variable.getReference()
-        perc = ''
-        d = 0
-        filled = ''
-        for level in ref.getLevels():
-            var = ref.getVariable(level)
-            if var is None:
-                return variable.expression()
-            filled += perc + var.getName()
-            perc = '%'
-            if var.isArray() and d < dim:
-                filled += '('
-                sep = ''
-                for _ in range(0, var.getDimension()):
-                    filled += sep
-                    if d < dim and d < len(indices):
-                        filled += indices[d]
-                    else:
-                        filled += ':'
-                    sep = ', '
-                    d += 1
-                filled += ')'
-        return filled
+        return FilledVariable(variable.getReference(), dim, *indices)
+    
+#     def fillIndices(self, variable, dim, *indices):
+#         assertType(variable, 'variable', UsedVariable, True)
+#         assertType(dim, 'dim', int)
+#         assertTypeAll(indices, 'indices', str)
+#         
+#         if variable is None:
+#             return ''
+#         
+#         ref = variable.getReference()
+#         perc = ''
+#         d = 0
+#         filled = ''
+#         for level in ref.getLevels():
+#             var = ref.getVariable(level)
+#             if var is None:
+#                 return variable.expression()
+#             filled += perc + var.getName()
+#             perc = '%'
+#             if var.isArray() and d < dim:
+#                 filled += '('
+#                 sep = ''
+#                 for _ in range(0, var.getDimension()):
+#                     filled += sep
+#                     if d < dim and d < len(indices):
+#                         filled += indices[d]
+#                     else:
+#                         filled += ':'
+#                     sep = ', '
+#                     d += 1
+#                 filled += ')'
+#         return filled
     
     def writeVarNameWithFilledIndicesToString(self, variable, destination, dim, *indices):
         assertType(variable, 'variable', UsedVariable, True)
@@ -189,12 +196,12 @@ class TemplatesNameSpace(object):
         filled = self.fillIndices(variable, dim, *parts)
         if not filled:
             return ''
-        if filled == variable.expression():
+        if filled.expression() == variable.expression():
             return destination + ' = "' + variable.expression() + '"'
         
         write = "WRITE (" + destination + ",'("
         write += 'A,I0,' * min(dim, len(indices), variable.totalDim())
-        write += "A)') '" + filled + "'"
+        write += "A)') '" + filled.expression() + "'"
         
         return write
 
@@ -553,6 +560,40 @@ class UsedVariable(object):
     
     def fromGlobal(self):
         return self.__ref.getLevel0Variable().isModuleVar()
+
+class FilledVariable(UsedVariable):
+    def __init__(self, reference, dim, *indices):
+        assertType(reference, 'reference', VariableReference)
+        assertType(dim, 'dim', int)
+        assertTypeAll(indices, 'indices', str)
+        super(FilledVariable, self).__init__(reference)
+        self.__dim = dim
+        self.__indices = indices
+        
+    def expression(self):
+        ref = self.getReference()
+        perc = ''
+        d = 0
+        filled = ''
+        for level in ref.getLevels():
+            var = ref.getVariable(level)
+            if var is None:
+                return super(FilledVariable, self).expression()
+            filled += perc + var.getName()
+            perc = '%'
+            if var.isArray() and d < self.__dim:
+                filled += '('
+                sep = ''
+                for _ in range(0, var.getDimension()):
+                    filled += sep
+                    if d < self.__dim and d < len(self.__indices):
+                        filled += self.__indices[d]
+                    else:
+                        filled += ':'
+                    sep = ', '
+                    d += 1
+                filled += ')'
+        return filled
 
 class Argument(object):
     
