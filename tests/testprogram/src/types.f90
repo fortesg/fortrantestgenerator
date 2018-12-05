@@ -19,8 +19,8 @@ IMPLICIT NONE
   END TYPE testa
 
   TYPE :: jmodel
-      INTEGER                            :: id                !< Model id
-      CHARACTER(len=10)                  :: shortname         !< Model short name
+      INTEGER                            :: id
+      CHARACTER(len=10)                  :: name
   END TYPE jmodel
 
   TYPE jmodel_m
@@ -57,6 +57,8 @@ CONTAINS
       ALLOCATE(tj%models(no_of_models))
       DO i = 1, no_of_models
         ALLOCATE(tj%models(i)%m)
+        tj%models(i)%m%id = i
+        WRITE (tj%models(i)%m%name, '(A,I0)') 'Model ', i
       END DO
     END IF
   END SUBROUTINE init_jmodels
