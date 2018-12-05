@@ -145,7 +145,7 @@ class TemplatesNameSpace(object):
         return ''
     
     def fillIndices(self, variable, dim, *indices):
-        assertType(variable, 'variable', UsedVariable, True)
+        assertType(variable, 'variable', UsedVariable)
         assertType(dim, 'dim', int)
         assertTypeAll(indices, 'indices', str)
         
