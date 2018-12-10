@@ -1,10 +1,9 @@
 FTGROOT = $(HOME)/workspace/fortrantestgenerator
-SBROOT = $(HOME)/lib/serialbox
 SB2ROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 
 FF = mpif90
-FFLAGS = -cpp -g -O0
+FFLAGS = -cpp -g -O0 -fopenmp
 LIBS = -L$(SB2ROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
 INCLUDE = -I$(SB2ROOT)/include
 ICONINCLUDE = -I$(ICONBUILDDIR)/module 
@@ -13,21 +12,16 @@ MPINODES = 2
 
 ######################################################
 
-capture-standalone: clean ftg-standalone maingeneric 
+capture-Standalone: clean ftg-Standalone maingeneric 
 	-mpirun -n $(MPINODES) ./maingeneric
 
-capture-standalone_nompi: clean ftg-standalone_nompi maingeneric 
+capture-StandaloneNoMPI: clean ftg-StandaloneNoMPI maingeneric 
 	./maingeneric
 
-capture-icon_standalone: clean ftg-icon_standalone mainicon 
+capture-IconStandalone: clean ftg-IconStandalone mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
-capture-icon_testbed: clean ftg-icon_testbed mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
-
-capture-icon_standalone_legacy: LIBS = -L$(SBROOT)/lib -lFortranSer -lSerialboxWrapper -lSerialbox -lUtils -ljson -lstdc++ -lsha256
-capture-icon_standalone_legacy: INCLUDE = -I$(SBROOT)/include/fortran
-capture-icon_standalone_legacy: clean ftg-icon_standalone_legacy mainicon 
+capture-IconTestbed: clean ftg-IconTestbed mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
 maingeneric: maingeneric.f90 sub.o types.o globals.o
@@ -38,20 +32,17 @@ mainicon: mainicon.f90 sub.o types.o globals.o
 	
 sub.o : types.o globals.o
 
-ftg-standalone: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone.py sub testsub
+ftg-Standalone: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
 
-ftg-standalone_nompi: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_standalone_nompi.py sub testsub
+ftg-StandaloneNoMPI: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
 
-ftg-icon_standalone: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone.py sub testsub
+ftg-IconStandalone: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
 
-ftg-icon_testbed: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_testbed.py sub testsub
-
-ftg-icon_standalone_legacy: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_icon_standalone_legacy.py sub testsub
+ftg-IconTestbed: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconTestbed.py sub testsub
 
 assembler: globals.s types.s sub.s maingeneric.s 
 
@@ -62,7 +53,7 @@ assembler: globals.s types.s sub.s maingeneric.s
 	$(FF) -c $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $<
 	
 clean:
-	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_standalone.py
+	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_Standalone.py
 	rm -f maingeneric mainicon *.o *.mod *.s
 	
 clean-o:

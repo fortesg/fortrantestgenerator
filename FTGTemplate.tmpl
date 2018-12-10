@@ -1,0 +1,44 @@
+#import os
+#def captureBeforeContains
+#end def captureBeforeContains
+##
+#def captureAfterLastSpecification
+#end def captureAfterLastSpecification
+##
+#def captureBeforeEnd
+#end def captureBeforeEnd
+##
+#def captureAfterSubroutine
+#end def captureAfterSubroutine
+##
+#def export
+#end def export
+##
+#def replay
+#end def replay
+##
+#def include(file)
+    #include os.path.dirname(self._CHEETAH_src) + '/../' + file
+#end def includeFromThisDirectory
+##
+#attr part = ''
+##
+#if $part == 'captureBeforeContains'
+    $captureBeforeContains
+#elif $part == 'captureAfterLastSpecification' 
+    $captureAfterLastSpecification
+#elif $part == 'captureBeforeEnd' 
+    $captureBeforeEnd
+#elif $part == 'captureAfterSubroutine' 
+    $captureAfterSubroutine
+#elif $part == 'captureAfterSubroutine' 
+    $captureAfterSubroutine
+#elif $part == 'export' 
+    $export
+#elif $part == 'replay' 
+    $replay
+#elif not $part
+    #raise ValueError('No template part given')
+#else
+    #raise ValueError('Not a valid template part: ' + str($part))
+#end if

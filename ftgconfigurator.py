@@ -2,7 +2,7 @@ import os
 import sys
 
 CFG_FCG_DIR = 'FCG_DIR'
-CFG_TEMPLATE_DIR = 'TEMPLATE_DIR'
+CFG_TEMPLATE = 'TEMPLATE'
 CFG_TEST_SOURCE_DIR = 'TEST_SOURCE_DIR'
 CFG_TEST_DATA_BASE_DIR = 'TEST_DATA_BASE_DIR'
 CFG_MODIFY_SOURCE_DIRS = 'MODIFY_SOURCE_DIRS'
@@ -47,8 +47,8 @@ def loadFortranTestGeneratorConfiguration(configFile):
                 print >> sys.stderr, 'FortranCallGraph not found in directory (' + CFG_FCG_DIR + '): ' + fcgDir
                 configError = True
 
-    if CFG_TEMPLATE_DIR not in config or not config[CFG_TEMPLATE_DIR]:
-        print >> sys.stderr, 'Missing config variable: ' + CFG_TEMPLATE_DIR
+    if CFG_TEMPLATE not in config or not config[CFG_TEMPLATE]:
+        print >> sys.stderr, 'Missing config variable: ' + CFG_TEMPLATE
         configError = True
 
     if CFG_TEST_SOURCE_DIR not in config or not config[CFG_TEST_SOURCE_DIR]:

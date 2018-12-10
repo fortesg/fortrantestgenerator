@@ -1,8 +1,5 @@
 from assertions import assertType, assertTypeAll
-from source import Subroutine, SourceFile, VariableReference
-from string import find
-import re
-from symbol import argument
+from source import Subroutine, SourceFile, VariableReference, Variable
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -29,136 +26,60 @@ class TemplatesNameSpace(object):
             
         self.subroutine = SubroutineNameSpace(subroutine)
         self.module = ModuleNameSpace(subroutine.getModuleName())
-        self.arguments = ArgumentsNameSpace(subroutine, typeArgumentReferences)
+        self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
-     
-    def getExpression(self, variableName, level):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getExpression(level)
-        return ''    
-        
-    def levels(self, variableName, decrementing = False):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getLevels(decrementing)
-        return []
-    
-    def dim(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getLevelNDimension()
-        return -1
-    
-    def totalDim(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.getTotalDimensions()
-        return -1
-    
-    def type(self, variableName):
-        var = self._findVariable(variableName)
-        if var is None:
-            return ''
-        return var.getTypeName()
 
-    def isAllocatable(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and var.isAllocatable()
-    
-    def isPointer(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and var.isPointer()
-    
-    def isAllocatableOrPointer(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and (var.isAllocatable() or var.isPointer())
-    
-    def isArray(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            return reference.isOneVariableArray()
-            
-        return False
-    
-    def isInArgument(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            var = reference.getVariable()
-            if var is not None:
-                return var.isInArgument()
-            
-        return False
-    
-    def isOutArgument(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            var = reference.getVariable()
-            if var is not None:
-                return var.isOutArgument()
-            
-        return False
-    
-    def isReferencable(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            if find(variableName, '%') > 0:
-                return reference.isReferencable()
-            return True
+    def lbound(self, variable, dim, *placeholder):
+        assertType(variable, 'variable', UsedVariable, True)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
         
-        return False
-    
-    def getNumberOfMandatoryDimensions(self, variableName):
-        if find(variableName, '%') > 0:
-            reference = self._findReference(variableName)
-            if reference is not None:
-                for level in reference.getLevels(True):
-                    variable = reference.getVariable(level)
-                    if variable is not None and (variable.isAllocatable() or variable.isPointer() or variable.isArray()):
-                        dims = 0
-                        for cLevel in range(level - 1, -1, -1):
-                            cVariable = reference.getVariable(cLevel)
-                            if cVariable is not None and cVariable.isArray():
-                                dims += cVariable.getDimension()
-                        return dims
-        return 0
-        
-    def lbound(self, variableName, dim, *placeholder):
-        bound = self.__bound(variableName, dim, placeholder)
+        bound = self.__bound(variable, dim, placeholder)
         if bound != '':
             return 'L' + bound
         return ''
     
-    def ubound(self, variableName, dim, *placeholder):
-        bound = self.__bound(variableName, dim, placeholder)
+    def ubound(self, variable, dim, *placeholder):
+        assertType(variable, 'variable', UsedVariable, True)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
+        
+        bound = self.__bound(variable, dim, placeholder)
         if bound != '':
             return 'U' + bound
         return ''
 
-    def __bound(self, variableName, dim, placeholder):
+    def __bound(self, variable, dim, placeholder):
+        assertType(variable, 'variable', UsedVariable, True)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
+        
+        if variable is None:
+            return ''
+        
         noDim = False
         if dim <= 0:
             noDim = True
         
-        reference = self._findReference(variableName)
-        if reference is not None and reference.isOneVariableArray():
+        ref = variable.getReference()
+        if ref.isOneVariableArray():
             if noDim:
-                dim = reference.getTotalDimensions()
-            elif dim > reference.getTotalDimensions():
+                dim = ref.getTotalDimensions()
+            elif dim > ref.getTotalDimensions():
                 return ''
             
             top = 0
             perc = ''
             bound = 'BOUND('
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
+            for level in ref.getLevels():
+                var = ref.getVariable(level)
+                if var is None:
                     return ''
-                bound += perc + variable.getName()
+                bound += perc + var.getName()
                 perc = '%'
                 bot = top 
-                top += variable.getDimension()
+                top += var.getDimension()
                 if top < dim:
                     if top > bot:
                         bound += '('
@@ -176,179 +97,140 @@ class TemplatesNameSpace(object):
                 
         return ''
     
+    def allocatedOrAssociated(self, variable, dim, *placeholder):
+        assertType(variable, 'variable', UsedVariable, True)
+        assertType(dim, 'dim', int)
+        assertTypeAll(placeholder, 'placeholder', str)
         
-    def getContainer(self, variableName, dim):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            top = 0
-            perc = ''
-            cont = ''
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
-                    return ''
-                cont += perc + variable.getName()
-                perc = '%'
-                top += variable.getDimension()
-                if top >= dim:
-                    break
-            return cont
-                
-        return ''
-    
-    def allocatedOrAssociated(self, variableName, dim, *placeholder):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            totalDim = reference.getTotalDimensions()
-            if dim > totalDim:
-                dim = totalDim
-            top = 0
-            pointer = False
-            allocatable = False
-            perc = ''
-            aa = '('
-            totalAllocatablesAndPointers = reference.getNumberOfPointerAndAllocatableLevels()
-            allocatablesAndPointers = 0
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
-                    return ''
-                aa += perc + variable.getName()
-                perc = '%'
-                pointer = variable.isPointer()
-                allocatable = variable.isAllocatable()
-                allocatablesAndPointers += (pointer or allocatable)
-                bot = top 
-                top += variable.getDimension()
-                if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
-                    if top > bot:
-                        aa += '('
-                        sep = ''
-                        for i in range(bot, top):
-                            aa += sep + placeholder[i]
-                            sep = ', '
-                        aa += ')'
-                else:
-                    break
-            aa += ')'
-            if allocatable:
-                return 'ALLOCATED' + aa
-            elif pointer:
-                return 'ASSOCIATED' + aa
+        if variable is None:
+            return ''
         
-        return ''
-    
-    def fillIndices(self, variableName, dim, *indices):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            perc = ''
-            d = 0
-            filled = ''
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is None:
-                    return variableName
-                filled += perc + variable.getName()
-                perc = '%'
-                if variable.isArray() and d < dim:
-                    filled += '('
+        ref = variable.getReference()
+        totalDim = ref.getTotalDimensions()
+        if dim > totalDim:
+            dim = totalDim
+        top = 0
+        pointer = False
+        allocatable = False
+        perc = ''
+        aa = '('
+        totalAllocatablesAndPointers = ref.getNumberOfPointerAndAllocatableLevels()
+        allocatablesAndPointers = 0
+        for level in ref.getLevels():
+            var = ref.getVariable(level)
+            if var is None:
+                return ''
+            aa += perc + var.getName()
+            perc = '%'
+            pointer = var.isPointer()
+            allocatable = var.isAllocatable()
+            allocatablesAndPointers += (pointer or allocatable)
+            bot = top 
+            top += var.getDimension()
+            if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
+                if top > bot:
+                    aa += '('
                     sep = ''
-                    for _ in range(0, variable.getDimension()):
-                        filled += sep
-                        if d < dim and d < len(indices):
-                            filled += indices[d]
-                        else:
-                            filled += ':'
+                    for i in range(bot, top):
+                        aa += sep + placeholder[i]
                         sep = ', '
-                        d += 1
-                    filled += ')'
-            return filled
-        
+                    aa += ')'
+            else:
+                break
+        aa += ')'
+        if allocatable:
+            return 'ALLOCATED' + aa
+        elif pointer:
+            return 'ASSOCIATED' + aa
         return ''
     
-    def writeVarNameWithFilledIndicesToString(self, variableName, destination, dim, *indices):
+    def fillIndices(self, variable, dim, *indices):
+        assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(indices, 'indices', str)
+        
+        return FilledVariable(variable.getReference(), dim, *indices)
+    
+#     def fillIndices(self, variable, dim, *indices):
+#         assertType(variable, 'variable', UsedVariable, True)
+#         assertType(dim, 'dim', int)
+#         assertTypeAll(indices, 'indices', str)
+#         
+#         if variable is None:
+#             return ''
+#         
+#         ref = variable.getReference()
+#         perc = ''
+#         d = 0
+#         filled = ''
+#         for level in ref.getLevels():
+#             var = ref.getVariable(level)
+#             if var is None:
+#                 return variable.expression()
+#             filled += perc + var.getName()
+#             perc = '%'
+#             if var.isArray() and d < dim:
+#                 filled += '('
+#                 sep = ''
+#                 for _ in range(0, var.getDimension()):
+#                     filled += sep
+#                     if d < dim and d < len(indices):
+#                         filled += indices[d]
+#                     else:
+#                         filled += ':'
+#                     sep = ', '
+#                     d += 1
+#                 filled += ')'
+#         return filled
+    
+    def writeVarNameWithFilledIndicesToString(self, variable, destination, dim, *indices):
+        assertType(variable, 'variable', UsedVariable, True)
+        
+        if variable is None:
+            return ''
+        
         parts = []
         for index in indices:
             parts.append("', " + index + ", '") 
         
-        filled = self.fillIndices(variableName, dim, *parts)
+        filled = self.fillIndices(variable, dim, *parts)
         if not filled:
             return ''
-        if filled == variableName.lower():
-            return destination + ' = "' + variableName + '"'
+        if filled.expression() == variable.expression():
+            return destination + ' = "' + variable.expression() + '"'
         
         write = "WRITE (" + destination + ",'("
-        write += 'A,I0,' * min(dim, len(indices), self.totalDim(variableName))
-        write += "A)') '" + filled + "'"
+        write += 'A,I0,' * min(dim, len(indices), variable.totalDim())
+        write += "A)') '" + filled.expression() + "'"
         
         return write
-    
-    def _findVariable(self, variableName):
-        # TODO Kann man hier nicht _findReference benutzen?
-        variableName = variableName.lower()
-        if not variableName:
-            return None
-        elif find(variableName, '%') < 0:
-            if self.__subroutine.hasVariable(variableName):
-                return self.__subroutine.getVariable(variableName)
-        for reference in (self._typeArgumentReferences + self._globalsReferences):
-            expression = reference.getExpression().lower()
-            if expression == variableName:
-                return reference.getLevelNVariable()
-            elif expression.startswith(variableName + '%'):
-                return reference.getVariable(variableName.count('%'))
-
-        return None
-    
-    def _findReference(self, expression):
-        expression = expression.lower()
-        expression = self.__removeBrackets(expression)
-        if not expression:
-            return None
-        elif find(expression, '%') < 0:
-            if self.__subroutine.hasVariable(expression):
-                return VariableReference(expression, self.__subroutine.getName(), 0, self.__subroutine.getVariable(expression))
-        for reference in self._typeArgumentReferences + self._globalsReferences:
-            refExpression = reference.getExpression().lower()
-            if refExpression == expression:
-                return reference
-            elif refExpression.startswith(expression + "%"):
-                return reference.getSubReference(expression.count('%'))
-        return None   
-    
-    def __removeBrackets(self, text):
-        regEx = re.compile(r'.*\([^\(\)]*\).*')
-        while regEx.match(text) is not None:
-            text = re.sub(r'\([^\(\)]*\)', '', text)
-        return text
-
 
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
     def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
-        
         super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.__registered = set()
         
-    def needsRegistration(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and not self.alreadyRegistered(variableName)
+    def needsRegistration(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        return not self.alreadyRegistered(variable)
     
-    def containerNeedsRegistration(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            for level in reference.getLevels(True):
-                variable = reference.getVariable(level)
-                if variable is not None and not self.alreadyRegistered(reference.getExpression(level)):
-                    return True
+    def containerNeedsRegistration(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        
+        for level in variable.levels(True):
+            if not self.alreadyRegistered(variable.container(level)):
+                return True
                 
         return False
     
-    def setRegistered(self, variableName):
-        self.__registered.add(variableName)
+    def setRegistered(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        self.__registered.add(variable)
         
-    def alreadyRegistered(self, variableName):
-        return variableName in self.__registered
+    def alreadyRegistered(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        return variable in self.__registered
     
     def resetRegistrations(self):
         self.__registered = set()
@@ -356,39 +238,48 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
 class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
     def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
-        
         super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)        
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
         self.__allocated = set()
         
-    def needsAllocationFilled(self, variableName, dim, *indices): 
-        var = self._findVariable(variableName)
-        filled = self.fillIndices(variableName, dim, *indices)
-        return var is not None and (var.isAllocatable() or var.isPointer() or var.hasClassType()) and not self.alreadyAllocated(filled)
+    def needsAllocationFilled(self, variable, dim, *indices): 
+        assertType(variable, 'variable', UsedVariable)
+        assertType(dim, 'dim', int)
+        assertTypeAll(indices, 'indices', str)
+        
+        filled = self.fillIndices(variable, dim, *indices)
+        return (variable.allocatableOrPointer() or variable.hasClassType()) and not self.alreadyAllocated(filled)
 
-    def needsAllocation(self, variableName):
-        var = self._findVariable(variableName)
-        return var is not None and (var.isAllocatable() or var.isPointer() or var.hasClassType()) and not self.alreadyAllocated(variableName)
+    def needsAllocation(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        return (variable.allocatableOrPointer() or variable.hasClassType() or (variable.fromArgument() and variable.level() == 0 and variable.dim() > 0)) and not self.alreadyAllocated(variable)
     
-    def containerNeedsAllocation(self, variableName):
-        reference = self._findReference(variableName)
-        if reference is not None:
-            for level in reference.getLevels(True):
-                variable = reference.getVariable(level)
-                if variable is not None and (variable.isAllocatable() or variable.isPointer() or variable.hasClassType()) and not self.alreadyAllocated(reference.getExpression(level)):
-                    return True
-                
+    def containerNeedsAllocation(self, variable):
+        assertType(variable, 'variable', UsedVariable)
+        for level in variable.levels(True):
+            container = variable.container(level)
+            if self.needsAllocation(container):
+                return True
         return False
     
-    def setAllocated(self, variableName):
-        self.__allocated.add(variableName)
+    def setAllocated(self, variable):
+        assertType(variable, 'variable', [UsedVariable, str])
+        self.__allocated.add(variable)
         
-    def alreadyAllocated(self, variableName):
-        return variableName in self.__allocated
+    def alreadyAllocated(self, variable):
+        assertType(variable, 'variable', [UsedVariable, str])
+        return variable in self.__allocated
 
-    def alloc(self, variableName, dim, *dimSizes):
-        alloc = 'ALLOCATE(' + variableName
+    def alloc(self, variable, dim, *dimSizes): 
+        assertType(variable, 'variable', UsedVariable, True)
+        assertType(dim, 'dim', int)
+        assertTypeAll(dimSizes, 'dimSizes', str)
+        
+        if variable is None:
+            return ''
+        
+        alloc = 'ALLOCATE(' + variable.expression()
         if dim > 0:
             alloc += '('
             sep = ''
@@ -398,7 +289,7 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
             alloc += ')'
         alloc += ')'
         
-        self.setAllocated(variableName)
+        self.setAllocated(variable)
             
         return alloc
     
@@ -418,69 +309,7 @@ class ModuleNameSpace(object):
 
         self.name = moduleName
 
-class ArgumentsNameSpace(object):
-    
-    def __init__(self, subroutine, typeArgumentReferences):
-        assertType(subroutine, 'subroutine', Subroutine)
-        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
-        
-        self.input = ArgumentsSubNameSpace(subroutine.getInArguments(), typeArgumentReferences)
-        self.output = ArgumentsSubNameSpace(subroutine.getOutArguments(), typeArgumentReferences)
-        self.all = ArgumentsSubNameSpace(subroutine.getArguments(), typeArgumentReferences)
 
-class ArgumentsSubNameSpace(object):
-    def __init__(self, arguments, typeArgumentReferences):
-        self.__arguments = arguments
-        self._typeArgumentReferences = typeArgumentReferences
-        
-        self.__names = []
-        for argument in self.__arguments:
-            self.__names.append(argument.getName())
-        
-    def names(self):
-        return ', '.join(self.__names)
-    
-    def specifications(self, intent = '', allocatable = False, charLengthZero = False):
-        specs = []
-        for argument in self.__arguments:
-            argCopy = argument.getAlias(argument.getName())
-            argCopy.setIntent(intent)
-            if allocatable: 
-                if (argCopy.hasBuiltInType() and argCopy.getDimension() > 0) or (argCopy.hasClassType()):
-                    argCopy.setAllocatable(True)
-            else:
-                argCopy.setAllocatable(False)
-            if charLengthZero and argCopy.hasBuiltInType() and argCopy.getTypeName().startswith('CHARACTER'):
-                argCopy.setTypeName('CHARACTER(len=0)')
-            argCopy.setTarget(False)
-            specs.append(str(argCopy))
-            
-        return "\n".join(specs)
-    
-    def basic(self):
-        basic = []
-        for argument in self.__arguments:
-            if argument.hasBuiltInType():
-                name = argument.getName()
-                if not argument.isOptionalArgument():
-                    basic.append(name)
-        return basic
-    
-    def optional(self):
-        optional = []
-        for argument in self.__arguments:
-            if argument.hasBuiltInType():
-                name = argument.getName()
-                if argument.isOptionalArgument():
-                    optional.append(name)
-        return optional
-    
-    def usedTypeMembers(self):
-        usedTypeMembers = []
-        for reference in self._typeArgumentReferences:
-            if reference.getVariableName(0) in self.__names:
-                usedTypeMembers.append(reference.getExpression())
-        return usedTypeMembers
 
 class GlobalsNameSpace(object):
     
@@ -493,9 +322,9 @@ class GlobalsNameSpace(object):
         self.usedVariables = []
         variables = set()
         types = set()
-        for reference in globalsReferences:
-            self.usedVariables.append(reference.getExpression())
-            variable = reference.getLevel0Variable()
+        for ref in globalsReferences:
+            self.usedVariables.append(UsedVariable(ref))
+            variable = ref.getLevel0Variable()
             variables.add(variable)
             if variable.hasDerivedType() and variable.isTypeAvailable():
                 types.add(variable.getType())
@@ -588,7 +417,6 @@ class ExportNameSpace(object):
         self.module = ModuleNameSpace(moduleName)
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
         
-        
 class ExportGlobalsNameSpace(object):
     
     def __init__(self, moduleName, sourceFile, globalsReferences):
@@ -596,7 +424,7 @@ class ExportGlobalsNameSpace(object):
         assertType(sourceFile, 'sourceFile', SourceFile)
         assertType(globalsReferences, 'globalsReferences', list)
         
-        publicElements = sourceFile.getPublicElements()
+        publicElements = sourceFile.getModule(moduleName).getPublicElements()
         
         self.exports = 'PUBLIC :: '
         variables = set()
@@ -621,3 +449,320 @@ class ExportGlobalsNameSpace(object):
         
         if self.exports == 'PUBLIC ::':
             self.exports = ''
+            
+class UsedVariable(object):
+    
+    def __init__(self, reference):
+        assertType(reference, 'reference', VariableReference)
+        self.__ref = reference
+        
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, UsedVariable)):
+            return False;
+        else:
+            return self.__ref == other.__ref
+    
+    def __ne__(self, other):
+        return not self == other
+        
+    def __hash__(self):
+        return hash(self.__ref)
+        
+    def __str__(self):
+        return self.expression()
+    
+    def getReference(self):
+        return self.__ref
+    
+    def type(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return ''
+        return var.getTypeName()
+    
+    def hasClassType(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return ''
+        return var.hasClassType()
+    
+    def expression(self):
+        return self.__ref.getExpression().lower()
+    
+    def level(self):
+        return self.__ref.getLevel()
+    
+    def levels(self, decrementing = False):
+        return self.__ref.getLevels(decrementing)
+        
+    def dim(self):
+        return self.__ref.getLevelNDimension()
+    
+    def allocatable(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return False
+        return var.isAllocatable()
+    
+    def pointer(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return False
+        return var.isPointer()
+    
+    def allocatableOrPointer(self):
+        var = self.__ref.getLevelNVariable()
+        if var is None:
+            return False
+        return var.isAllocatable() or var.isPointer()
+    
+    def totalDim(self):
+        return self.__ref.getTotalDimensions()
+    
+    def containsArray(self):
+        return self.__ref.isOneVariableArray()
+    
+    def referencable(self):
+        return self.__ref.isReferencable()
+    
+    def mandatoryDimensions(self):
+        for level in self.__ref.getLevels(True):
+            variable = self.__ref.getVariable(level)
+            if variable is not None and (variable.isAllocatable() or variable.isPointer() or variable.isArray()):
+                dims = 0
+                for cLevel in range(level - 1, -1, -1):
+                    cVariable = self.__ref.getVariable(cLevel)
+                    if cVariable is not None and cVariable.isArray():
+                        dims += cVariable.getDimension()
+                return dims
+        return 0
+    
+    def container(self, level = -1):
+        if level < 0:
+            level = level + self.level()
+        level = min(level, self.level())
+        level = max(level, 0)
+
+        return UsedVariable(self.__ref.getSubReference(level))
+    
+    def containerByDimension(self, dim):
+        cDims = 0
+        for level in self.__ref.getLevels():
+            variable = self.__ref.getVariable(level)
+            if variable is not None and variable.isArray():
+                cDims += variable.getDimension()
+                if cDims >= dim:
+                    return UsedVariable(self.__ref.getSubReference(level)) 
+        return self
+    
+    def fromArgument(self):
+        return self.__ref.getLevel0Variable().isArgument()
+    
+    def fromGlobal(self):
+        return self.__ref.getLevel0Variable().isModuleVar()
+
+class FilledVariable(UsedVariable):
+    def __init__(self, reference, dim, *indices):
+        assertType(reference, 'reference', VariableReference)
+        assertType(dim, 'dim', int)
+        assertTypeAll(indices, 'indices', str)
+        super(FilledVariable, self).__init__(reference)
+        self.__dim = dim
+        self.__indices = indices
+        
+    def expression(self):
+        ref = self.getReference()
+        perc = ''
+        d = 0
+        filled = ''
+        for level in ref.getLevels():
+            var = ref.getVariable(level)
+            if var is None:
+                return super(FilledVariable, self).expression()
+            filled += perc + var.getName()
+            perc = '%'
+            if var.isArray() and d < self.__dim:
+                filled += '('
+                sep = ''
+                for _ in range(0, var.getDimension()):
+                    filled += sep
+                    if d < self.__dim and d < len(self.__indices):
+                        filled += self.__indices[d]
+                    else:
+                        filled += ':'
+                    sep = ', '
+                    d += 1
+                filled += ')'
+        return filled
+
+class Argument(object):
+    
+    def __init__(self, variable, references):
+        assertType(variable, 'variable', Variable)
+        assert variable.isArgument()
+        assertTypeAll(references, 'references', VariableReference)
+        
+        self.__var = variable
+        self.__used = []
+        for ref in references:
+            if ref.getLevel0Variable() == self.__var:
+                self.__used.append(UsedVariable(ref))
+        if not self.__used and variable.hasBuiltInType():
+            self.__used.append(UsedVariable(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable)))
+            
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, Argument)):
+            return False;
+        else:
+            return self.__var == other.__var
+    
+    def __ne__(self, other):
+        return not self == other
+        
+    def __hash__(self):
+        return hash(self.__var)
+        
+    def __str__(self):
+        return self.name()
+
+    def intent(self):
+        return self.__var.getIntent().lower()
+    
+    def intentIn(self):
+        return self.intent() == 'in'
+    
+    def intentOut(self):
+        return self.intent() == 'out'
+    
+    def intentInout(self):
+        return self.intent() == 'inout'
+    
+    def isIn(self):
+        return self.intentIn() or self.intentInout()
+    
+    def isOut(self):
+        return self.intentOut() or self.intentInout()
+    
+    def optional(self):
+        return self.__var.isOptionalArgument()
+    
+    def required(self):
+        return not self.__var.isOptionalArgument()
+    
+    def builtInType(self):
+        return self.__var.hasBuiltInType()
+    
+    def derivedType(self):
+        return self.__var.hasDerivedType()
+    
+    def array(self):
+        return self.__var.isArray()
+    
+    def pointer(self):
+        return self.__var.isPointer()
+    
+    def allocatable(self):
+        return self.__var.isAllocatable()
+    
+    def allocatableOrPointer(self):
+        return self.allocatable() or self.pointer()
+    
+    def name(self):
+        return self.__var.getName()
+    
+    def spec(self, intent = None, allocatable = None, charLengthZero = False):
+        alias = self.__var.getAlias()
+        if intent is not None:
+            alias.setIntent(intent)
+        if allocatable is not None:
+            if allocatable: 
+                if alias.getDimension() > 0 or alias.hasClassType():
+                    alias.setAllocatable(True)
+            else:
+                alias.setAllocatable(False)
+        if charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
+            alias.setTypeName('CHARACTER(len=0)')
+        alias.setTarget(False)
+        return str(alias)
+    
+    def usedVariables(self):
+        return self.__used
+
+class ArgumentList(object):
+    def __init__(self, arguments, typeArgumentReferences = None):
+        if typeArgumentReferences is None:
+            assertTypeAll(arguments, 'arguments', Argument)
+            self.__arguments = arguments
+        else:
+            assertTypeAll(arguments, 'arguments', Variable)
+            assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+            self.__arguments = [Argument(var, typeArgumentReferences) for var in arguments]
+    
+    def __nonzero__(self):
+        return bool(self.__arguments)
+    
+    def __len__(self):
+        return len(self.__arguments)
+    
+    def __getitem__(self, key):
+        return self.__arguments[key]
+        
+    def __iter__(self):
+        return iter(self.__arguments)
+    
+    def __reversed__(self):
+        return reversed(self.__arguments)
+    
+    def __contains__(self, item):
+        return item in self.__arguments
+    
+    def filter(self, predicate):
+        return ArgumentList([arg for arg in self.__arguments if predicate(arg)])
+    
+    def intentIn(self):
+        return self.filter(lambda a : a.intentIn())
+    
+    def intentOut(self):
+        return self.filter(lambda a : a.intentOut())
+    
+    def intentInout(self):
+        return self.filter(lambda a : a.intentInout())
+    
+    def allIn(self):
+        return self.filter(lambda a : a.isIn())
+    
+    def allOut(self):
+        return self.filter(lambda a : a.isOut())
+    
+    def optionals(self):
+        return self.filter(lambda a : a.optional())
+    
+    def requireds(self):
+        return self.filter(lambda a : a.required())
+    
+    def builtInTypes(self):
+        return self.filter(lambda a : a.builtInType())
+    
+    def derivedTypes(self):
+        return self.filter(lambda a : a.derivedType())
+    
+    def pointers(self):
+        return self.filter(lambda a : a.pointer())
+    
+    def allocatables(self):
+        return self.filter(lambda a : a.allocatable())
+    
+    def allocatablesOrPointers(self):
+        return self.filter(lambda a : a.allocatableOrPointer())
+    
+    def names(self):
+        return [arg.name() for arg in self.__arguments]
+    
+    def joinNames(self, sep = ', '):
+        return sep.join(self.names())
+    
+    def specs(self, intent = None, allocatable = None, charLengthZero = False):
+        return "\n".join([arg.spec(intent, allocatable, charLengthZero) for arg in self.__arguments])
+    
+    def usedVariables(self):
+        return sum([arg.usedVariables() for arg in self.__arguments], [])            

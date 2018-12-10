@@ -7,19 +7,19 @@ from replay import ReplayCodeGenerator
 
 class CombinedCodeGenerator(CodeGenerator):
     
-    def __init__(self, sourceFiles, modifySourceFiles, templateDir, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(modifySourceFiles, 'modifySourceFiles', SourceFiles)
-        assertType(templateDir, 'templateDir', str)
-        if not os.path.isdir(templateDir):
-            raise IOError("Not a directory: " + templateDir);
+        assertType(templatePath, 'templatePath', str)
+        if not os.path.isfile(templatePath):
+            raise IOError("Template file not found: " + templatePath)
         assertType(testDataDir, 'testDataDir', str)
         if not os.path.isdir(testDataDir):
             raise IOError("Not a directory: " + testDataDir);
 
-        super(CombinedCodeGenerator, self).__init__(sourceFiles, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
-        self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templateDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
-        self.__replay = ReplayCodeGenerator(sourceFiles, templateDir, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
+        super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
+        self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
         
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         self.__capture.addCode(subroutine, typeArgumentReferences, globalsReferences)

@@ -1,0 +1,39 @@
+#extends FTGTemplate
+
+#attr prologue = '! ================= BEGIN FORTRAN TEST GENERATOR (FTG) ======================='
+
+#attr epilogue = '! ================= END FORTRAN TEST GENERATOR (FTG) ========================='
+
+#def captureBeforeContains
+    $include('Standalone/capture.beforecontains.tmpl')
+#end def captureBeforeContains
+
+#def captureAfterLastSpecification
+    $include('Standalone/capture.afterlastspecification.tmpl')
+#end def captureAfterLastSpecification
+
+#def captureBeforeEnd
+    $include('Standalone/capture.beforeend.tmpl')
+#end def captureBeforeEnd
+
+#def captureAfterSubroutine
+    $include('Standalone/capture.aftersubroutine.tmpl')
+#end def captureAfterSubroutine
+
+#def ftgWrite($var)
+    #set global $ftgWrite_var = $var
+    $include('Standalone/capture.ftgWrite.tmpl')
+#end def ftgWrite
+
+#def export
+    $include('Standalone/export.beforecontains.tmpl')
+#end def export
+
+#def replay
+    $include('Standalone/replay.test.tmpl')
+#end def replay
+
+#def ftgRead($var)
+    #set global $ftgRead_var = $var
+    $include('Standalone/replay.ftgRead.tmpl')
+#end def ftgRead

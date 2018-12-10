@@ -1,7 +1,8 @@
-import sys
 import os
+import sys
 import shutil
 from Cheetah.Template import Template
+from Cheetah import ImportHooks
 from assertions import assertType, assertTypeAll
 from source import SourceFiles, SubroutineFullName
 from trackvariable import VariableTracker
@@ -16,8 +17,11 @@ class CodeGenerator(object):
     INDENT_LENGTH = 2
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceFiles, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = ''):
+    def __init__(self, sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
+        assertType(templatePath, 'templatePath', str)
+        if not os.path.isfile(templatePath):
+            raise IOError("Template file not found: " + templatePath)
         assertType(graphBuilder, 'graphBuilder', CallGraphBuilder)
         assertType(backupSuffix, 'backupSuffix', str)
         assertTypeAll(excludeModules, 'excludeModules', str)
@@ -25,12 +29,21 @@ class CodeGenerator(object):
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)        
         
         self._sourceFiles = sourceFiles
+        self.__templatePath = templatePath
         self.__graphBuilder = graphBuilder
         self._backupSuffix = '.' + backupSuffix.lstrip('.')
         self.__excludeModules = excludeModules
         self.__ignoredModulesForGlobals = ignoredModulesForGlobals;
         self.__ignoredTypes = ignoredTypes;
         self.__ignorePrefix = ignorePrefix; 
+        
+        templateDir = os.path.dirname(os.path.realpath(self.__templatePath))
+        templateDirParent = os.path.abspath(os.path.join(templateDir, os.pardir))
+        for name in os.listdir(templateDirParent):
+            templateDirSibling = os.path.join(templateDirParent, name)
+            if os.path.isdir(templateDirSibling):
+                sys.path.append(templateDirSibling)
+        ImportHooks.install()
         
     def generate(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
@@ -115,14 +128,10 @@ class CodeGenerator(object):
             print " >>> NOT FOUND"
             return False
 
-    def _processTemplate(self, sourceFilePath, lineNumber, templatePath, templateNameSpace):
-        if not os.path.isfile(templatePath):
-            print  >> sys.stderr, '*** WARNING [CaptureCodeGenerator]: Template file not found: ' + str(templatePath) + ' ***';
-            return
-        
-        print "      Process Template " + os.path.basename(templatePath) + " on file " + sourceFilePath, 
+    def _processTemplate(self, sourceFilePath, lineNumber, part, templateNameSpace):
+        print "      Process Template " + os.path.basename(self.__templatePath) + " [" + part + "]" + " on file " + sourceFilePath, 
         source = self._readFile(sourceFilePath)
-        codeToAdd = self._breakLines(self._indent((str(Template(file=templatePath, searchList=[templateNameSpace])))))
+        codeToAdd = self.__loadTemplate(part, templateNameSpace)
         
         if codeToAdd:
             source = source[:lineNumber] + ["\n"] + [codeToAdd] + ["\n", "\n"] + source[lineNumber:]
@@ -132,9 +141,14 @@ class CodeGenerator(object):
         else:
             print " >>> EMPTY"
             return False
+        
+    def __loadTemplate(self, part, templateNameSpace):
+        template = Template(file=self.__templatePath, searchList=[templateNameSpace])
+        template.part = part
+        return self._breakLines(self._indent(str(template).strip()))
     
     def _indent(self, text):
-        if not text.strip():
+        if not text:
             return text
         
         beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ')

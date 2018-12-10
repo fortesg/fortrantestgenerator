@@ -1,0 +1,154 @@
+$prologue
+
+SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
+
+  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+  USE mo_mpi,          ONLY: get_my_mpi_all_id
+  USE m_ser_ftg,       ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
+
+  CHARACTER(*), INTENT(IN) :: stage, dir
+
+  CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
+
+  WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+
+  WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), get_my_mpi_all_id()
+  
+  mkdirerr = ''
+  CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdirerr)
+  IF (TRIM(mkdirerr) /= '') THEN
+    WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
+  END IF 
+  
+  ignore_bullshit_max_dim_size = 100000
+  ignore_bullshit_allow_negative_indices = .TRUE.
+  
+  CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
+  CALL ftg_add_serializer_metainfo('subroutine', '${subroutine.name}')
+  CALL ftg_add_serializer_metainfo('stage', stage)
+  CALL ftg_add_serializer_metainfo('mpi_all_id', get_my_mpi_all_id())
+
+END SUBROUTINE ftg_${subroutine.name}_init_for_capture
+
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
+
+  ftg_${subroutine.name}_capture_input_active =     &
+    ftg_${subroutine.name}_capture_input_enabled .AND.&
+    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_input_active
+  
+SUBROUTINE ftg_${subroutine.name}_capture_input(${args.joinNames})
+
+  USE mtime,   ONLY: calendarType
+  USE mo_mpi,  ONLY: get_my_mpi_all_id
+  USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
+  
+  ${globals.imports}
+
+  ${args.specs(intent = 'in')}
+
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+  CHARACTER(len=256) :: ftg_c
+
+  IF (ftg_${subroutine.name}_capture_input_active()) THEN
+    
+    CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
+    CALL ftg_set_savepoint('input')
+
+    WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
+    WRITE (0,*) 'FTG WRITE INPUT DATA ${subroutine.name}', get_my_mpi_all_id()
+    
+    ! MTIME CALENDAR TYPE --> Remove this line if mtime is not used
+    CALL ftg_write("ftg_mtime_calendar", calendarType())
+
+    ! REQUIRED ARGUMENTS
+    #for $var in $args.requireds.usedVariables
+      $ftgWrite($var)#end for
+    
+    ! OPTIONAL ARGUMENTS
+    #for $arg in $args.optionals
+        #if $arg.usedVariables
+            IF (PRESENT($arg.name)) THEN
+            #for $var in $arg.usedVariables
+              $ftgWrite($var)#end for 
+            END IF
+        #end if 
+    #end for
+    
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgWrite($var)#end for
+    
+    CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
+
+    CALL ftg_destroy_savepoint()
+    WRITE (0,*) 'FTG FINALIZE INPUT DATA ${subroutine.name}', get_my_mpi_all_id()
+    CALL ftg_destroy_serializer()
+    
+  END IF
+
+END SUBROUTINE ftg_${subroutine.name}_capture_input
+
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
+
+  ftg_${subroutine.name}_capture_output_active =     &
+    ftg_${subroutine.name}_capture_output_enabled .AND.&
+    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_output_active
+  
+SUBROUTINE ftg_${subroutine.name}_capture_output(${args.allOut.joinNames})
+
+  USE mo_mpi, ONLY: work_mpi_barrier, get_my_mpi_all_id
+  USE mo_exception, ONLY: finish
+  USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
+
+  ${globals.imports}
+
+  ${args.allOut.specs(intent = 'in')}
+
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+  CHARACTER(len=256) :: ftg_c
+
+  IF (ftg_${subroutine.name}_capture_output_active()) THEN
+
+    CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
+    CALL ftg_set_savepoint('output')
+
+    WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
+    WRITE (0,*) 'FTG WRITE output DATA ${subroutine.name}', get_my_mpi_all_id()
+
+    $resetRegistrations
+    ! REQUIRED ARGUMENTS
+    #for $var in $args.allOut.requireds.usedVariables
+      $ftgWrite($var)#end for
+    
+    ! OPTIONAL ARGUMENTS
+    #for $arg in $args.allOut.optionals
+        #if $arg.usedVariables
+            IF (PRESENT($arg.name)) THEN
+            #for $var in $arg.usedVariables
+              $ftgWrite($var)#end for 
+            END IF
+        #end if 
+    #end for
+    
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgWrite($var)#end for
+    
+    CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
+
+    CALL ftg_destroy_savepoint()
+    WRITE (0,*) 'FTG FINALIZE output DATA ${subroutine.name}', get_my_mpi_all_id()
+    CALL ftg_destroy_serializer()
+    
+    CALL work_mpi_barrier()
+    CALL finish('FTG EXIT', 'Output captured: ${subroutine.name}', 0)
+    
+  END IF
+
+END SUBROUTINE ftg_${subroutine.name}_capture_output
+  
+$epilogue
