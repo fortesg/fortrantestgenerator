@@ -3,7 +3,7 @@ SB2ROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 
 FF = mpif90
-FFLAGS = -cpp -g -O0
+FFLAGS = -cpp -g -O0 -fopenmp
 LIBS = -L$(SB2ROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
 INCLUDE = -I$(SB2ROOT)/include
 ICONINCLUDE = -I$(ICONBUILDDIR)/module 

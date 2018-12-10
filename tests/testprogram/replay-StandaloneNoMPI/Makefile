@@ -2,7 +2,7 @@ FTGROOT = $(HOME)/workspace/fortrantestgenerator
 SBROOT = $(HOME)/lib/serialbox2
 
 FF = gfortran
-FFLAGS = -g -O0
+FFLAGS = -g -O0 -fopenmp
 LIBS = -L$(SBROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++ -lpthread
 INCLUDE = -I$(SBROOT)/include -I../src
 
