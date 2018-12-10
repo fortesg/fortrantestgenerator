@@ -45,7 +45,7 @@ To run FTG, you will need the following software packages:
 
 * `Python 2.7` (Python 3+ is currently not supported)
 * `Cheetah Template Engine`: https://github.com/CheetahTemplate3/cheetah3
-* `Serialbox2` (>= 2.3.0): https://github.com/eth-cscs/serialbox2
+* `Serialbox2` (>= 2.4.0): https://github.com/eth-cscs/serialbox2
 * `FortranCallGraph` (>= 1.4.0): https://github.com/fortesg/fortrancallgraph
 
 ## Quick Start Guide
