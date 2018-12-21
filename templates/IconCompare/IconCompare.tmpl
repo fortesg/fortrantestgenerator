@@ -3,3 +3,8 @@
 #def replay
     $include('IconCompare/replay.test.tmpl')
 #end def replay
+
+#def ftgCompare($var)
+    #set global $ftgCompare_var = $var
+    $include('IconCompare/replay.ftgCompare.tmpl')
+#end def ftgCompare
