@@ -123,7 +123,7 @@ CONTAINS
     
     failure_count = 0
 
-    CALL ftg_set_savepoint('input')
+    CALL ftg_set_savepoint('output')
   
     WRITE (0,'(a,i1,a)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
     
