@@ -47,7 +47,7 @@ compare-mpi:
 compare-nompi:
 	$(COMPARE) -w data/ftg_testsub_test/output/MetaData-ftg_testsub_output.json data/ftg_testsub_test/output_test/MetaData-ftg_testsub_output.json
 
-ok: 	
+ok:
 	printf '\e[38;5;0m\e[48;5;10m*** OK ***\e[48;5;0m\n\e[38;5;15m'
 	
 clean: 

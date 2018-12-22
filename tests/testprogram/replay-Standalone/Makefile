@@ -3,7 +3,7 @@ SBROOT = $(HOME)/lib/serialbox2
 
 FF = mpif90
 FFLAGS = -g -O0 -fopenmp
-LIBS = -L$(SBROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
+LIBS = -L$(SBROOT)/lib  -lSerialboxFortranStatic -lSerialboxCStatic  -lSerialboxStatic -lstdc++ -lstdc++fs
 INCLUDE = -I$(SBROOT)/include -I../src
 MPINODES = 2 
 

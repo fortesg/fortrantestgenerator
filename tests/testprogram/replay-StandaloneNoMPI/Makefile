@@ -3,7 +3,7 @@ SBROOT = $(HOME)/lib/serialbox2
 
 FF = gfortran
 FFLAGS = -g -O0 -fopenmp
-LIBS = -L$(SBROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++ -lpthread
+LIBS = -L$(SBROOT)/lib  -lSerialboxFortranStatic -lSerialboxCStatic  -lSerialboxStatic -lstdc++ -lstdc++fs -lpthread
 INCLUDE = -I$(SBROOT)/include -I../src
 
 ######################################################

@@ -206,7 +206,7 @@ Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 * For including the libraries, you can just use the `OTHER_LIBS` variable in your `mh-linux` file:
   ```
-  OTHER_LIBS  = ${OTHER_LIBS} -L$SERIALROOT/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
+  OTHER_LIBS  = ${OTHER_LIBS} -L$SERIALROOT/lib  -lSerialboxFortranStatic -lSerialboxCStatic  -lSerialboxStatic -lstdc++ -lstdc++fs
   ```
 * For including the includes, there is no such variable, so I have just addded them to the `FFLAGS` variable:
   ```

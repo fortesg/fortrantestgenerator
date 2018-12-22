@@ -4,7 +4,7 @@ ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 
 FF = mpif90
 FFLAGS = -cpp -g -O0 -fopenmp
-LIBS = -L$(SB2ROOT)/lib  -lSerialboxCore -lSerialboxC -lSerialboxFortran -lstdc++
+LIBS = -L$(SB2ROOT)/lib  -lSerialboxFortranStatic -lSerialboxCStatic  -lSerialboxStatic -lstdc++ -lstdc++fs
 INCLUDE = -I$(SB2ROOT)/include
 ICONINCLUDE = -I$(ICONBUILDDIR)/module 
 ICONMODULES = $(ICONBUILDDIR)/src/mo_mpi.o $(ICONBUILDDIR)/src/mo_exception.o $(ICONBUILDDIR)/support/util_backtrace.o $(ICONBUILDDIR)/support/util_system.o $(ICONBUILDDIR)/externals/mtime/src/*.o
