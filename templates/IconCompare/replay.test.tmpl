@@ -11,7 +11,7 @@ PROGRAM ftg_${subroutine.name}_test
   USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
 
   USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
-  USE m_ser_ftg_cmp, ONLY: ftg_compare
+  USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix
   
   ${globals.imports}
   
@@ -122,6 +122,7 @@ CONTAINS
     CHARACTER(len=256) :: ftg_c
     
     failure_count = 0
+    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG Compare ${subroutine.name} (', get_my_mpi_all_id(), ') * '
 
     CALL ftg_set_savepoint('output')
   
