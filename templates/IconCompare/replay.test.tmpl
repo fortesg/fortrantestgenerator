@@ -11,7 +11,7 @@ PROGRAM ftg_${subroutine.name}_test
   USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
 
   USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
-  USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix
+  USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
   
   ${globals.imports}
   
@@ -52,18 +52,22 @@ CONTAINS
     ! Remove if capture code already deleted
     ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
     ftg_${subroutine.name}_capture_output_enabled = .FALSE.
-    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG Compare ${subroutine.name} (', get_my_mpi_all_id(), ') * '
+    
+    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG ${subroutine.name} (', get_my_mpi_all_id(), ') * '
+    ftg_cmp_print_when_equal = .TRUE.
+    ftg_cmp_count_missing_field_as_failure = .FALSE.
 
     CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
     CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
     CALL ftg_destroy_serializer()
 
     CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)
+
+    CALL ${subroutine.name}(${args.joinNames})
+    
     ! TODO All nodes one after another
     CALL ftg_${subroutine.name}_compare_output(${args.allOut.joinNames}, failure_count)
     CALL ftg_destroy_serializer()
-
-    CALL ${subroutine.name}(${args.joinNames})
 
   END SUBROUTINE ftg_test_${subroutine.name}
 
