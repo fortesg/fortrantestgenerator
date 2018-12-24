@@ -4,7 +4,7 @@ PROGRAM ftg_${subroutine.name}_test
   USE mo_kind
   USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
   USE mo_exception,      ONLY: message
-  USE mo_mpi,            ONLY: get_my_mpi_all_id, start_mpi, stop_mpi !ICON
+  USE mo_mpi,            ONLY: get_my_mpi_all_id, work_mpi_barrier, start_mpi, stop_mpi !ICON
 
   USE ${module.name}, ONLY: ${subroutine.name}
   ! Remove if capture code already deleted
@@ -21,7 +21,6 @@ IMPLICIT NONE
 
 CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
 CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
-LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
 LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 INTEGER :: failure_count
@@ -30,6 +29,7 @@ CALL start_mpi('ftg_${subroutine.name}_test') !ICON
 
 CALL ftg_test_${subroutine.name}(failure_count)
 
+CALL work_mpi_barrier()
 CALL stop_mpi() !ICON
 
 ! TODO Ergebnisse aller Prozesse sammeln und nur von einem Prozess beenden lassen
@@ -52,6 +52,7 @@ CONTAINS
     ! Remove if capture code already deleted
     ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
     ftg_${subroutine.name}_capture_output_enabled = .FALSE.
+    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG Compare ${subroutine.name} (', get_my_mpi_all_id(), ') * '
 
     CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
     CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
@@ -122,7 +123,6 @@ CONTAINS
     CHARACTER(len=256) :: ftg_c
     
     failure_count = 0
-    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG Compare ${subroutine.name} (', get_my_mpi_all_id(), ') * '
 
     CALL ftg_set_savepoint('output')
   
