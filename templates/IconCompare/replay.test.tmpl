@@ -3,8 +3,8 @@ PROGRAM ftg_${subroutine.name}_test
   USE mtime
   USE mo_kind
   USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
-  USE mo_exception,      ONLY: message
-  USE mo_mpi,            ONLY: get_my_mpi_all_id, work_mpi_barrier, start_mpi, stop_mpi !ICON
+  USE mo_exception,      ONLY: message, finish
+  USE mo_mpi,            ONLY: get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, start_mpi, stop_mpi !ICON
 
   USE ${module.name}, ONLY: ${subroutine.name}
   ! Remove if capture code already deleted
@@ -29,14 +29,10 @@ CALL start_mpi('ftg_${subroutine.name}_test') !ICON
 
 CALL ftg_test_${subroutine.name}(failure_count)
 
-CALL work_mpi_barrier()
 CALL stop_mpi() !ICON
-
-! TODO Ergebnisse aller Prozesse sammeln und nur von einem Prozess beenden lassen
-IF (failure_count == 0) THEN
-    STOP 0
-ELSE
-    STOP 1
+IF (failure_count > 0) THEN
+    !TODO Print total number of failures
+    CALL finish('FTG TEST FAILED', '${subroutine.name}', 2)
 END IF 
 
 CONTAINS
@@ -46,6 +42,10 @@ CONTAINS
     INTEGER, INTENT(out) :: failure_count
       
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+    
+    INTEGER :: mpi_all_id
+    
+    mpi_all_id = get_my_mpi_all_id()
   
     CALL message('FTG', '*** Run test for ${subroutine.name} ***')
 
@@ -53,7 +53,7 @@ CONTAINS
     ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
     ftg_${subroutine.name}_capture_output_enabled = .FALSE.
     
-    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG ${subroutine.name} (', get_my_mpi_all_id(), ') * '
+    WRITE (ftg_cmp_message_prefix,'(a,i1,a)') 'FTG ${subroutine.name} (', mpi_all_id, ') * '
     ftg_cmp_print_when_equal = .TRUE.
     ftg_cmp_count_missing_field_as_failure = .FALSE.
 
@@ -61,13 +61,22 @@ CONTAINS
     CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
     CALL ftg_destroy_serializer()
 
-    CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)
-
     CALL ${subroutine.name}(${args.joinNames})
     
-    ! TODO All nodes one after another
+    IF (mpi_all_id > 0) THEN
+        CALL p_recv(failure_count, mpi_all_id - 1, 0)
+    ELSE
+        failure_count = 0
+    END IF
+
+    CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)    
     CALL ftg_${subroutine.name}_compare_output(${args.allOut.joinNames}, failure_count)
     CALL ftg_destroy_serializer()
+    !TODO Print number of failures per process
+    
+    IF (mpi_all_id < get_my_mpi_all_comm_size() - 1) THEN
+        CALL p_send(failure_count, mpi_all_id + 1, 0)
+    END IF
 
   END SUBROUTINE ftg_test_${subroutine.name}
 
@@ -80,7 +89,7 @@ CONTAINS
 
     WRITE (basename,'(a,a,a,i1)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
-    WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
+    WRITE (0,'(A)') 'FTG INIT ${subroutine.name} '//TRIM(basename)
     CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
     IF (SERIALBOX_DEBUG) THEN
       CALL ftg_print_serializer_debuginfo()
@@ -121,13 +130,11 @@ CONTAINS
     
     ${args.allOut.specs(intent = 'in')}
     
-    INTEGER, INTENT(out) :: failure_count
+    INTEGER, INTENT(inout) :: failure_count
     LOGICAL :: result
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
     CHARACTER(len=256) :: ftg_c
     
-    failure_count = 0
-
     CALL ftg_set_savepoint('output')
   
     WRITE (0,'(a,i1,a)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
