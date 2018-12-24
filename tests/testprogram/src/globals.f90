@@ -9,13 +9,6 @@ REAL :: number = 0
 
 PUBLIC :: set, get
 
-
-! ================= BEGIN FORTRAN TEST GENERATOR (FTG) =======================
-
-PUBLIC :: number
-
-! ================= END FORTRAN TEST GENERATOR (FTG) =========================
-
 CONTAINS
 
 SUBROUTINE set(new)
