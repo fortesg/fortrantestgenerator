@@ -1,7 +1,7 @@
 FTGROOT = $(HOME)/workspace/fortrantestgenerator
 SBROOT = $(HOME)/lib/serialbox2
+FF = $(HOME)/lib/mpich/bin/mpif90
 
-FF = mpif90
 FFLAGS = -g -O0 -fopenmp
 LIBS = -L$(SBROOT)/lib  -lSerialboxFortranStatic -lSerialboxCStatic  -lSerialboxStatic -lstdc++ -lstdc++fs
 INCLUDE = -I$(SBROOT)/include -I../src
