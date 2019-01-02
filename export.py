@@ -31,7 +31,6 @@ class ExportCodeGenerator(CodeGenerator):
                     if usedSourceFilePath.endswith(self._backupSuffix):
                         usedSourceFilePath = usedSourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
                         usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
-                    # TODO: Das mit dem Backup erstellen und wieder entfernen, wenn nix passiert, funktioniert nicht, wenn Backup zuvor schon existierte
                     backup = self._createFileBackup(usedSourceFilePath)
                     exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
                     result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
