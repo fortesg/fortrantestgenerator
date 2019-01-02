@@ -4,10 +4,13 @@ from assertions import assertType
 from source import SourceFiles
 from capture import CaptureCodeGenerator
 from replay import ReplayCodeGenerator
+from export import ExportCodeGenerator
 
 class CombinedCodeGenerator(CodeGenerator):
     
-    def __init__(self, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, capture, replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+        assertType(capture, 'capture', bool)
+        assertType(replay, 'replay', bool)
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(modifySourceFiles, 'modifySourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
@@ -18,9 +21,17 @@ class CombinedCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir);
 
         super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
-        self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
-        self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
-        
+        self.__export = ExportCodeGenerator(sourceFiles, modifySourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        self.__capture = None
+        self.__replay = None        
+        if capture:
+            self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        if replay:
+            self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+    
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
-        self.__capture.addCode(subroutine, typeArgumentReferences, globalsReferences)
-        self.__replay.addCode(subroutine, typeArgumentReferences, globalsReferences)
+        self.__export.addCode(subroutine, typeArgumentReferences, globalsReferences)
+        if self.__capture:
+            self.__capture.addCode(subroutine, typeArgumentReferences, globalsReferences)
+        if self.__replay:
+            self.__replay.addCode(subroutine, typeArgumentReferences, globalsReferences)

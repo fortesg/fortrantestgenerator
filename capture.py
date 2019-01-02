@@ -26,7 +26,7 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir
 
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
-        print "  Add Code"
+        print "  Add Code to Module under Test"
         
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
@@ -34,7 +34,6 @@ class CaptureCodeGenerator(CodeGenerator):
             sourceFilePath = sourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
             subroutine = SourceFile(sourceFilePath, originalSourceFile.isPreprocessed()).getSubroutine(subroutine.getName())
                     
-        print "    ...to Module under Test"
         self._createFileBackup(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
         # Reihenfolge wichtig: von unten nach oben!!!
@@ -47,25 +46,6 @@ class CaptureCodeGenerator(CodeGenerator):
         lastSpecificationLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
         self._processTemplate(sourceFilePath, lastSpecificationLineNumber, self.AFTER_LAST_SPECIFICATION_TEMPLATE_PART, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, templateNameSpace)
-        
-        print "    ...to Used Modules"
-        moduleName = subroutine.getModuleName()
-        refModules = list(self.__extractModulesFromVariableReferences(globalsReferences))
-        refModules.sort(reverse = True)
-        for refModule in refModules:
-            refModuleName = refModule.getName() 
-            if refModuleName != moduleName:
-                if not refModule.isPublic():
-                    usedSourceFile = refModule.getSourceFile()
-                    usedSourceFilePath = usedSourceFile.getPath()
-                    if usedSourceFilePath.endswith(self._backupSuffix):
-                        usedSourceFilePath = usedSourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
-                        usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
-                    backup = self._createFileBackup(usedSourceFilePath)
-                    exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
-                    result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
-                    if backup and not result:
-                        self._removeFileBackup(usedSourceFilePath)
 
     def _findSubroutine(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)

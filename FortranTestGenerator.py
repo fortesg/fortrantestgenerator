@@ -13,6 +13,7 @@ from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE,
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
+    argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-c', '--capture', action="store_true", help='Generate Capture Code')
     argParser.add_argument('-r', '--replay', action="store_true", help='Generate Replay Code')
     argParser.add_argument('-cf', '--configFile', type=str, help='Import configuration from this file.');
@@ -42,8 +43,6 @@ def main():
     from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES, CFG_ASSEMBLER_DIRS,\
     CFG_SPECIAL_MODULE_FILES, CFG_CACHE_DIR, CFG_SOURCE_DIRS, CFG_SOURCE_FILES_PREPROCESSED
     from source import SubroutineFullName, SourceFiles
-    from capture import CaptureCodeGenerator
-    from replay import ReplayCodeGenerator
     from backup import BackupFileFinder
     from combined import CombinedCodeGenerator
     from assembler import FromAssemblerCallGraphBuilder
@@ -73,7 +72,7 @@ def main():
         backupFinder = BackupFileFinder(config[CFG_SOURCE_DIRS], backupSuffix) 
         
 
-    if args.capture or args.replay:
+    if args.export or args.capture or args.replay:
         moduleName = args.module;
         subroutineName = args.subroutine;
         
@@ -101,16 +100,8 @@ def main():
     else: 
         sourceFiles.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(sourceFiles.getSpecialModuleFiles()))
 
-    if args.capture or args.replay:
-        if args.capture and args.replay:
-            print 'Generate capture and replay code'
-            generator = CombinedCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
-        elif args.capture:
-            print 'Generate capture code'
-            generator = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
-        else:
-            print 'Generate replay code'
-            generator = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
+    if args.export or args.capture or args.replay:
+        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupSuffix, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix)
         generator.generate(subroutineFullName)
         
 if __name__ == "__main__":
