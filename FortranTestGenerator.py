@@ -13,8 +13,8 @@ from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE,
 
 def parseArguments(argParser):
     argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
-    argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-c', '--capture', action="store_true", help='Generate Capture Code')
+    argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-r', '--replay', action="store_true", help='Generate Replay Code')
     argParser.add_argument('-cf', '--configFile', type=str, help='Import configuration from this file.');
     argParser.add_argument('module', nargs='?', default=None);
@@ -24,8 +24,8 @@ def parseArguments(argParser):
 def main():
     argParser = argparse.ArgumentParser(description='Generate test code.');
     args = parseArguments(argParser);
-    if not (args.restore or args.capture or args.replay):
-        argParser.error('No action requested, add -b/--restore and/or -c/--capture and/or -r/--replay')
+    if not (args.restore or args.export or args.capture or args.replay):
+        argParser.error('No action requested, add -b/--restore and/or -c/--capture and/or -e/--export and/or -r/--replay')
 
     config = loadFortranTestGeneratorConfiguration(args.configFile)
     if config is None:
