@@ -4,6 +4,8 @@ from assertions import assertType, assertTypeAll
 class BackupFileFinder(object):
     
     DEFAULT_SUFFIX = '.f90'
+    CAPTURE_SUFFIX_PREFIX = '.capture'
+    EXPORT_SUFFIX_PREFIX = '.export'
     
     def __init__(self, sourceDirs, backupSuffix):
         assertType(backupSuffix, 'backupSuffix', str)
@@ -16,7 +18,7 @@ class BackupFileFinder(object):
                 raise IOError("Not a directory: " + baseDir);
         
         self.__sourceDirs = sourceDirs
-        self.__backupSuffix = '.' + backupSuffix.lstrip('.')
+        self.__backupSuffix = backupSuffix
 
     def find(self):
         backupFiles = []
@@ -47,7 +49,11 @@ class BackupFileFinder(object):
         return specialModuleFiles
             
     def __getOriginalFile(self, backupFile):
-        return backupFile.replace(self.__backupSuffix, BackupFileFinder.DEFAULT_SUFFIX)
+        originalFile = backupFile
+        originalFile = originalFile.replace(BackupFileFinder.EXPORT_SUFFIX_PREFIX + self.__backupSuffix, self.__backupSuffix)
+        originalFile = originalFile.replace(BackupFileFinder.CAPTURE_SUFFIX_PREFIX + self.__backupSuffix, self.__backupSuffix)
+        originalFile = originalFile.replace(self.__backupSuffix, BackupFileFinder.DEFAULT_SUFFIX)
+        return originalFile
             
     def __getBackupFile(self, originalFile):
         backupFile = originalFile.replace(BackupFileFinder.DEFAULT_SUFFIX, self.__backupSuffix)

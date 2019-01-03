@@ -31,7 +31,7 @@ class CodeGenerator(object):
         self._sourceFiles = sourceFiles
         self.__templatePath = templatePath
         self.__graphBuilder = graphBuilder
-        self._backupSuffix = '.' + backupSuffix.lstrip('.')
+        self._backupSuffix = backupSuffix
         self.__excludeModules = excludeModules
         self.__ignoredModulesForGlobals = ignoredModulesForGlobals;
         self.__ignoredTypes = ignoredTypes;

@@ -31,7 +31,7 @@ def main():
     if config is None:
         exit(3)
         
-    backupSuffix = config[CFG_BACKUP_SUFFIX]
+    backupSuffix = '.' + config[CFG_BACKUP_SUFFIX].lstrip('.')
     ftgPrefix = config[CFG_FTG_PREFIX]
     templatePath = config[CFG_TEMPLATE]
     testSourceDir = config[CFG_TEST_SOURCE_DIR]

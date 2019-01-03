@@ -5,6 +5,7 @@ from source import SourceFiles
 from capture import CaptureCodeGenerator
 from replay import ReplayCodeGenerator
 from export import ExportCodeGenerator
+from backup import BackupFileFinder
 
 class CombinedCodeGenerator(CodeGenerator):
     
@@ -21,11 +22,11 @@ class CombinedCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir);
 
         super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
-        self.__export = ExportCodeGenerator(sourceFiles, modifySourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        self.__export = ExportCodeGenerator(sourceFiles, modifySourceFiles, templatePath, graphBuilder, BackupFileFinder.EXPORT_SUFFIX_PREFIX + backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         self.__capture = None
         self.__replay = None        
         if capture:
-            self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+            self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, BackupFileFinder.CAPTURE_SUFFIX_PREFIX + backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         if replay:
             self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
     
