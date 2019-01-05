@@ -17,13 +17,12 @@ class CodeGenerator(object):
     INDENT_LENGTH = 2
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = ''):
+    def __init__(self, sourceFiles, templatePath, graphBuilder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
             raise IOError("Template file not found: " + templatePath)
         assertType(graphBuilder, 'graphBuilder', CallGraphBuilder)
-        assertType(backupSuffix, 'backupSuffix', str)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredModulesForGlobals, 'ignoredModulesForGlobals', str)        
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)        
@@ -31,7 +30,6 @@ class CodeGenerator(object):
         self._sourceFiles = sourceFiles
         self.__templatePath = templatePath
         self.__graphBuilder = graphBuilder
-        self._backupSuffix = backupSuffix
         self.__excludeModules = excludeModules
         self.__ignoredModulesForGlobals = ignoredModulesForGlobals;
         self.__ignoredTypes = ignoredTypes;
@@ -95,38 +93,6 @@ class CodeGenerator(object):
         assertType(moduleName, 'moduleName', str)
         
         return self._sourceFiles.findModule(moduleName);
-        
-    def _createFileBackup(self, originalPath):
-        print "      Create File Backup of " + originalPath,
-        backupPath = originalPath.replace(CodeGenerator.DEFAULT_SUFFIX, self._backupSuffix)
-        backupPath = backupPath.replace(CodeGenerator.DEFAULT_SUFFIX.upper(), self._backupSuffix)
-        if (backupPath == originalPath):
-            backupPath = originalPath + self._backupSuffix
-        if not os.path.exists(backupPath):
-            shutil.copyfile(originalPath, backupPath)
-            print
-            return True
-        elif not os.path.exists(originalPath):
-            shutil.copyfile(backupPath, originalPath)
-            print
-            return True
-        else:
-            print " >>> ALREADY EXISTS"
-            return False
-        
-    def _removeFileBackup(self, originalPath):
-        print "      Remove File Backup of " + originalPath,
-        backupPath = originalPath.replace(CodeGenerator.DEFAULT_SUFFIX, self._backupSuffix)
-        backupPath = backupPath.replace(CodeGenerator.DEFAULT_SUFFIX.upper(), self._backupSuffix)
-        if (backupPath == originalPath):
-            backupPath = originalPath + self._backupSuffix
-        if os.path.exists(backupPath):
-            os.remove(backupPath)
-            print
-            return True
-        else:
-            print " >>> NOT FOUND"
-            return False
 
     def _processTemplate(self, sourceFilePath, lineNumber, part, templateNameSpace):
         print "      Process Template " + os.path.basename(self.__templatePath) + " [" + part + "]" + " on file " + sourceFilePath, 

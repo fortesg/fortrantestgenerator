@@ -10,7 +10,7 @@ class ReplayCodeGenerator(CodeGenerator):
     TEST_TEMPLATE_PART = 'replay'
     TEMP_TEST_FILE = 'ftg_temp_test.f90'
     
-    def __init__(self, sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
@@ -19,7 +19,7 @@ class ReplayCodeGenerator(CodeGenerator):
         if not os.path.isdir(testDataDir):
             raise IOError("Not a directory: " + testDataDir);
 
-        super(ReplayCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
+        super(ReplayCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)        
         self.__testSourceDir = testSourceDir
         self.__testDataDir = testDataDir
         

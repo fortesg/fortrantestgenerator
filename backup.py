@@ -1,4 +1,5 @@
 import os
+import shutil
 from assertions import assertType, assertTypeAll
 
 class BackupFileFinder(object):
@@ -19,6 +20,14 @@ class BackupFileFinder(object):
         
         self.__sourceDirs = sourceDirs
         self.__backupSuffix = backupSuffix
+        self.__suffixPrefix = ''
+        
+    def getBackupSuffix(self):
+        return self.__suffixPrefix + self.__backupSuffix
+    
+    def setBackupSuffixPrefix(self, prefix):
+        self.__suffixPrefix = prefix
+        
 
     def find(self):
         backupFiles = []
@@ -47,11 +56,42 @@ class BackupFileFinder(object):
             specialModuleFiles[self.__getModuleName(backupFile)] = backupFile[(backupFile.rfind('/') + 1):]
             
         return specialModuleFiles
+    
+    def create(self, originalPath):
+        print "      Create File Backup of " + originalPath,
+        backupPath = originalPath.replace(BackupFileFinder.DEFAULT_SUFFIX, self.getBackupSuffix())
+        backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.getBackupSuffix())
+        if (backupPath == originalPath):
+            backupPath = originalPath + self.getBackupSuffix()
+        if not os.path.exists(backupPath):
+            shutil.copyfile(originalPath, backupPath)
+            print
+            return True
+        elif not os.path.exists(originalPath):
+            shutil.copyfile(backupPath, originalPath)
+            print
+            return True
+        else:
+            print " >>> ALREADY EXISTS"
+            return False
+        
+    def remove(self, originalPath):
+        print "      Remove File Backup of " + originalPath,
+        backupPath = originalPath.replace(BackupFileFinder.DEFAULT_SUFFIX, self.getBackupSuffix())
+        backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.getBackupSuffix())
+        if (backupPath == originalPath):
+            backupPath = originalPath + self.getBackupSuffix()
+        if os.path.exists(backupPath):
+            os.remove(backupPath)
+            print
+            return True
+        else:
+            print " >>> NOT FOUND"
+            return False
             
     def __getOriginalFile(self, backupFile):
-        originalFile = backupFile
-        originalFile = originalFile.replace(BackupFileFinder.EXPORT_SUFFIX_PREFIX + self.__backupSuffix, self.__backupSuffix)
-        originalFile = originalFile.replace(BackupFileFinder.CAPTURE_SUFFIX_PREFIX + self.__backupSuffix, self.__backupSuffix)
+        originalFile = backupFile.replace(BackupFileFinder.EXPORT_SUFFIX_PREFIX, '')
+        originalFile = originalFile.replace(BackupFileFinder.CAPTURE_SUFFIX_PREFIX, '')
         originalFile = originalFile.replace(self.__backupSuffix, BackupFileFinder.DEFAULT_SUFFIX)
         return originalFile
             

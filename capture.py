@@ -2,7 +2,8 @@ import os
 from generator import CodeGenerator 
 from assertions import assertType
 from source import SourceFiles, SourceFile, SubroutineFullName
-from templatenamespace import CaptureTemplatesNameSpace, ExportNameSpace
+from templatenamespace import CaptureTemplatesNameSpace
+from backup import BackupFileFinder
 
 class CaptureCodeGenerator(CodeGenerator):
     
@@ -12,29 +13,32 @@ class CaptureCodeGenerator(CodeGenerator):
     BEFORE_END_TEMPLATE_PART = 'captureBeforeEnd'
     EXPORT_TEMPLATE_PART = 'export'
     
-    def __init__(self, sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupSuffix, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
             raise IOError("Template file not found: " + templatePath)
         assertType(testDataDir, 'testDataDir', str)
         if not os.path.isdir(testDataDir):
-            raise IOError("Not a directory: " + testDataDir);
+            raise IOError("Not a directory: " + testDataDir)
+        assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
-        super(CaptureCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, backupSuffix, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        super(CaptureCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         self.__modifySourceFiles = modifySourceFiles      
-        self.__testDataDir = testDataDir
+        self.__testDataDir = testDataDir     
+        self.__backupFinder = backupFinder
 
     def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
         print "  Add Code to Module under Test"
         
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
-        if sourceFilePath.endswith(self._backupSuffix):
-            sourceFilePath = sourceFilePath.replace(self._backupSuffix, CodeGenerator.DEFAULT_SUFFIX)
+        if sourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
+            sourceFilePath = sourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
             subroutine = SourceFile(sourceFilePath, originalSourceFile.isPreprocessed()).getSubroutine(subroutine.getName())
-                    
-        self._createFileBackup(sourceFilePath)
+        
+        self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)            
+        self.__backupFinder.create(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
         # Reihenfolge wichtig: von unten nach oben!!!
         self._processTemplate(sourceFilePath, subroutine.getLastLineNumber(), self.AFTER_LAST_LINE_TEMPLATE_PART, templateNameSpace)
