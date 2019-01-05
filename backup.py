@@ -34,7 +34,7 @@ class BackupFileFinder(object):
         for sourceDir in self.__sourceDirs:
             for root, _, files in os.walk(sourceDir):
                 for name in files:
-                    if name.find(self.__backupSuffix) >= 0:
+                    if name.find(self.getBackupSuffix()) >= 0:
                         backupFiles.append(os.path.join(root, name))
         return backupFiles
         

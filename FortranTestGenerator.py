@@ -12,7 +12,8 @@ from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE,
     CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE, CFG_FCG_DIR
 
 def parseArguments(argParser):
-    argParser.add_argument('-b', '--restore', action="store_true", help='Restore Backup Files')
+    argParser.add_argument('-a', '--restoreCapture', action="store_true", help='Restore only Capture Backup Files')
+    argParser.add_argument('-b', '--restore', action="store_true", help='Restore all Backup Files')
     argParser.add_argument('-c', '--capture', action="store_true", help='Generate Capture Code')
     argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-r', '--replay', action="store_true", help='Generate Replay Code')
@@ -24,8 +25,8 @@ def parseArguments(argParser):
 def main():
     argParser = argparse.ArgumentParser(description='Generate test code.');
     args = parseArguments(argParser);
-    if not (args.restore or args.export or args.capture or args.replay):
-        argParser.error('No action requested, add -b/--restore and/or -c/--capture and/or -e/--export and/or -r/--replay')
+    if not (args.restore or args.restoreCapture or args.export or args.capture or args.replay):
+        argParser.error('No action requested, add -a/--restoreCapture and/or -b/--restore and/or -c/--capture and/or -e/--export and/or -r/--replay')
 
     config = loadFortranTestGeneratorConfiguration(args.configFile)
     if config is None:
@@ -94,7 +95,12 @@ def main():
             argParser.error('Subroutine ' + str(subroutineFullName) + ' not found!');
         
     if args.restore:
-        print 'Restore Backup Files'
+        print 'Restore all Backup Files'
+        backupFinder.restore()
+        sourceFiles.clearCache()
+    elif args.restoreCapture:
+        print 'Restore Capture Backup Files'
+        backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)
         backupFinder.restore()
         sourceFiles.clearCache()
     else: 
