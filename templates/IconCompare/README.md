@@ -19,4 +19,4 @@ Nevertheless, the [Replay template](replay.test.tmpl) still contains two depende
 ```
 
 This is just to make sure that capturing is disabled if the *Capture Code* still exists.
-If the *Capture Code* is already removed, those lines need to be deleted from the generated test program.
+If the *Capture Code* is already deleted, those lines need to be removed from the generated test program.
