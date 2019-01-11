@@ -9,5 +9,7 @@
    │
    └─ IconStandalone/IconStandalone.tmpl
       │
+      ├─ IconCompare/IconCompare.tmpl
+      │
       └─ IconTestbed/IconTestbed.tmpl
 ```
