@@ -8,6 +8,7 @@ The generated test program compares the output data directly with the stored val
 Nevertheless, the [Replay template](replay.test.tmpl) still contains two dependencies to the *Capture Code*:
 
 ```fortran
+  ! Remove if capture code already deleted
   USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
 
 [...]
