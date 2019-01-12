@@ -76,7 +76,7 @@ The meaning of the variables is documented in the [sample configuration file](co
 
 #### 7. Create assembler files
 
-Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `-save-temps -g -O0` to generate assembler files. **Do not compile with OpenMP** since assembler files containing OpenMP code are currently [not supported by FortranCallGraph](https://github.com/fortesg/fortrancallgraph/issues/7).
+Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `-save-temps -g -O0` to generate assembler files.
 
 #### 8. Create capture code
 
@@ -96,14 +96,7 @@ If you want the capturing to happen for example in the 42nd execution of `my_sub
 
 #### 10. Create folders for the captured data
 
-You will need the following directories for capturing data from `my_subroutine`:
-* `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/input`
-* `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output`
-* `TEST_DATA_BASE_DIR/ftg_my_subroutine_test/output_test`
-
-`TEST_DATA_BASE_DIR` stands for the path set in the configuration file. `my_subroutine` has to be replaced by the actual subroutine name.
-
-It is a little bit annoying that you have to create these folders manually, but currently there is no other option.
+Create the directory defined in your configuration file in the variable `TEST_DATA_BASE_DIR`.
 
 #### 11. Compile and run your application with the capture code
 
@@ -137,6 +130,8 @@ This compares the output for the first MPI process. Replace `_0` by `_1`, `_2`, 
 
 If deviations are shown, it's up to you to figure out what went wrong, for example if one variable was missed by the source code analysis or if there is some kind of non-determinism in your code.
 
+When using the template `IconCompare`, results are checked automatically by the test driver after running the subroutine under test. You don't have to use the compare tool. 
+
 #### 15. Make a real test out of the generated test driver
 
 For example add some checks, modify the loaded input data and run the subroutine under test again etc.
@@ -149,16 +144,21 @@ Some basic checks will be added to the provided templates in the future.
 
 ## Please Note
 
-* `FortranTestGenerator.py -c` not only generates the capture code in the module with the subroutine under test, but also a `PUBLIC` statements in every module that contains a module variable that is needed by the test and not yet public (export code).
-This only works for module variables that are private because the whole module is private and they are not explicitly set to public. If a variable is private because it has the private keyword in its declaration, this procedure won't work and you have to manually make them public. The compiler will tell you if there is such a problem. Similar problems can occure elsewhere.
+* `FortranTestGenerator.py -c` and `-r` not only generate capture and replay code, but also add `PUBLIC` statements in every module that contains a module variable that is needed by the test and not yet public (export code).
+This only works for module variables that are private because the whole module is private and they are not explicitly set to public. If a variable is private because it has the private keyword in its declaration, this procedure won't work and you have to manually make them public. The compiler will tell you if there is such a problem. Similar problems can occure elsewhere. With `-e` you can only create the export code.
 
-* For each module that is modified by `FortranTestGenerator.py -c` a copy of the original version is created with the file ending `.ftg-backup`. You can restore these backups by running
+* For each module that is modified a copy of the original version is created with the file ending `.ftg-backup`. You can restore these backups by running
   ```
   $> ./FortranTestGenerator.py -b
   ```
-* You can combine the options `-b`, `-c` and `-r` in any combination. When running `FortranTestGenerator.py` with `-b` option, restoring the backups will always be the first action, and when running with `-r`, generating the replay code will come at last.
+or   
+  ```
+  $> ./FortranTestGenerator.py -a
+  ```
+The latter will only restore the capture code backups and the export code backups. 
+* You can combine the options `-a`, `-b`, `-c`, `-e` and `-r` in any combination. When running `FortranTestGenerator.py` with `-a` or `-b` option, restoring the backups will always be the first action, and when running with `-r`, generating the replay code will come at last.
 
-* `-b` will restore all backups, so also the generated PUBLIC statements will be removed, but usually, you will need them for your test. So, if you want any generated code to stay, just remove the corresponding .ftg-backup file. It then might make sense to add some preprocessor directives around the generated code (e.g. something like `#ifdef __FTG_TESTS_ENABLED__ ... #endif`). If you want to have such directives always be there, just add them to the template you are using.
+* If you want any generated code to stay, just remove the corresponding .ftg-backup file, so it want be considered by `-a` or `-b`. It then might make sense to add some preprocessor directives around the generated code (e.g. something like `#ifdef __FTG_TESTS_ENABLED__ ... #endif`). If you want to have such directives always be there, just add them to the template you are using.
 
 * As long as there is a backup file, any analysis is done on this instead of the original file.
 
