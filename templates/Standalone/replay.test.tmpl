@@ -35,8 +35,6 @@ CONTAINS
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
     #if $subroutine.isFunction
         ${subroutine.result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
-    #else
-        CALL ${subroutine.name}(${args.joinNames})
     #end if
   
     IF (my_mpi_id == 0) THEN
