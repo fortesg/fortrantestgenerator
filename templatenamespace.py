@@ -151,38 +151,6 @@ class TemplatesNameSpace(object):
         
         return FilledVariable(variable.getReference(), dim, *indices)
     
-#     def fillIndices(self, variable, dim, *indices):
-#         assertType(variable, 'variable', UsedVariable, True)
-#         assertType(dim, 'dim', int)
-#         assertTypeAll(indices, 'indices', str)
-#         
-#         if variable is None:
-#             return ''
-#         
-#         ref = variable.getReference()
-#         perc = ''
-#         d = 0
-#         filled = ''
-#         for level in ref.getLevels():
-#             var = ref.getVariable(level)
-#             if var is None:
-#                 return variable.expression()
-#             filled += perc + var.getName()
-#             perc = '%'
-#             if var.isArray() and d < dim:
-#                 filled += '('
-#                 sep = ''
-#                 for _ in range(0, var.getDimension()):
-#                     filled += sep
-#                     if d < dim and d < len(indices):
-#                         filled += indices[d]
-#                     else:
-#                         filled += ':'
-#                     sep = ', '
-#                     d += 1
-#                 filled += ')'
-#         return filled
-    
     def writeVarNameWithFilledIndicesToString(self, variable, destination, dim, *indices):
         assertType(variable, 'variable', UsedVariable, True)
         
