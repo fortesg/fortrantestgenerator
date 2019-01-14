@@ -35,8 +35,9 @@ FUNCTION testsub(ra, rlog, oreal, oa)
   END IF
 
   CALL set(ra%c%r2(1,1))
+  testsub = get()
   IF (PRESENT(oreal)) THEN
-    oreal = get()
+    oreal = testsub
   END IF
 
   jm = get_jmodel(1)
