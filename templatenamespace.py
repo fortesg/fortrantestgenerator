@@ -731,7 +731,6 @@ class FunctionResult(object):
         return specBuilder.spec(self.__var, name)
     
     def usedVariables(self):
-        raise NotImplementedError #TODO: Function Result References
         return self.__used
 
 class VariableSpecificationBuilder():
