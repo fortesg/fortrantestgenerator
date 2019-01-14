@@ -302,6 +302,13 @@ class SubroutineNameSpace(object):
         self.export = ''
         if self.name not in subroutine.getModule().getPublicElements():
             self.export = 'PUBLIC :: ' + self.name
+        
+        self.isFunction = subroutine.isFunction()
+        if self.isFunction:
+            self.result = FunctionResult(subroutine.getResultVariable(), []) #TODO: Function Result References!
+        else:
+            self.result = None
+
 
 class ModuleNameSpace(object):
     def __init__(self, moduleName):
@@ -686,6 +693,64 @@ class Argument(object):
         return str(alias)
     
     def usedVariables(self):
+        return self.__used
+
+class FunctionResult(object):
+    
+    def __init__(self, variable, references):
+        assertType(variable, 'variable', Variable)
+        assert variable.isFunctionResult()
+        assertTypeAll(references, 'references', VariableReference)
+        
+        self.__var = variable
+        self.__used = []
+        for ref in references:
+            if ref.getLevel0Variable() == self.__var:
+                self.__used.append(UsedVariable(ref))
+        if not self.__used and variable.hasBuiltInType():
+            self.__used.append(UsedVariable(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable)))
+        
+    def __str__(self):
+        return self.name()
+    
+    def builtInType(self):
+        return self.__var.hasBuiltInType()
+    
+    def derivedType(self):
+        return self.__var.hasDerivedType()
+    
+    def array(self):
+        return self.__var.isArray()
+    
+    def pointer(self):
+        return self.__var.isPointer()
+    
+    def allocatable(self):
+        return self.__var.isAllocatable()
+    
+    def allocatableOrPointer(self):
+        return self.allocatable() or self.pointer()
+    
+    def name(self):
+        return self.__var.getName()
+    
+    def spec(self, intent = None, allocatable = None, charLengthZero = False):
+        alias = self.__var.getAlias()
+        if intent is not None:
+            alias.setIntent(intent)
+        if allocatable is not None:
+            if allocatable: 
+                if alias.getDimension() > 0 or alias.hasClassType():
+                    alias.setAllocatable(True)
+            else:
+                alias.setAllocatable(False)
+        if charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
+            alias.setTypeName('CHARACTER(len=0)')
+        alias.setTarget(False)
+        return str(alias)
+    
+    def usedVariables(self):
+        raise NotImplementedError #TODO: Function Result References
         return self.__used
 
 class ArgumentList(object):
