@@ -1,5 +1,6 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
+from asn1crypto.core import InstanceOf
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -29,6 +30,20 @@ class TemplatesNameSpace(object):
         self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
+
+    def commaList(self, *elements):
+        stringElements = []
+        for e in elements:
+            if isinstance(e, ArgumentList):
+                stringElements.append(e.joinNames())
+            elif isinstance(e, Argument) or isinstance(e, FunctionResult):
+                stringElements.append(e.name())
+            elif isinstance(e, UsedVariable):
+                stringElements.append(e.expression())
+            elif e is not None:
+                stringElements.append(str(e))
+        
+        return ', '.join(stringElements)
 
     def lbound(self, variable, dim, *placeholder):
         assertType(variable, 'variable', UsedVariable, True)
