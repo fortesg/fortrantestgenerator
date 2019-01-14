@@ -33,6 +33,11 @@ CONTAINS
   SUBROUTINE ftg_test_${subroutine.name}()
 
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+    #if $subroutine.isFunction
+        ${subroutine.result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+    #else
+        CALL ${subroutine.name}(${args.joinNames})
+    #end if
   
     IF (my_mpi_id == 0) THEN
       WRITE(*,*) ('*** FTG: Run test for ${subroutine.name} ***')
@@ -47,7 +52,11 @@ CONTAINS
     CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
     CALL ftg_destroy_serializer()
 
-    CALL ${subroutine.name}(${args.joinNames})
+    #if $subroutine.isFunction
+        ${subroutine.name}_result = ${subroutine.name}(${args.joinNames})
+    #else
+        CALL ${subroutine.name}(${args.joinNames})
+    #end if
 
   END SUBROUTINE ftg_test_${subroutine.name}
 
