@@ -59,6 +59,7 @@ class TestTemplate(unittest.TestCase):
                 self.export = 'EXPORT'
                 self.name = 'NAME'
                 self.joinNames = 'NAMES'
+                self.result = 'RESULT'
         
         class DummyNamespace(object):
             def __init__(self):
@@ -66,6 +67,9 @@ class TestTemplate(unittest.TestCase):
                 self.globals = DummySubnamespace()
                 self.args = ArgumentList([])
                 self.dataDir = 'DATADIR'
+             
+            def commaList(self, *elements):
+                return ', '.join(map(str, elements))
         
         template = Template(file=FTG_DIR + '/templates/IconStandalone/IconStandalone.tmpl', searchList=[DummyNamespace()])
         template.part = 'captureBeforeContains'
