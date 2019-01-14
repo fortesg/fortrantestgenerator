@@ -14,7 +14,7 @@ PUBLIC :: testsub
 
 CONTAINS
 
-SUBROUTINE testsub(ra, rlog, oreal, oa)
+FUNCTION testsub(ra, rlog, oreal, oa)
 
   TYPE(testa), INTENT(inout) :: ra
   LOGICAL, INTENT(in) :: rlog(4)
@@ -24,6 +24,7 @@ SUBROUTINE testsub(ra, rlog, oreal, oa)
 #ifdef _OPENACC
   LOGICAL :: openacc
 #endif
+  REAL :: testsub
 
   IF (rlog(1)) THEN
     ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:)
@@ -44,6 +45,6 @@ SUBROUTINE testsub(ra, rlog, oreal, oa)
 #ifdef _OPENACC
   WRITE (*,*) 'OPENACC enabled'
 #endif
-END SUBROUTINE testsub
+END FUNCTION testsub
 
 END MODULE sub

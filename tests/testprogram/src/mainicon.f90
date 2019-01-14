@@ -12,7 +12,7 @@ INTEGER rank, u
 TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag(4)
-REAL :: out
+REAL :: out, result
 
 CALL start_mpi('testprogram:mainicon')
 rank = get_my_mpi_all_id()
@@ -48,13 +48,14 @@ flag(:) = .TRUE.
 CALL set(109.0)
 
 IF (MOD(rank, 2) == 0) THEN
-  CALL testsub(a, flag, oa = oa)
+  result = testsub(a, flag, oa = oa)
 ELSE
-  CALL testsub(a, flag, out, oa)
-  PRINT*, 'node', rank, ': ', out
+  result = testsub(a, flag, out, oa)
+  PRINT*, 'node', rank, ' out: ', out
 END IF
 
-PRINT*, 'node', rank, ': ', a%c%r2
+PRINT*, 'node', rank, ' a%c%r2: ', a%c%r2
+PRINT*, 'node', rank, ' result: ', result
 
 CALL stop_mpi()
 

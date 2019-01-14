@@ -12,7 +12,7 @@ INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u
 TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag(4)
-REAL :: out
+REAL :: out, result
 
 CALL MPI_INIT(ierror)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
@@ -49,13 +49,14 @@ flag(:) = .TRUE.
 CALL set(109.0)
 
 IF (MOD(rank, 2) == 0) THEN
-  CALL testsub(a, flag, oa = oa)
+  result = testsub(a, flag, oa = oa)
 ELSE
-  CALL testsub(a, flag, out, oa)
-  PRINT*, 'node', rank, ': ', out
+  result = testsub(a, flag, out, oa)
+  PRINT*, 'node', rank, ' out: ', out
 END IF
 
-PRINT*, 'node', rank, ': ', a%c%r2
+PRINT*, 'node', rank, ' a%c%r2: ', a%c%r2
+PRINT*, 'node', rank, ' result: ', result
 
 CALL MPI_FINALIZE(ierror)
 
