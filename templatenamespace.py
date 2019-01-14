@@ -677,13 +677,19 @@ class Argument(object):
     def name(self):
         return self.__var.getName()
     
-    def spec(self, intent = None, allocatable = None, charLengthZero = False):
+    def spec(self, name = None, prefix = '', suffix = '', intent = None, allocatable = None, charLengthZero = False):
+        assertType(name, 'name', str, True)
+        assertType(prefix, 'prefix', str, True)
+        assertType(suffix, 'suffix', str, True)
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
         assertType(charLengthZero, 'charLengthZero', bool)
         
         specBuilder = VariableSpecificationBuilder(intent, allocatable, charLengthZero)
-        return specBuilder.spec(self.__var)
+        if name == None:
+            name = self.name()
+        name = prefix + name + suffix
+        return specBuilder.spec(self.__var, name)
     
     def usedVariables(self):
         return self.__used
@@ -727,13 +733,19 @@ class FunctionResult(object):
     def name(self):
         return self.__var.getName()
     
-    def spec(self, intent = None, allocatable = None, charLengthZero = False):
+    def spec(self, name = None, prefix = '', suffix = '', intent = None, allocatable = None, charLengthZero = False):
+        assertType(name, 'name', str, True)
+        assertType(prefix, 'prefix', str, True)
+        assertType(suffix, 'suffix', str, True)
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
         assertType(charLengthZero, 'charLengthZero', bool)
         
         specBuilder = VariableSpecificationBuilder(intent, allocatable, charLengthZero)
-        return specBuilder.spec(self.__var)
+        if name == None:
+            name = self.name()
+        name = prefix + name + suffix
+        return specBuilder.spec(self.__var, name)
     
     def usedVariables(self):
         raise NotImplementedError #TODO: Function Result References
@@ -744,15 +756,16 @@ class VariableSpecificationBuilder():
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
         assertType(charLengthZero, 'charLengthZero', bool)
-        
+
         self.__intent = intent
         self.__allocatable = allocatable
         self.__charLengthZero = charLengthZero
     
-    def spec(self, variable):
+    def spec(self, variable, name):
+        assertType(name, 'name', str, True)
         assertType(variable, 'variable', Variable)
         
-        alias = variable.getAlias()
+        alias = variable.getAlias(name)
         if self.__intent is not None:
             alias.setIntent(self.__intent)
         if self.__allocatable is not None:
@@ -839,12 +852,14 @@ class ArgumentList(object):
     def joinNames(self, sep = ', '):
         return sep.join(self.names())
     
-    def specs(self, intent = None, allocatable = None, charLengthZero = False):
+    def specs(self, prefix = '', suffix = '', intent = None, allocatable = None, charLengthZero = False):
+        assertType(prefix, 'prefix', str, True)
+        assertType(suffix, 'suffix', str, True)
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
         assertType(charLengthZero, 'charLengthZero', bool)
         
-        return "\n".join([arg.spec(intent, allocatable, charLengthZero) for arg in self.__arguments])
+        return "\n".join([arg.spec(None, prefix, suffix, intent, allocatable, charLengthZero) for arg in self.__arguments])
     
     def usedVariables(self):
         return sum([arg.usedVariables() for arg in self.__arguments], [])            
