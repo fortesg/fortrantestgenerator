@@ -678,19 +678,12 @@ class Argument(object):
         return self.__var.getName()
     
     def spec(self, intent = None, allocatable = None, charLengthZero = False):
-        alias = self.__var.getAlias()
-        if intent is not None:
-            alias.setIntent(intent)
-        if allocatable is not None:
-            if allocatable: 
-                if alias.getDimension() > 0 or alias.hasClassType():
-                    alias.setAllocatable(True)
-            else:
-                alias.setAllocatable(False)
-        if charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
-            alias.setTypeName('CHARACTER(len=0)')
-        alias.setTarget(False)
-        return str(alias)
+        assertType(intent, 'intent', str, True)
+        assertType(allocatable, 'allocatable', bool, True)
+        assertType(charLengthZero, 'charLengthZero', bool)
+        
+        specBuilder = VariableSpecificationBuilder(intent, allocatable, charLengthZero)
+        return specBuilder.spec(self.__var)
     
     def usedVariables(self):
         return self.__used
@@ -735,23 +728,43 @@ class FunctionResult(object):
         return self.__var.getName()
     
     def spec(self, intent = None, allocatable = None, charLengthZero = False):
-        alias = self.__var.getAlias()
-        if intent is not None:
-            alias.setIntent(intent)
-        if allocatable is not None:
-            if allocatable: 
-                if alias.getDimension() > 0 or alias.hasClassType():
-                    alias.setAllocatable(True)
-            else:
-                alias.setAllocatable(False)
-        if charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
-            alias.setTypeName('CHARACTER(len=0)')
-        alias.setTarget(False)
-        return str(alias)
+        assertType(intent, 'intent', str, True)
+        assertType(allocatable, 'allocatable', bool, True)
+        assertType(charLengthZero, 'charLengthZero', bool)
+        
+        specBuilder = VariableSpecificationBuilder(intent, allocatable, charLengthZero)
+        return specBuilder.spec(self.__var)
     
     def usedVariables(self):
         raise NotImplementedError #TODO: Function Result References
         return self.__used
+
+class VariableSpecificationBuilder():
+    def __init__(self, intent = None, allocatable = None, charLengthZero = False):
+        assertType(intent, 'intent', str, True)
+        assertType(allocatable, 'allocatable', bool, True)
+        assertType(charLengthZero, 'charLengthZero', bool)
+        
+        self.__intent = intent
+        self.__allocatable = allocatable
+        self.__charLengthZero = charLengthZero
+    
+    def spec(self, variable):
+        assertType(variable, 'variable', Variable)
+        
+        alias = variable.getAlias()
+        if self.__intent is not None:
+            alias.setIntent(self.__intent)
+        if self.__allocatable is not None:
+            if self.__allocatable: 
+                if alias.getDimension() > 0 or alias.hasClassType():
+                    alias.setAllocatable(True)
+            else:
+                alias.setAllocatable(False)
+        if self.__charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
+            alias.setTypeName('CHARACTER(len=0)')
+        alias.setTarget(False)
+        return str(alias)
 
 class ArgumentList(object):
     def __init__(self, arguments, typeArgumentReferences = None):
@@ -827,6 +840,10 @@ class ArgumentList(object):
         return sep.join(self.names())
     
     def specs(self, intent = None, allocatable = None, charLengthZero = False):
+        assertType(intent, 'intent', str, True)
+        assertType(allocatable, 'allocatable', bool, True)
+        assertType(charLengthZero, 'charLengthZero', bool)
+        
         return "\n".join([arg.spec(intent, allocatable, charLengthZero) for arg in self.__arguments])
     
     def usedVariables(self):
