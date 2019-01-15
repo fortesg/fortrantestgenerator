@@ -38,7 +38,7 @@ LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
 
 END FUNCTION ftg_${subroutine.name}_capture_input_active
   
-SUBROUTINE ftg_${subroutine.name}_capture_input(${args.joinNames})
+SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
   USE mtime,   ONLY: calendarType
   USE mo_mpi,  ONLY: get_my_mpi_all_id

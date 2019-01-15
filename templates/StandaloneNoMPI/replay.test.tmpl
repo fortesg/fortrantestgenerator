@@ -35,13 +35,13 @@ CONTAINS
     ftg_${subroutine.name}_capture_round = 1
 
     CALL ftg_${subroutine.name}_init_for_replay('input')
-    CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
+    CALL ftg_${subroutine.name}_replay_input($commaList($args))
     CALL ftg_destroy_serializer()
 
     #if $subroutine.isFunction
-        ${subroutine.name}_result = ${subroutine.name}(${args.joinNames})
+        ${subroutine.name}_result = ${subroutine.name}($commaList($args))
     #else
-        CALL ${subroutine.name}(${args.joinNames})
+        CALL ${subroutine.name}($commaList($args))
     #end if
 
   END SUBROUTINE ftg_test_${subroutine.name}
@@ -63,7 +63,7 @@ CONTAINS
 
   END SUBROUTINE ftg_${subroutine.name}_init_for_replay
   
-  SUBROUTINE ftg_${subroutine.name}_replay_input(${args.joinNames})
+  SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
     
     ${args.specs(intent = 'inout', allocatable = True)}
 
