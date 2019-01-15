@@ -50,6 +50,9 @@ CONTAINS
     INTEGER, INTENT(out) :: total_failure_count
       
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+    #if $subroutine.isFunction
+        ${subroutine.result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+    #end if
     
     INTEGER :: mpi_all_id, failure_count
     
@@ -70,7 +73,11 @@ CONTAINS
     CALL ftg_${subroutine.name}_replay_input(${args.joinNames})
     CALL ftg_destroy_serializer()
 
-    CALL ${subroutine.name}(${args.joinNames})
+    #if $subroutine.isFunction
+        ${subroutine.name}_result = ${subroutine.name}(${args.joinNames})
+    #else
+        CALL ${subroutine.name}(${args.joinNames})
+    #end if
 
     ! One process after another to get nice, ordered printing
     ! Change this if to slow
@@ -81,7 +88,12 @@ CONTAINS
     END IF
 
     CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)    
-    CALL ftg_${subroutine.name}_compare_output(${args.allOut.joinNames}, failure_count)
+    #if $subroutine.isFunction
+        #set $resultArg = $subroutine.name + '_result'
+    #else
+      #set $resultArg = ''
+    #end if  
+    CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
     CALL ftg_destroy_serializer()
     
     IF (failure_count == 0) THEN
@@ -148,9 +160,12 @@ CONTAINS
 
   END SUBROUTINE ftg_${subroutine.name}_replay_input
   
-  SUBROUTINE ftg_${subroutine.name}_compare_output(${args.allOut.joinNames}, failure_count)
+  SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $subroutine.result, 'failure_count'))
     
-    ${args.allOut.specs(intent = 'in')}
+    ${args.allOut.specs(intent = 'in', allocatable = False)}
+    #if $subroutine.isFunction:
+      ${subroutine.result.spec(intent = 'in', allocatable = False)}
+    #end if
     
     INTEGER, INTENT(inout) :: failure_count
     LOGICAL :: result
@@ -164,7 +179,13 @@ CONTAINS
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables
       $ftgCompare($var) #end for
-
+    
+    #if $subroutine.isFunction
+      ! RESULT
+      #for $var in $subroutine.result.usedVariables
+        $ftgCompare($var)#end for
+    #end if
+    
     ! GLOBALS
     #for $var in $globals.usedVariables
       $ftgCompare($var) #end for
