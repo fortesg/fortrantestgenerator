@@ -98,7 +98,7 @@ LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
 
 END FUNCTION ftg_${subroutine.name}_capture_output_active
   
-SUBROUTINE ftg_${subroutine.name}_capture_output(${args.allOut.joinNames})
+SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $subroutine.result))
 
   USE mo_mpi, ONLY: work_mpi_barrier, get_my_mpi_all_id
   USE mo_exception, ONLY: finish
@@ -106,7 +106,10 @@ SUBROUTINE ftg_${subroutine.name}_capture_output(${args.allOut.joinNames})
 
   ${globals.imports}
 
-  ${args.allOut.specs(intent = 'in')}
+  ${args.allOut.specs(intent = 'in', allocatable = False)}
+  #if $subroutine.isFunction:
+    ${subroutine.result.spec(intent = 'in', allocatable = False)}
+  #end if
 
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
   CHARACTER(len=256) :: ftg_c
@@ -123,16 +126,22 @@ SUBROUTINE ftg_${subroutine.name}_capture_output(${args.allOut.joinNames})
     ! REQUIRED ARGUMENTS
     #for $var in $args.allOut.requireds.usedVariables
       $ftgWrite($var)#end for
-    
+      
     ! OPTIONAL ARGUMENTS
     #for $arg in $args.allOut.optionals
-        #if $arg.usedVariables
-            IF (PRESENT($arg.name)) THEN
-            #for $var in $arg.usedVariables
-              $ftgWrite($var)#end for 
-            END IF
-        #end if 
+      #if $arg.usedVariables
+        IF (PRESENT($arg.name)) THEN
+          #for $var in $arg.usedVariables
+            $ftgWrite($var)#end for 
+        END IF
+      #end if 
     #end for
+    
+    #if $subroutine.isFunction
+      ! RESULT
+      #for $var in $subroutine.result.usedVariables
+        $ftgWrite($var)#end for
+    #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
