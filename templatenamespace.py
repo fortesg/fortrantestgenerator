@@ -40,7 +40,7 @@ class TemplatesNameSpace(object):
                 stringElements.append(e.name())
             elif isinstance(e, UsedVariable):
                 stringElements.append(e.expression())
-            elif e is not None:
+            elif e:
                 stringElements.append(str(e))
         
         return ', '.join(stringElements)
