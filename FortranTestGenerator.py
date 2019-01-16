@@ -46,7 +46,7 @@ def main():
     from source import SubroutineFullName, SourceFiles
     from backup import BackupFileFinder
     from combined import CombinedCodeGenerator
-    from assembler import FromAssemblerCallGraphBuilder
+    from assembler import GNUx86AssemblerCallGraphBuilder
     from treecache import CachedAssemblerCallGraphBuilder
     
     configFTG = {}
@@ -61,7 +61,7 @@ def main():
     ignoreGlobalsFromModuls = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     ignoreDerivedTypes = config[CFG_IGNORE_DERIVED_TYPES]
 
-    graphBuilder = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
+    graphBuilder = GNUx86AssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
         graphBuilder = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], graphBuilder)
     sourceFiles = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
