@@ -228,7 +228,6 @@ I have done it like this:
   $> find build/x86_64-unknown-linux-gnu -name *.f90 -delete
   $> export FFLAGS='' && ./configure && make
   ```
-* [Disable OpenMP for creating assembler files!](https://github.com/fortesg/fortrancallgraph/issues/7)  
 #### 3. Configuration
 
 [My FortranCallGraph configuration file for ICON](https://github.com/fortesg/config-examples/blob/master/icon/config_fortrancallgraph.py)
