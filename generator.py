@@ -1,6 +1,5 @@
 import os
 import sys
-import shutil
 from Cheetah.Template import Template
 from Cheetah import ImportHooks
 from assertions import assertType, assertTypeAll
