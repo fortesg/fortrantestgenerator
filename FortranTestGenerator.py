@@ -18,8 +18,8 @@ def parseArguments(argParser):
     argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-r', '--replay', action="store_true", help='Generate Replay Code')
     argParser.add_argument('-cf', '--configFile', type=str, help='Import configuration from this file.');
-    argParser.add_argument('module', nargs='?', default=None);
-    argParser.add_argument('subroutine', nargs='?', default=None);
+    argParser.add_argument('module', nargs='?', default=None, help='Module name');
+    argParser.add_argument('subroutine', nargs='?', default=None, help='Subroutine or function name');
     return argParser.parse_args();
 
 def main():
