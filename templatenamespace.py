@@ -3,13 +3,15 @@ from source import Subroutine, SourceFile, VariableReference, Variable
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
         assertType(subroutine, 'subroutine', Subroutine)
         assertType(typeArgumentReferences, 'typeArgumentReferences', list)
+        assertType(typeResultReferences, 'typeResultReferences', list)
         assertType(globalsReferences, 'globalsReferences', list)
         
         self.__subroutine = subroutine
         self._typeArgumentReferences = typeArgumentReferences
+        self._typeResultReferences = typeResultReferences
         
         self._globalsReferences = []
         for reference in globalsReferences:
@@ -189,8 +191,8 @@ class TemplatesNameSpace(object):
 
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
-        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
+        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir)
         self.__registered = set()
         
     def needsRegistration(self, variable):
@@ -219,8 +221,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         
 class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, testDataDir):
-        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, globalsReferences, testDataDir)
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
+        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)        
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
         self.__allocated = set()

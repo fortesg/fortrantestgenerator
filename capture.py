@@ -39,7 +39,7 @@ class CaptureCodeGenerator(CodeGenerator):
         
         self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)            
         self.__backupFinder.create(sourceFilePath)
-        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
+        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir)
         # Reihenfolge wichtig: von unten nach oben!!!
         self._processTemplate(sourceFilePath, subroutine.getLastLineNumber(), self.AFTER_LAST_LINE_TEMPLATE_PART, templateNameSpace)
         lastLine = subroutine.getContainsLineNumber()

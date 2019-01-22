@@ -31,7 +31,7 @@ class ReplayCodeGenerator(CodeGenerator):
         print "      Create file " + tempTestFile
         self._writeFile(tempTestFile, [])
         
-        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, globalsReferences, self.__testDataDir)
+        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir)
         self._processTemplate(tempTestFile, 0, self.TEST_TEMPLATE_PART, templateNameSpace)
         
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)
