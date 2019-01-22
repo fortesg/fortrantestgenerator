@@ -39,7 +39,7 @@ class TemplatesNameSpace(object):
     def commaList(self, *elements):
         stringElements = []
         for e in elements:
-            if isinstance(e, ArgumentList):
+            if isinstance(e, ArgumentList) and len(e) > 0:
                 stringElements.append(e.joinNames())
             elif isinstance(e, Argument) or isinstance(e, FunctionResult):
                 stringElements.append(e.name())
