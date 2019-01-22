@@ -26,9 +26,13 @@ class TemplatesNameSpace(object):
                     reference.setLevel0Variable(alias)
             self._globalsReferences.append(reference)
             
-        self.subroutine = SubroutineNameSpace(subroutine)
         self.module = ModuleNameSpace(subroutine.getModuleName())
         self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
+        if subroutine.isFunction():
+            self.result = FunctionResult(subroutine.getResultVariable(), typeResultReferences)
+        else:
+            self.result = None
+        self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
 
@@ -279,20 +283,21 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
     
 
 class SubroutineNameSpace(object):
-    def __init__(self, subroutine):
+    def __init__(self, subroutine, argumentList, functionResult):
         assertType(subroutine, 'subroutine', Subroutine)
+        assertType(argumentList, 'argumentList', ArgumentList)
+        assertType(functionResult, 'functionResult', FunctionResult, True)
         
         self.name = subroutine.getSimpleName().lower()
         self.export = ''
         if self.name not in subroutine.getModule().getPublicElements():
             self.export = 'PUBLIC :: ' + self.name
+
+        self.args = argumentList
         
         self.isFunction = subroutine.isFunction()
-        if self.isFunction:
-            self.result = FunctionResult(subroutine.getResultVariable(), []) #TODO: Function Result References!
-        else:
-            self.result = None
-
+        self.result = functionResult
+        
 
 class ModuleNameSpace(object):
     def __init__(self, moduleName):
