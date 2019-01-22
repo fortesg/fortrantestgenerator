@@ -28,7 +28,7 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir     
         self.__backupFinder = backupFinder
 
-    def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
+    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
         print "  Add Code to Module under Test"
         
         originalSourceFile = subroutine.getSourceFile()

@@ -31,9 +31,9 @@ class CombinedCodeGenerator(CodeGenerator):
         if replay:
             self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
     
-    def addCode(self, subroutine, typeArgumentReferences, globalsReferences):
-        self.__export.addCode(subroutine, typeArgumentReferences, globalsReferences)
+    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
+        self.__export.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)
         if self.__capture:
-            self.__capture.addCode(subroutine, typeArgumentReferences, globalsReferences)
+            self.__capture.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)
         if self.__replay:
-            self.__replay.addCode(subroutine, typeArgumentReferences, globalsReferences)
+            self.__replay.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)

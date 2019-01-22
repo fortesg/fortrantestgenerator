@@ -20,7 +20,7 @@ class ExportCodeGenerator(CodeGenerator):
         self.__modifySourceFiles = modifySourceFiles     
         self.__backupFinder = backupFinder 
 
-    def addCode(self, subroutine, typeArgumentReferences, globalsReferences):  # @UnusedVariable
+    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):  # @UnusedVariable
         print "  Add Code to Used Modules"
         
         moduleName = subroutine.getModuleName()
