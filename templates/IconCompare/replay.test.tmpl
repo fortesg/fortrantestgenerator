@@ -33,7 +33,6 @@ CALL ftg_test_${subroutine.name}(failure_count)
 
 IF (get_my_mpi_all_id() == 0) THEN
     IF (failure_count > 0) THEN
-        !TODO Print total number of failures
         WRITE (failure_count_char,'(I0)') failure_count
         CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(failure_count_char), 2)
     ELSE
