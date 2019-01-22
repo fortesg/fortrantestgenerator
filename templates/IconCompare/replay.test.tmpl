@@ -73,7 +73,13 @@ CONTAINS
     CALL ftg_destroy_serializer()
 
     #if $subroutine.isFunction
-        ${subroutine.name}_result = ${subroutine.name}($commaList($args))
+        #if $subroutine.result.pointer
+            #set $assign = '=>'
+        #else
+            #set $assign = '='
+        #end if
+        ${subroutine.name}_result $assign ${subroutine.name}($commaList($args))
+        
     #else
         CALL ${subroutine.name}($commaList($args))
     #end if
