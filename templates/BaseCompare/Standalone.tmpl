@@ -20,11 +20,6 @@
     $include('Standalone/capture.aftersubroutine.tmpl')
 #end def captureAfterSubroutine
 
-#def ftgWrite($var)
-    #set global $ftgWrite_var = $var
-    $include('Standalone/capture.ftgWrite.tmpl')
-#end def ftgWrite
-
 #def export
     $include('Standalone/export.beforecontains.tmpl')
 #end def export
@@ -33,7 +28,17 @@
     $include('Standalone/replay.test.tmpl')
 #end def replay
 
+#def ftgWrite($var)
+    #set global $ftgWrite_var = $var
+    $include('Standalone/capture.ftgWrite.tmpl')
+#end def ftgWrite
+
 #def ftgRead($var)
     #set global $ftgRead_var = $var
     $include('Standalone/replay.ftgRead.tmpl')
 #end def ftgRead
+
+#def ftgCompare($var)
+    #set global $ftgCompare_var = $var
+    $include('IconCompare/replay.ftgCompare.tmpl')
+#end def ftgCompare
