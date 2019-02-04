@@ -10,7 +10,7 @@ test-IconTestbed: clean capture-IconTestbed replay-IconTestbed compare-mpi ok
 
 test-IconCompare: clean capture-IconCompare replay-IconCompare ok
 
-test-BaseCompare: clean capture-IconCompare replay-BaseCompare ok
+test-BaseCompare: clean capture-IconCompare clean-capture-icon replay-BaseCompare ok
 
 replay-Standalone: 
 	$(MAKE) -C replay-Standalone replay
@@ -26,6 +26,9 @@ replay-IconTestbed:
 	
 replay-IconCompare: 
 	$(MAKE) -C replay-IconCompare replay
+	
+replay-BaseCompare: 
+	$(MAKE) -C replay-BaseCompare replay
 	 
 capture-Standalone: 
 	$(MAKE) -C src capture-Standalone
@@ -55,6 +58,12 @@ compare-nompi:
 ok:
 	printf '\e[38;5;0m\e[48;5;10m*** OK ***\e[48;5;0m\n\e[38;5;15m'
 	
+clean-capture-icon: 
+	$(MAKE) -C src clean-capture-icon
+	
+clean-capture-generic: 
+	$(MAKE) -C src clean-capture-generic
+
 clean: 
 	$(MAKE) -C src clean
 	$(MAKE) -C replay-Standalone clean
@@ -65,4 +74,4 @@ clean:
 	$(MAKE) -C replay-BaseCompare clean
 	rm -Rf data/*
 	
-.PHONY: test clean replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-IconCompare replay-BaseCompare
+.PHONY: test clean clean-capture-icon clean-capture-generic replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-IconCompare replay-BaseCompare

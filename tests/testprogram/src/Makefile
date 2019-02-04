@@ -64,12 +64,22 @@ assembler: globals.s types.s sub.s maingeneric.s
 %.o: %.f90
 	$(FF) -c $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $<
 	
-clean:
-	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_Standalone.py
+clean: clean-ftg-b
 	rm -f maingeneric mainicon *.o *.mod *.s
+	
+clean-capture-icon: clean-ftg-a 
+	$(MAKE) -B mainicon
+clean-capture-generic: clean-ftg-a 
+	$(MAKE) -B maingeneric
+	
+clean-ftg-b:
+	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_Standalone.py
+	
+clean-ftg-a:
+	$(FTGROOT)/FortranTestGenerator.py -a -cf ../config_fortrantestgenerator_test_Standalone.py
 	
 clean-o:
 	rm -f *.o
 	
-.PHONY: clean seticonvars
+.PHONY: clean clean-capture-icon clean-capture-generic clean-ftg-b clean-ftg-a seticonvars
 	
