@@ -10,6 +10,8 @@ test-IconTestbed: clean capture-IconTestbed replay-IconTestbed compare-mpi ok
 
 test-IconCompare: clean capture-IconCompare replay-IconCompare ok
 
+test-BaseCompare: clean capture-IconCompare replay-BaseCompare ok
+
 replay-Standalone: 
 	$(MAKE) -C replay-Standalone replay
 	 
@@ -40,6 +42,9 @@ capture-IconTestbed:
 capture-IconCompare: 
 	$(MAKE) -C src capture-IconCompare
 	 
+capture-BaseCompare: 
+	$(MAKE) -C src capture-BaseCompare
+	 
 compare-mpi:
 	$(COMPARE) -w data/ftg_testsub_test/output/MetaData-ftg_testsub_output_0.json data/ftg_testsub_test/output_test/MetaData-ftg_testsub_output_0.json
 	$(COMPARE) -w data/ftg_testsub_test/output/MetaData-ftg_testsub_output_1.json data/ftg_testsub_test/output_test/MetaData-ftg_testsub_output_1.json
@@ -57,6 +62,7 @@ clean:
 	$(MAKE) -C replay-IconStandalone clean
 	$(MAKE) -C replay-IconTestbed clean
 	$(MAKE) -C replay-IconCompare clean
+	$(MAKE) -C replay-BaseCompare clean
 	rm -Rf data/*
 	
-.PHONY: test clean replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-IconCompare 
+.PHONY: test clean replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-IconCompare replay-BaseCompare
