@@ -10,7 +10,7 @@ test-IconTestbed: clean capture-IconTestbed replay-IconTestbed compare-mpi ok
 
 test-IconCompare: clean capture-IconCompare replay-IconCompare ok
 
-test-BaseCompare: clean capture-IconCompare clean-capture-icon replay-BaseCompare ok
+test-BaseCompare: clean capture-BaseCompare clean-capture-icon replay-BaseCompare ok
 
 replay-Standalone: 
 	$(MAKE) -C replay-Standalone replay
