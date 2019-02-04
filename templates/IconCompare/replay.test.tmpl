@@ -79,7 +79,6 @@ CONTAINS
             #set $assign = '='
         #end if
         ${subroutine.name}_result $assign ${subroutine.name}($commaList($args))
-        
     #else
         CALL ${subroutine.name}($commaList($args))
     #end if
