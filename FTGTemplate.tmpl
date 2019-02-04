@@ -1,4 +1,7 @@
 #import os
+#def captureAfterUse
+#end def captureAfterUse
+##
 #def captureBeforeContains
 #end def captureBeforeContains
 ##
@@ -23,7 +26,9 @@
 ##
 #attr part = ''
 ##
-#if $part == 'captureBeforeContains'
+#if $part == 'captureAfterUse'
+    $captureAfterUse
+#elif $part == 'captureBeforeContains'
     $captureBeforeContains
 #elif $part == 'captureAfterLastSpecification' 
     $captureAfterLastSpecification

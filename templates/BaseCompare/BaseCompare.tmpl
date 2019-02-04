@@ -4,6 +4,10 @@
 
 #attr epilogue = '! ================= END FORTRAN TEST GENERATOR (FTG) ========================='
 
+#def captureAfterUse
+    $include('BaseCompare/capture.afteruse.tmpl')
+#end def captureAfterUse
+
 #def captureBeforeContains
     $include('BaseCompare/capture.beforecontains.tmpl')
 #end def captureBeforeContains

@@ -2,9 +2,6 @@ $prologue
 
 SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
-  USE mpi
-  USE m_ser_ftg,         ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
-
   CHARACTER(*), INTENT(IN) :: stage, dir
 
   INTEGER(kind=4) my_mpi_id, error
@@ -29,9 +26,6 @@ END FUNCTION ftg_${subroutine.name}_capture_input_active
   
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
-  USE mpi
-  USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
-  
   ${globals.imports}
 
   ${args.specs(intent = 'in')}
@@ -78,9 +72,6 @@ LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
 END FUNCTION ftg_${subroutine.name}_capture_output_active
   
 SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
-
-  USE mpi
-  USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
 
   ${globals.imports}
 

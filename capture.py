@@ -4,13 +4,15 @@ from assertions import assertType
 from source import SourceFiles, SourceFile, SubroutineFullName
 from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
+from linenumbers import LastUseLineFinder
 
 class CaptureCodeGenerator(CodeGenerator):
     
-    AFTER_LAST_LINE_TEMPLATE_PART = 'captureAfterSubroutine'
+    AFTER_USE_TEMPLATE_PART = 'captureAfterUse'
     BEFORE_CONTAINS_TEMPLATE_PART = 'captureBeforeContains'
     AFTER_LAST_SPECIFICATION_TEMPLATE_PART = 'captureAfterLastSpecification'
     BEFORE_END_TEMPLATE_PART = 'captureBeforeEnd'
+    AFTER_LAST_LINE_TEMPLATE_PART = 'captureAfterSubroutine'
     EXPORT_TEMPLATE_PART = 'export'
     
     def __init__(self, sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
@@ -50,6 +52,9 @@ class CaptureCodeGenerator(CodeGenerator):
         lastSpecificationLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
         self._processTemplate(sourceFilePath, lastSpecificationLineNumber, self.AFTER_LAST_SPECIFICATION_TEMPLATE_PART, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, templateNameSpace)
+        lastUseLineNumber = subroutine.getModule().getLastUseLineNumber()
+        lastUseLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine.getModule(), lastUseLineNumber)
+        self._processTemplate(sourceFilePath, lastUseLineNumber, self.AFTER_USE_TEMPLATE_PART, templateNameSpace)
 
     def _findSubroutine(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
