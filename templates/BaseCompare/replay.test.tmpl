@@ -2,9 +2,10 @@ PROGRAM ftg_${subroutine.name}_test
 
   USE mpi
 
-  USE ${module.name}, ONLY: ${subroutine.name}, ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_output_dir
+  USE ${module.name}, ONLY: ${subroutine.name}
 
   USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
+  USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
   
   ${globals.imports}
   
@@ -14,69 +15,73 @@ IMPLICIT NONE
 
 INTEGER, PARAMETER :: MAX_CHAR_LENGTH = 1024
 CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
-CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output_test'
-LOGICAL, PARAMETER :: OUTPUT_ENABLED = .TRUE.
-LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
 
-INTEGER (kind=4) :: my_mpi_id, error
+INTEGER (kind=4) :: my_mpi_id, error, failure_count
 
 CALL MPI_INIT(error)
 
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
 
-CALL ftg_test_${subroutine.name}()
+ftg_cmp_print_when_equal = .TRUE.
+ftg_cmp_count_missing_field_as_failure = .FALSE.
+WRITE (ftg_cmp_message_prefix, '(A,I2)') 'Rank #', my_mpi_id
 
+CALL ftg_test_${subroutine.name}(my_mpi_id, failure_count)
+
+IF (failure_count > 0) THEN
+    WRITE (*,'(A,A,I0,A)') TRIM(ftg_cmp_message_prefix), ': TEST FAILED (', failure_count, ' failures)'
+ELSE
+    WRITE (*,'(A,A)') TRIM(ftg_cmp_message_prefix), ': TEST PASSED'
+END IF
+    
 CALL MPI_FINALIZE(error)
 
 CONTAINS
   
-  SUBROUTINE ftg_test_${subroutine.name}()
-
+  SUBROUTINE ftg_test_${subroutine.name}(my_mpi_id, failure_count)
+  
+    INTEGER, INTENT(in) :: my_mpi_id
+    INTEGER, INTENT(out) :: failure_count
+      
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
     #if $subroutine.isFunction
         ${subroutine.result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
     #end if
-  
-    IF (my_mpi_id == 0) THEN
-      WRITE(*,*) ('*** FTG: Run test for ${subroutine.name} ***')
-    END IF
-    
-    ftg_${subroutine.name}_capture_input_enabled = .FALSE.
-    ftg_${subroutine.name}_capture_output_enabled = OUTPUT_ENABLED
-    ftg_${subroutine.name}_output_dir = OUTPUT_DIR
-    ftg_${subroutine.name}_capture_round = 1
 
-    CALL ftg_${subroutine.name}_init_for_replay('input')
+    CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
     CALL ftg_${subroutine.name}_replay_input($commaList($args))
     CALL ftg_destroy_serializer()
 
     #if $subroutine.isFunction
-        #if $subroutine.result.pointer
-            #set $assign = '=>'
-        #else
-            #set $assign = '='
-        #end if
-        ${subroutine.name}_result $assign ${subroutine.name}($commaList($args))
+      #if $subroutine.result.pointer
+        ${subroutine.name}_result => ${subroutine.name}($commaList($args))
+      #else
+        ${subroutine.name}_result = ${subroutine.name}($commaList($args))
+      #end if
     #else
         CALL ${subroutine.name}($commaList($args))
     #end if
 
+    CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)    
+    #if $subroutine.isFunction
+        #set $resultArg = $subroutine.name + '_result'
+    #else
+      #set $resultArg = ''
+    #end if  
+    CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
+    CALL ftg_destroy_serializer()
+    
   END SUBROUTINE ftg_test_${subroutine.name}
 
   
-  SUBROUTINE ftg_${subroutine.name}_init_for_replay(stage)
+  SUBROUTINE ftg_${subroutine.name}_init_for_replay(stage, dir)
 
-    CHARACTER(*), INTENT(IN) :: stage
-
+    CHARACTER(*), INTENT(IN) :: stage, dir
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
 
     WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
-
-    WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
-    CALL ftg_set_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r')
-    IF (SERIALBOX_DEBUG) THEN
-      CALL ftg_print_serializer_debuginfo()
-    END IF
+    CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
 
   END SUBROUTINE ftg_${subroutine.name}_init_for_replay
   
@@ -90,8 +95,6 @@ CONTAINS
 
     CALL ftg_set_savepoint('input')
   
-    WRITE (0,'(a,i1,a)') 'FTG READ INPUT DATA ${subroutine.name} (', my_mpi_id, ')'
-
     ! ARGUMENTS
     #for $var in $args.usedVariables
       $ftgRead($var) #end for
@@ -103,5 +106,39 @@ CONTAINS
     CALL ftg_destroy_savepoint()
 
   END SUBROUTINE ftg_${subroutine.name}_replay_input
+  
+  SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $subroutine.result, 'failure_count'))
+    
+    ${args.allOut.specs(intent = 'in', allocatable = False)}
+    #if $subroutine.isFunction:
+      ${subroutine.result.spec(intent = 'in', allocatable = False)}
+    #end if
+    
+    INTEGER, INTENT(out) :: failure_count
+    LOGICAL :: result
+    INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+    CHARACTER(len=256) :: ftg_c
+    
+    CALL ftg_set_savepoint('output')
+  
+    failure_count = 0
+    
+    ! ARGUMENTS
+    #for $var in $args.allOut.usedVariables
+      $ftgCompare($var) #end for
+    
+    #if $subroutine.isFunction
+      ! RESULT
+      #for $var in $subroutine.result.usedVariables
+        $ftgCompare($var)#end for
+    #end if
+    
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgCompare($var) #end for
+
+    CALL ftg_destroy_savepoint()
+    
+  END SUBROUTINE ftg_${subroutine.name}_compare_output  
   
 END PROGRAM ftg_${subroutine.name}_test
