@@ -16,13 +16,11 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
 END SUBROUTINE ftg_${subroutine.name}_init_for_capture
 
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
 
-  ftg_${subroutine.name}_capture_input_active =       &
-    ftg_${subroutine.name}_capture_input_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
+  ftg_${subroutine.name}_capture_active = ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
 
-END FUNCTION ftg_${subroutine.name}_capture_input_active
+END FUNCTION ftg_${subroutine.name}_capture_active
   
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
@@ -33,7 +31,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
   CHARACTER(len=256) :: ftg_c
 
-  IF (ftg_${subroutine.name}_capture_input_active()) THEN
+  IF (ftg_${subroutine.name}_capture_active()) THEN
     
     CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
     CALL ftg_set_savepoint('input')
@@ -63,14 +61,6 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
 END SUBROUTINE ftg_${subroutine.name}_capture_input
 
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
-
-  ftg_${subroutine.name}_capture_output_active =       &
-    ftg_${subroutine.name}_capture_output_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_output_active
-  
 SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
 
   ${globals.imports}
@@ -83,7 +73,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, error
   CHARACTER(len=256) :: ftg_c
 
-  IF (ftg_${subroutine.name}_capture_output_active()) THEN
+  IF (ftg_${subroutine.name}_capture_active()) THEN
 
     CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
     CALL ftg_set_savepoint('output')
