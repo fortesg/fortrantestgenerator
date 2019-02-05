@@ -1,7 +1,7 @@
 import os
 from generator import CodeGenerator 
-from assertions import assertType
-from source import SourceFiles, SourceFile, SubroutineFullName
+from assertions import assertType, assertTypeAll
+from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
 from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
 from linenumbers import LastUseLineFinder
@@ -30,9 +30,14 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir     
         self.__backupFinder = backupFinder
 
-    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
+        assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         print "  Add Code to Module under Test"
         
+        subroutine = self._findSubroutine(subroutineFullName)
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
         if sourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):

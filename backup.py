@@ -36,7 +36,9 @@ class BackupFileFinder(object):
                 for name in files:
                     if name.find(self.getBackupSuffix()) >= 0:
                         backupFiles.append(os.path.join(root, name))
-        return sorted(backupFiles) #Sorting makes capture backups to be restored before export backups
+        #Sorting makes capture backups to be restored before export backups
+        # and export backups set to special module files
+        return sorted(backupFiles) 
         
     def restore(self):
         for backupFile in self.find():

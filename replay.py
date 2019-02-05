@@ -1,8 +1,8 @@
 import os
 import re
 from generator import CodeGenerator 
-from assertions import assertType
-from source import SourceFiles
+from assertions import assertType, assertTypeAll
+from source import SourceFiles, VariableReference, SubroutineFullName
 from templatenamespace import ReplayTemplatesNameSpace
 
 class ReplayCodeGenerator(CodeGenerator):
@@ -23,7 +23,12 @@ class ReplayCodeGenerator(CodeGenerator):
         self.__testSourceDir = testSourceDir
         self.__testDataDir = testDataDir
         
-    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
+        assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        
         print "  Create code in new test source file"
         
         tempTestFile = os.path.join(self.__testSourceDir, self.TEMP_TEST_FILE)
@@ -31,6 +36,7 @@ class ReplayCodeGenerator(CodeGenerator):
         print "      Create file " + tempTestFile
         self._writeFile(tempTestFile, [])
         
+        subroutine = self._findSubroutine(subroutineFullName)
         templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir)
         self._processTemplate(tempTestFile, 0, self.TEST_TEMPLATE_PART, templateNameSpace)
         

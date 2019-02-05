@@ -1,7 +1,7 @@
 import os
 from generator import CodeGenerator 
-from assertions import assertType
-from source import SourceFiles
+from assertions import assertType, assertTypeAll
+from source import SourceFiles, SourceFile, VariableReference, SubroutineFullName
 from capture import CaptureCodeGenerator
 from replay import ReplayCodeGenerator
 from export import ExportCodeGenerator
@@ -23,17 +23,23 @@ class CombinedCodeGenerator(CodeGenerator):
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
         super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
-        self.__export = ExportCodeGenerator(sourceFiles, modifySourceFiles, templatePath, graphBuilder, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        self.__export = ExportCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, graphBuilder, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         self.__capture = None
         self.__replay = None        
         if capture:
-            self.__capture = CaptureCodeGenerator(sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+            self.__capture = CaptureCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
         if replay:
-            self.__replay = ReplayCodeGenerator(sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+            self.__replay = ReplayCodeGenerator(self._sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
     
-    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
-        self.__export.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
+        assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        
+        self.__export.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
         if self.__capture:
-            self.__capture.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)
+            self._sourceFiles.clearCache()
+            self.__capture.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
         if self.__replay:
-            self.__replay.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)
+            self.__replay.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)

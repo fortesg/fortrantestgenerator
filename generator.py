@@ -49,11 +49,7 @@ class CodeGenerator(object):
             ignoreRegex = re.compile('^' + self.__ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
         else:
             ignoreRegex = None
-            
-        subroutine = self._findSubroutine(subroutineFullName)
-        if subroutine is None:
-            raise LookupError("Subroutine not found: " + str(subroutineFullName))
-
+        
         print "  Build Call Graph"
         callGraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
         
@@ -70,6 +66,7 @@ class CodeGenerator(object):
         print "    Find References to Type Argument Members"
         typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callGraph)
         
+        subroutine = self._findSubroutine(subroutineFullName)
         if subroutine.isFunction() and subroutine.getResultVariable().hasDerivedType():
             print "    Find References to Type Result"
             typeResultReferences = argumentTracker.trackDerivedTypeResult(callGraph)
@@ -86,10 +83,9 @@ class CodeGenerator(object):
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
+        self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
         
-        self.addCode(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences)
-        
-    def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
         raise NotImplementedError()
     
     def _findSubroutine(self, subroutineFullName):
