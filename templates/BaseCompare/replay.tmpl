@@ -25,14 +25,14 @@ CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
 
 ftg_cmp_print_when_equal = .TRUE.
 ftg_cmp_count_missing_field_as_failure = .FALSE.
-WRITE (ftg_cmp_message_prefix, '(A,I2)') 'Rank #', my_mpi_id
+WRITE (ftg_cmp_message_prefix, '(A,I0,A)') 'Rank #', my_mpi_id, ':'
 
 CALL ftg_test_${subroutine.name}(my_mpi_id, failure_count)
 
 IF (failure_count > 0) THEN
-    WRITE (*,'(A,A,I0,A)') TRIM(ftg_cmp_message_prefix), ': TEST FAILED (', failure_count, ' failures)'
+    WRITE (*,'(A,A,I0,A)') TRIM(ftg_cmp_message_prefix), ' TEST FAILED (', failure_count, ' failures)'
 ELSE
-    WRITE (*,'(A,A)') TRIM(ftg_cmp_message_prefix), ': TEST PASSED'
+    WRITE (*,'(A,A)') TRIM(ftg_cmp_message_prefix), ' TEST PASSED'
 END IF
     
 CALL MPI_FINALIZE(error)
