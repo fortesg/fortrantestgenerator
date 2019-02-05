@@ -1,8 +1,11 @@
-#set $export = $globals.exports
-#if $export
+#if $globals.exports or $module.name == $subroutine.moduleName and $subroutine.export
   $prologue
   
-  $export
+  $globals.exports
+  #if $module.name == $subroutine.moduleName
+    $subroutine.export
+  #end if
+  sdsd
   
   $epilogue  
 #end if

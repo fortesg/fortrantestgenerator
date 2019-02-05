@@ -23,7 +23,6 @@ class ExportCodeGenerator(CodeGenerator):
     def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):  # @UnusedVariable
         print "  Add Code to Used Modules"
         
-        moduleName = subroutine.getModuleName()
         refModules = list(self.__extractModulesFromVariableReferences(globalsReferences))
         refModules.sort(reverse = True)
         for refModule in refModules:
@@ -36,7 +35,7 @@ class ExportCodeGenerator(CodeGenerator):
                     usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
                 self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
                 backup = self.__backupFinder.create(usedSourceFilePath)
-                exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
+                exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine)
                 result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
                 if backup and not result:
                     self.__backupFinder.remove(usedSourceFilePath)

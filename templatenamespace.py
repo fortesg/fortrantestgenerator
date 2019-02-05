@@ -285,17 +285,20 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
 class SubroutineNameSpace(object):
     def __init__(self, subroutine, argumentList, functionResult):
         assertType(subroutine, 'subroutine', Subroutine)
-        assertType(argumentList, 'argumentList', ArgumentList)
+        assertType(argumentList, 'argumentList', ArgumentList, True)
         assertType(functionResult, 'functionResult', FunctionResult, True)
         
         self.name = subroutine.getSimpleName().lower()
+        self.isFunction = subroutine.isFunction()
+        self.moduleName = subroutine.getModuleName().lower()
+
         self.export = ''
         if self.name not in subroutine.getModule().getPublicElements():
             self.export = 'PUBLIC :: ' + self.name
 
+        #DEPRECATED
         self.args = argumentList
-        
-        self.isFunction = subroutine.isFunction()
+        #DEPRECATED
         self.result = functionResult
         
 
@@ -405,13 +408,14 @@ class TypesNameSpace(object):
         
 class ExportNameSpace(object):
     
-    def __init__(self, moduleName, sourceFile, globalsReferences):
+    def __init__(self, moduleName, sourceFile, globalsReferences, subroutine):
         assertType(moduleName, 'moduleName', str)
         assertType(sourceFile, 'sourceFile', SourceFile)
         assertType(globalsReferences, 'globalsReferences', list)
         
         self.module = ModuleNameSpace(moduleName)
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
+        self.subroutine = SubroutineNameSpace(subroutine, None, None)
         
 class ExportGlobalsNameSpace(object):
     

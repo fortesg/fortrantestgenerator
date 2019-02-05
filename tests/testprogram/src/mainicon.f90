@@ -4,7 +4,7 @@ USE mo_mpi,            ONLY: get_my_mpi_all_id, start_mpi, stop_mpi
 
 USE types
 USE globals, ONLY : set
-USE sub, ONLY : testsub, init
+USE sub, ONLY : wrapper, init
 
 IMPLICIT NONE
 
@@ -50,9 +50,9 @@ flag(:) = .TRUE.
 CALL set(109.0)
 
 IF (MOD(rank, 2) == 0) THEN
-  result = testsub(a, flag, oa = oa)
+  result = wrapper(a, flag, oa = oa)
 ELSE
-  result = testsub(a, flag, out, oa)
+  result = wrapper(a, flag, out, oa)
   PRINT*, 'node', rank, ' out: ', out
 END IF
 

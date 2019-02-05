@@ -9,14 +9,7 @@ PRIVATE
 
 INTEGER :: self
 
-PUBLIC :: init, testsub
-
-
-! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
-
-PUBLIC :: self
-
-! =========== END FORTRAN TEST GENERATOR (FTG) =============
+PUBLIC :: init, wrapper
 
 CONTAINS
 
@@ -24,6 +17,16 @@ SUBROUTINE init(start)
   INTEGER, INTENT(in) :: start
   self = start
 END SUBROUTINE init
+
+FUNCTION wrapper(ra, rlog, oreal, oa)
+  TYPE(testa), INTENT(inout) :: ra
+  LOGICAL, INTENT(in) :: rlog(4)
+  REAL, INTENT(out), OPTIONAL :: oreal
+  TYPE(testa), INTENT(inout), OPTIONAL :: oa
+  REAL :: wrapper
+
+  wrapper = testsub(ra, rlog, oreal, oa)
+END FUNCTION wrapper
 
 FUNCTION testsub(ra, rlog, oreal, oa)
 
