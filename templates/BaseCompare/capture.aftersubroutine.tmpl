@@ -18,7 +18,8 @@ END SUBROUTINE ftg_${subroutine.name}_init_for_capture
 
 LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
 
-  ftg_${subroutine.name}_capture_active = ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
+  ftg_${subroutine.name}_capture_active = &
+    ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
 
 END FUNCTION ftg_${subroutine.name}_capture_active
   
@@ -31,33 +32,29 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
   CHARACTER(len=256) :: ftg_c
 
-  IF (ftg_${subroutine.name}_capture_active()) THEN
-    
-    CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
-    CALL ftg_set_savepoint('input')
+  CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
+  CALL ftg_set_savepoint('input')
 
-    ! REQUIRED ARGUMENTS
-    #for $var in $args.requireds.usedVariables
-      $ftgWrite($var)#end for
-  
-    ! OPTIONAL ARGUMENTS
-    #for $arg in $args.optionals
-      #if $arg.usedVariables
-        IF (PRESENT($arg.name)) THEN
-        #for $var in $arg.usedVariables
-          $ftgWrite($var)#end for 
-        END IF
-      #end if 
-    #end for
-  
-    ! GLOBALS
-    #for $var in $globals.usedVariables
-      $ftgWrite($var)#end for
+  ! REQUIRED ARGUMENTS
+  #for $var in $args.requireds.usedVariables
+    $ftgWrite($var)#end for
 
-    CALL ftg_destroy_savepoint()
-    CALL ftg_destroy_serializer()
+  ! OPTIONAL ARGUMENTS
+  #for $arg in $args.optionals
+    #if $arg.usedVariables
+      IF (PRESENT($arg.name)) THEN
+      #for $var in $arg.usedVariables
+        $ftgWrite($var)#end for 
+      END IF
+    #end if 
+  #end for
 
-  END IF
+  ! GLOBALS
+  #for $var in $globals.usedVariables
+    $ftgWrite($var)#end for
+
+  CALL ftg_destroy_savepoint()
+  CALL ftg_destroy_serializer()
 
 END SUBROUTINE ftg_${subroutine.name}_capture_input
 
@@ -73,43 +70,39 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, error
   CHARACTER(len=256) :: ftg_c
 
-  IF (ftg_${subroutine.name}_capture_active()) THEN
+  CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
+  CALL ftg_set_savepoint('output')
 
-    CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
-    CALL ftg_set_savepoint('output')
-
-    $resetRegistrations
-    ! REQUIRED ARGUMENTS
-    #for $var in $args.allOut.requireds.usedVariables
+  $resetRegistrations
+  ! REQUIRED ARGUMENTS
+  #for $var in $args.allOut.requireds.usedVariables
+    $ftgWrite($var)#end for
+    
+  ! OPTIONAL ARGUMENTS
+  #for $arg in $args.allOut.optionals
+    #if $arg.usedVariables
+      IF (PRESENT($arg.name)) THEN
+        #for $var in $arg.usedVariables
+          $ftgWrite($var)#end for 
+      END IF
+    #end if 
+  #end for
+  
+  #if $subroutine.isFunction
+    ! RESULT
+    #for $var in $result.usedVariables
       $ftgWrite($var)#end for
-      
-    ! OPTIONAL ARGUMENTS
-    #for $arg in $args.allOut.optionals
-      #if $arg.usedVariables
-        IF (PRESENT($arg.name)) THEN
-          #for $var in $arg.usedVariables
-            $ftgWrite($var)#end for 
-        END IF
-      #end if 
-    #end for
-    
-    #if $subroutine.isFunction
-      ! RESULT
-      #for $var in $result.usedVariables
-        $ftgWrite($var)#end for
-    #end if
-    
-    ! GLOBALS
-    #for $var in $globals.usedVariables
-      $ftgWrite($var)#end for
-    
-    CALL ftg_destroy_savepoint()
-    CALL ftg_destroy_serializer()
-    
-    CALL MPI_BARRIER (MPI_COMM_WORLD, error)
-    STOP 'FTG STOP'
-
-  END IF
+  #end if
+  
+  ! GLOBALS
+  #for $var in $globals.usedVariables
+    $ftgWrite($var)#end for
+  
+  CALL ftg_destroy_savepoint()
+  CALL ftg_destroy_serializer()
+  
+  CALL MPI_BARRIER (MPI_COMM_WORLD, error)
+  STOP 'FTG STOP'
 
 END SUBROUTINE ftg_${subroutine.name}_capture_output
   

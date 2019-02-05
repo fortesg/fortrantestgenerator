@@ -1,6 +1,8 @@
 $prologue
 
 ftg_${subroutine.name}_round = ftg_${subroutine.name}_round + 1
-CALL ftg_${subroutine.name}_capture_input($commaList($args))
+IF (ftg_${subroutine.name}_capture_active()) THEN
+  CALL ftg_${subroutine.name}_capture_input($commaList($args))
+END IF
 
 $epilogue
