@@ -46,7 +46,7 @@ CONTAINS
       
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
     #if $subroutine.isFunction
-        ${subroutine.result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+        ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
     #end if
 
     CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
@@ -54,7 +54,7 @@ CONTAINS
     CALL ftg_destroy_serializer()
 
     #if $subroutine.isFunction
-      #if $subroutine.result.pointer
+      #if $result.pointer
         ${subroutine.name}_result => ${subroutine.name}($commaList($args))
       #else
         ${subroutine.name}_result = ${subroutine.name}($commaList($args))
@@ -107,11 +107,11 @@ CONTAINS
 
   END SUBROUTINE ftg_${subroutine.name}_replay_input
   
-  SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $subroutine.result, 'failure_count'))
+  SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $result, 'failure_count'))
     
     ${args.allOut.specs(intent = 'in', allocatable = False)}
     #if $subroutine.isFunction:
-      ${subroutine.result.spec(intent = 'in', allocatable = False)}
+      ${result.spec(intent = 'in', allocatable = False)}
     #end if
     
     INTEGER, INTENT(out) :: failure_count
@@ -129,7 +129,7 @@ CONTAINS
     
     #if $subroutine.isFunction
       ! RESULT
-      #for $var in $subroutine.result.usedVariables
+      #for $var in $result.usedVariables
         $ftgCompare($var)#end for
     #end if
     

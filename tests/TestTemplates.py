@@ -14,7 +14,7 @@ sys.path.append(FTG_DIR + '/templates/Standalone')
 FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 
-from templatenamespace import ArgumentList
+from templatenamespace import ArgumentList, FunctionResult
 
 class TestTemplate(unittest.TestCase):
     @classmethod
@@ -60,12 +60,15 @@ class TestTemplate(unittest.TestCase):
                 self.name = 'NAME'
                 self.joinNames = 'NAMES'
                 self.result = 'RESULT'
+                self.moduleName = 'MODULE'
         
         class DummyNamespace(object):
             def __init__(self):
                 self.subroutine = DummySubnamespace()
+                self.module = DummySubnamespace()
                 self.globals = DummySubnamespace()
                 self.args = ArgumentList([])
+                self.result = None
                 self.dataDir = 'DATADIR'
              
             def commaList(self, *elements):

@@ -24,7 +24,7 @@ CONTAINS
 
     ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
     #if $subroutine.isFunction
-        ${subroutine.result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+        ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
     #end if
   
     WRITE(*,*) ('*** FTG: Run test for ${subroutine.name} ***')
@@ -39,7 +39,7 @@ CONTAINS
     CALL ftg_destroy_serializer()
 
     #if $subroutine.isFunction
-        #if $subroutine.result.pointer
+        #if $result.pointer
             #set $assign = '=>'
         #else
             #set $assign = '='
