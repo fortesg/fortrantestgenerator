@@ -4,7 +4,7 @@ USE mo_mpi,            ONLY: get_my_mpi_all_id, start_mpi, stop_mpi
 
 USE types
 USE globals, ONLY : set
-USE sub, ONLY : testsub
+USE sub, ONLY : testsub, init
 
 IMPLICIT NONE
 
@@ -16,6 +16,8 @@ REAL :: out, result
 
 CALL start_mpi('testprogram:mainicon')
 rank = get_my_mpi_all_id()
+
+CALL init(23)
 
 a%b => b
 oa%b => b

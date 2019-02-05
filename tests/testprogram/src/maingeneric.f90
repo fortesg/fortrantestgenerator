@@ -2,7 +2,7 @@ PROGRAM maingeneric
 
 USE types
 USE globals, ONLY : set
-USE sub, ONLY : testsub
+USE sub, ONLY : testsub, init
 
 IMPLICIT NONE
 
@@ -17,6 +17,8 @@ REAL :: out, result
 CALL MPI_INIT(ierror)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
+
+CALL init(42)
 
 a%b => b
 oa%b => b

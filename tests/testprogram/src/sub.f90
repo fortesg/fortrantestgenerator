@@ -7,12 +7,23 @@ IMPLICIT NONE
 
 PRIVATE
 
-INTEGER, PARAMETER :: base = 23
-REAL :: number = 0
+INTEGER :: self
 
-PUBLIC :: testsub
+PUBLIC :: init, testsub
+
+
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: self
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
 
 CONTAINS
+
+SUBROUTINE init(start)
+  INTEGER, INTENT(in) :: start
+  self = start
+END SUBROUTINE init
 
 FUNCTION testsub(ra, rlog, oreal, oa)
 
@@ -27,7 +38,7 @@ FUNCTION testsub(ra, rlog, oreal, oa)
   REAL :: testsub
 
   IF (rlog(1)) THEN
-    ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:)
+    ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:) + self
   END IF
 
   IF (PRESENT(oa)) THEN

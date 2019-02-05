@@ -28,19 +28,18 @@ class ExportCodeGenerator(CodeGenerator):
         refModules.sort(reverse = True)
         for refModule in refModules:
             refModuleName = refModule.getName() 
-            if refModuleName != moduleName:
-                if not refModule.isPublic():
-                    usedSourceFile = refModule.getSourceFile()
-                    usedSourceFilePath = usedSourceFile.getPath()
-                    if usedSourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
-                        usedSourceFilePath = usedSourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
-                        usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
-                    self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
-                    backup = self.__backupFinder.create(usedSourceFilePath)
-                    exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
-                    result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
-                    if backup and not result:
-                        self.__backupFinder.remove(usedSourceFilePath)
+            if not refModule.isPublic():
+                usedSourceFile = refModule.getSourceFile()
+                usedSourceFilePath = usedSourceFile.getPath()
+                if usedSourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
+                    usedSourceFilePath = usedSourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
+                    usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
+                self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
+                backup = self.__backupFinder.create(usedSourceFilePath)
+                exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences)
+                result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
+                if backup and not result:
+                    self.__backupFinder.remove(usedSourceFilePath)
 
     def _findSubroutine(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
