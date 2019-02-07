@@ -4,6 +4,7 @@ from generator import CodeGenerator
 from assertions import assertType
 from source import SourceFiles
 from templatenamespace import ReplayTemplatesNameSpace
+from printout import printLine
 
 class ReplayCodeGenerator(CodeGenerator):
     
@@ -24,11 +25,11 @@ class ReplayCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir
         
     def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
-        print "  Create code in new test source file"
+        printLine('Create code in new test source file', indent = 1)
         
         tempTestFile = os.path.join(self.__testSourceDir, self.TEMP_TEST_FILE)
         
-        print "      Create file " + tempTestFile
+        printLine('Create file ' + tempTestFile, indent = 2)
         self._writeFile(tempTestFile, [])
         
         templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir)
@@ -37,7 +38,7 @@ class ReplayCodeGenerator(CodeGenerator):
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)
         if testModuleName is not None:
             testFilePath = os.path.join(self.__testSourceDir, testModuleName + '.f90')
-            print "      Rename file to " + testFilePath
+            printLine('Rename file to ' + testFilePath, indent = 2)
             os.rename(tempTestFile, testFilePath)
         
     def __findModuleNameInTestFile(self, testFilePath):

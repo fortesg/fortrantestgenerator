@@ -4,6 +4,7 @@ from assertions import assertType
 from source import SourceFiles, SourceFile, SubroutineFullName
 from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
+from printout import printLine
 
 class CaptureCodeGenerator(CodeGenerator):
     
@@ -29,7 +30,7 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__backupFinder = backupFinder
 
     def addCode(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences):
-        print "  Add Code to Module under Test"
+        printLine('Add Code to Module under Test', indent = 1)
         
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
