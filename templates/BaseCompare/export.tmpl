@@ -1,4 +1,5 @@
 #if $globals.exports or $module.name == $subroutine.moduleName and $subroutine.export
+\#ifdef __FTG__
   $prologue
   
   $globals.exports
@@ -7,4 +8,5 @@
   #end if
   
   $epilogue  
+\#endif
 #end if

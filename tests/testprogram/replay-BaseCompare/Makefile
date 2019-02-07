@@ -3,7 +3,7 @@ SBROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 FF = $(HOME)/lib/mpich/bin/mpif90
 
-FFLAGS = -g -O0 -fopenmp
+FFLAGS = -g -O0 -fopenmp -D__FTG__
 LIBS = -L$(SBROOT)/lib -lSerialboxFortranStatic -lSerialboxCStatic -lSerialboxStatic -lstdc++ -lstdc++fs -L$(ICONBUILDDIR)/src
 INCLUDE = -I$(SBROOT)/include -I../src
 ICONLIBS = 
