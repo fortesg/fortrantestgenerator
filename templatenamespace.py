@@ -670,15 +670,17 @@ class Argument(object):
     def name(self):
         return self.__var.getName()
     
-    def spec(self, name = None, prefix = '', suffix = '', intent = None, allocatable = None, charLengthZero = False):
+    def spec(self, name = None, prefix = '', suffix = '', intent = None, allocatable = None, pointer = None, charLengthZero = False):
         assertType(name, 'name', str, True)
         assertType(prefix, 'prefix', str, True)
         assertType(suffix, 'suffix', str, True)
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
+        assertType(pointer, 'pointer', bool, True)
+        assert not (allocatable and pointer)
         assertType(charLengthZero, 'charLengthZero', bool)
         
-        specBuilder = VariableSpecificationBuilder(intent, allocatable, charLengthZero)
+        specBuilder = VariableSpecificationBuilder(intent, allocatable, pointer, charLengthZero)
         if name == None:
             name = self.name()
         name = prefix + name + suffix
@@ -726,15 +728,17 @@ class FunctionResult(object):
     def name(self):
         return self.__var.getName()
     
-    def spec(self, name = None, prefix = '', suffix = '', intent = None, allocatable = None, charLengthZero = False):
+    def spec(self, name = None, prefix = '', suffix = '', intent = None, allocatable = None, pointer = None, charLengthZero = False):
         assertType(name, 'name', str, True)
         assertType(prefix, 'prefix', str, True)
         assertType(suffix, 'suffix', str, True)
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
+        assertType(pointer, 'pointer', bool, True)
+        assert not (allocatable and pointer)
         assertType(charLengthZero, 'charLengthZero', bool)
         
-        specBuilder = VariableSpecificationBuilder(intent, allocatable, charLengthZero)
+        specBuilder = VariableSpecificationBuilder(intent, allocatable, pointer, charLengthZero)
         if name == None:
             name = self.name()
         name = prefix + name + suffix
@@ -744,13 +748,16 @@ class FunctionResult(object):
         return self.__used
 
 class VariableSpecificationBuilder():
-    def __init__(self, intent = None, allocatable = None, charLengthZero = False):
+    def __init__(self, intent = None, allocatable = None, pointer = None, charLengthZero = False):
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
+        assertType(pointer, 'pointer', bool, True)
+        assert not (allocatable and pointer)
         assertType(charLengthZero, 'charLengthZero', bool)
 
         self.__intent = intent
         self.__allocatable = allocatable
+        self.__pointer = pointer
         self.__charLengthZero = charLengthZero
     
     def spec(self, variable, name):
@@ -764,8 +771,15 @@ class VariableSpecificationBuilder():
             if self.__allocatable: 
                 if alias.getDimension() > 0 or alias.hasClassType():
                     alias.setAllocatable(True)
+                alias.setPointer(False)
             else:
                 alias.setAllocatable(False)
+        if self.__pointer is not None:
+            if self.__pointer: 
+                alias.setPointer(True)
+                alias.setAllocatable(False)
+            else:
+                alias.setPointer(False)
         if self.__charLengthZero and alias.hasBuiltInType() and alias.getTypeName().startswith('CHARACTER'):
             alias.setTypeName('CHARACTER(len=0)')
         alias.setTarget(False)
@@ -844,14 +858,16 @@ class ArgumentList(object):
     def joinNames(self, sep = ', '):
         return sep.join(self.names())
     
-    def specs(self, prefix = '', suffix = '', intent = None, allocatable = None, charLengthZero = False):
+    def specs(self, prefix = '', suffix = '', intent = None, allocatable = None, pointer = None, charLengthZero = False):
         assertType(prefix, 'prefix', str, True)
         assertType(suffix, 'suffix', str, True)
         assertType(intent, 'intent', str, True)
         assertType(allocatable, 'allocatable', bool, True)
+        assertType(pointer, 'pointer', bool, True)
+        assert not (allocatable and pointer)
         assertType(charLengthZero, 'charLengthZero', bool)
         
-        return "\n".join([arg.spec(None, prefix, suffix, intent, allocatable, charLengthZero) for arg in self.__arguments])
+        return "\n".join([arg.spec(None, prefix, suffix, intent, allocatable, pointer, charLengthZero) for arg in self.__arguments])
     
     def usedVariables(self):
         return sum([arg.usedVariables() for arg in self.__arguments], [])            

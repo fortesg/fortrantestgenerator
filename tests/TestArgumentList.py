@@ -129,7 +129,7 @@ INTEGER :: arg4
         expSpec = '''
 INTEGER, ALLOCATABLE, INTENT(inout) :: arg0
 INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: arg1
-INTEGER, POINTER, INTENT(in) :: arg2
+INTEGER, INTENT(in) :: arg2
 TYPE(test), INTENT(inout), OPTIONAL :: arg3
 INTEGER, INTENT(out), OPTIONAL :: arg4
 '''.strip()
@@ -143,6 +143,24 @@ TYPE(test), INTENT(inout), OPTIONAL :: arg3
 INTEGER, INTENT(out), OPTIONAL :: arg4
 '''.strip()
         self.assertEqual(expSpec, self.argList.specs(allocatable=False))
+        
+        expSpec = '''
+INTEGER, POINTER, INTENT(inout) :: arg0
+INTEGER, DIMENSION(:), POINTER, INTENT(inout) :: arg1
+INTEGER, POINTER, INTENT(in) :: arg2
+TYPE(test), POINTER, INTENT(inout), OPTIONAL :: arg3
+INTEGER, POINTER, INTENT(out), OPTIONAL :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs(pointer=True))
+        
+        expSpec = '''
+INTEGER, ALLOCATABLE, INTENT(inout) :: arg0
+INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: arg1
+INTEGER, INTENT(in) :: arg2
+TYPE(test), INTENT(inout), OPTIONAL :: arg3
+INTEGER, INTENT(out), OPTIONAL :: arg4
+'''.strip()
+        self.assertEqual(expSpec, self.argList.specs(pointer=False))
 
 if __name__ == "__main__":
     unittest.main()

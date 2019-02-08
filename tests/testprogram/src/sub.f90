@@ -38,7 +38,7 @@ FUNCTION testsub(ra, rlog, oreal, oa)
 #ifdef _OPENACC
   LOGICAL :: openacc
 #endif
-  REAL :: testsub
+  REAL, POINTER :: testsub
 
   IF (rlog(1)) THEN
     ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:) + self
@@ -49,6 +49,7 @@ FUNCTION testsub(ra, rlog, oreal, oa)
   END IF
 
   CALL set(ra%c%r2(1,1))
+  ALLOCATE(testsub)
   testsub = get()
   IF (PRESENT(oreal)) THEN
     oreal = testsub
