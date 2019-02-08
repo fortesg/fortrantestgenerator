@@ -33,6 +33,7 @@ CALL ftg_${subroutine.name}_replay_input($commaList($args))
 #else
   #set $resultArg = ''
 #end if  
+
 CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut,  \
                                                       $resultArg, 'failure_count'))
 
