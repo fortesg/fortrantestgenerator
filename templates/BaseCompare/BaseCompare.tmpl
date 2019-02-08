@@ -5,44 +5,44 @@
 #attr epilogue = '! =========== END FORTRAN TEST GENERATOR (FTG) ============='
 
 #def captureAfterUse
-    $include('BaseCompare/capture.afteruse.tmpl')
+  $include('BaseCompare/capture.afteruse.tmpl')
 #end def captureAfterUse
 
 #def captureBeforeContains
-    $include('BaseCompare/capture.beforecontains.tmpl')
+  $include('BaseCompare/capture.beforecontains.tmpl')
 #end def captureBeforeContains
 
 #def captureAfterLastSpecification
-    $include('BaseCompare/capture.afterlastspecification.tmpl')
+  $include('BaseCompare/capture.afterlastspecification.tmpl')
 #end def captureAfterLastSpecification
 
 #def captureBeforeEnd
-    $include('BaseCompare/capture.beforeend.tmpl')
+  $include('BaseCompare/capture.beforeend.tmpl')
 #end def captureBeforeEnd
 
 #def captureAfterSubroutine
-    $include('BaseCompare/capture.aftersubroutine.tmpl')
+  $include('BaseCompare/capture.aftersubroutine.tmpl')
 #end def captureAfterSubroutine
 
 #def export
-    $include('BaseCompare/export.tmpl')
+  $include('BaseCompare/export.tmpl')
 #end def export
 
 #def replay
-    $include('BaseCompare/replay.tmpl')
+  $include('BaseCompare/replay.tmpl')
 #end def replay
 
 #def ftgWrite($var)
-    #set global $ftgWrite_var = $var
-    $include('BaseCompare/capture.ftgWrite.tmpl')
+  #set global $ftgWrite_var = $var
+  $include('BaseCompare/capture.ftgWrite.tmpl')
 #end def ftgWrite
 
 #def ftgRead($var)
-    #set global $ftgRead_var = $var
-    $include('BaseCompare/replay.ftgRead.tmpl')
+  #set global $ftgRead_var = $var
+  $include('BaseCompare/replay.ftgRead.tmpl')
 #end def ftgRead
 
 #def ftgCompare($var)
-    #set global $ftgCompare_var = $var
-    $include('BaseCompare/replay.ftgCompare.tmpl')
+  #set global $ftgCompare_var = $var
+  $include('BaseCompare/replay.ftgCompare.tmpl')
 #end def ftgCompare

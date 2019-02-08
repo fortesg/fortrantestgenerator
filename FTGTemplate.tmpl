@@ -21,27 +21,27 @@
 #end def replay
 ##
 #def include(file)
-    #include os.path.dirname(self._CHEETAH_src) + '/../' + file
+  #include os.path.dirname(self._CHEETAH_src) + '/../' + file
 #end def include
 ##
 #attr part = ''
 ##
 #if $part == 'captureAfterUse'
-    $captureAfterUse
+  $captureAfterUse
 #elif $part == 'captureBeforeContains'
-    $captureBeforeContains
+  $captureBeforeContains
 #elif $part == 'captureAfterLastSpecification' 
-    $captureAfterLastSpecification
+  $captureAfterLastSpecification
 #elif $part == 'captureBeforeEnd' 
-    $captureBeforeEnd
+  $captureBeforeEnd
 #elif $part == 'captureAfterSubroutine' 
-    $captureAfterSubroutine
+  $captureAfterSubroutine
 #elif $part == 'export' 
-    $export
+  $export
 #elif $part == 'replay' 
-    $replay
+  $replay
 #elif not $part
-    #raise ValueError('No template part given')
+  #raise ValueError('No template part given')
 #else
-    #raise ValueError('Not a valid template part: ' + str($part))
+  #raise ValueError('Not a valid template part: ' + str($part))
 #end if

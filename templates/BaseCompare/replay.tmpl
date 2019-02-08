@@ -13,8 +13,8 @@ IMPLICIT NONE
 INTEGER (kind=4) :: rank, error, failure_count
 $args.specs(intent = '', allocatable = True)
 #if $subroutine.isFunction
-    $result.spec(name = $subroutine.name + '_result', \
-                 intent = '', allocatable = False, pointer = False)
+  $result.spec(name = $subroutine.name + '_result', intent = '', \
+               allocatable = False, pointer = False)
 #end if
 
 CALL MPI_INIT(error)
@@ -25,7 +25,7 @@ CALL ftg_${subroutine.name}_replay_input($commaList($args))
 #if $subroutine.isFunction
   ${subroutine.name}_result = ${subroutine.name}($commaList($args))
 #else
-    CALL ${subroutine.name}($commaList($args))
+  CALL ${subroutine.name}($commaList($args))
 #end if
 
 #if $subroutine.isFunction
@@ -33,12 +33,13 @@ CALL ftg_${subroutine.name}_replay_input($commaList($args))
 #else
   #set $resultArg = ''
 #end if  
-CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
+CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut,  \
+                                                      $resultArg, 'failure_count'))
 
 IF (failure_count > 0) THEN
-    WRITE (*,'(A,I0,A,I0,A)') 'Rank #', rank, ': *** TEST FAILED ***'
+  WRITE (*,'(A,I0,A,I0,A)') 'Rank #', rank, ': *** TEST FAILED ***'
 ELSE
-    WRITE (*,'(A,I0,A)') 'Rank #', rank, ': *** TEST PASSED ***'
+  WRITE (*,'(A,I0,A)') 'Rank #', rank, ': *** TEST PASSED ***'
 END IF
     
 CALL MPI_FINALIZE(error)
