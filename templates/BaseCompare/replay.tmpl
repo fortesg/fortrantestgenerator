@@ -11,11 +11,29 @@ PROGRAM ftg_${subroutine.name}_test
 IMPLICIT NONE
 
 INTEGER (kind=4) :: rank, error, failure_count
+$args.specs(intent = '', allocatable = True)
+#if $subroutine.isFunction
+    $result.spec(name = $subroutine.name + '_result', \
+                 intent = '', allocatable = False, pointer = False)
+#end if
 
 CALL MPI_INIT(error)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, error)
 
-CALL ftg_test_${subroutine.name}(failure_count)
+CALL ftg_${subroutine.name}_replay_input($commaList($args))
+
+#if $subroutine.isFunction
+  ${subroutine.name}_result = ${subroutine.name}($commaList($args))
+#else
+    CALL ${subroutine.name}($commaList($args))
+#end if
+
+#if $subroutine.isFunction
+    #set $resultArg = $subroutine.name + '_result'
+#else
+  #set $resultArg = ''
+#end if  
+CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
 
 IF (failure_count > 0) THEN
     WRITE (*,'(A,I0,A,I0,A)') 'Rank #', rank, ': *** TEST FAILED ***'
@@ -26,37 +44,6 @@ END IF
 CALL MPI_FINALIZE(error)
 
 CONTAINS
-  
-  SUBROUTINE ftg_test_${subroutine.name}(failure_count)
-  
-    INTEGER, INTENT(out) :: failure_count
-      
-    $args.specs(intent = '', allocatable = True, charLengthZero = True)
-    #if $subroutine.isFunction
-        $result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)
-    #end if
-
-    CALL ftg_${subroutine.name}_replay_input($commaList($args))
-
-    #if $subroutine.isFunction
-      #if $result.pointer
-        ${subroutine.name}_result => ${subroutine.name}($commaList($args))
-      #else
-        ${subroutine.name}_result = ${subroutine.name}($commaList($args))
-      #end if
-    #else
-        CALL ${subroutine.name}($commaList($args))
-    #end if
-
-    #if $subroutine.isFunction
-        #set $resultArg = $subroutine.name + '_result'
-    #else
-      #set $resultArg = ''
-    #end if  
-    CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
-    
-    
-  END SUBROUTINE ftg_test_${subroutine.name}
 
   SUBROUTINE ftg_${subroutine.name}_init_serializer(stage)
 
@@ -65,8 +52,8 @@ CONTAINS
     CHARACTER(len=256) :: basename
     CHARACTER(len=1024) :: dir
 
-    WRITE (dir,'(a,a)') TRIM(DATA_DIR), TRIM(stage)
     WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
+    WRITE (dir,'(a,a)') TRIM(DATA_DIR), TRIM(stage)
     
     CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
     CALL ftg_set_savepoint(TRIM(stage))
@@ -106,7 +93,7 @@ CONTAINS
     
     $args.allOut.specs(intent = 'in', allocatable = False)
     #if $subroutine.isFunction:
-      $result.spec(intent = 'in', allocatable = False)
+      $result.spec(intent = 'in', allocatable = False, pointer = False)
     #end if
     
     INTEGER, INTENT(out) :: failure_count
