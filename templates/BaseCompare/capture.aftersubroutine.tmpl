@@ -11,11 +11,11 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
   CHARACTER(*), INTENT(IN) :: stage, dir
 
-  INTEGER(kind=4) my_mpi_id, error
+  INTEGER(kind=4) rank, error
   CHARACTER(len=1024) :: basename
   
-  CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
-  WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
+  CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, error)
+  WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
 
   CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir))
   
