@@ -7,29 +7,29 @@ LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
 
 END FUNCTION ftg_${subroutine.name}_capture_active
 
-SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
+SUBROUTINE ftg_${subroutine.name}_init_serializer(stage)
 
-  CHARACTER(*), INTENT(IN) :: stage, dir
+    CHARACTER(*), PARAMETER :: DATA_DIR = '$dataDir/ftg_${subroutine.name}_test/'
+    CHARACTER(*), INTENT(IN) :: stage
+    CHARACTER(len=256) :: basename
+    CHARACTER(len=1024) :: dir
+    INTEGER(kind=4) rank, error
 
-  INTEGER(kind=4) rank, error
-  CHARACTER(len=1024) :: basename
-  
-  CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, error)
-  WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, error)
+    WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
+    WRITE (dir,'(a,a)') TRIM(DATA_DIR), TRIM(stage)
+    
+    CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
+    CALL ftg_set_savepoint(TRIM(stage))
 
-  CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir))
-  
-  CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
-  CALL ftg_set_savepoint(stage)
+  END SUBROUTINE ftg_${subroutine.name}_init_serializer
 
-END SUBROUTINE ftg_${subroutine.name}_init_for_capture
+  SUBROUTINE ftg_${subroutine.name}_close_serializer()
 
-SUBROUTINE ftg_${subroutine.name}_end_capture()
+   CALL ftg_destroy_savepoint()
+   CALL ftg_destroy_serializer()
 
-  CALL ftg_destroy_savepoint()
-  CALL ftg_destroy_serializer()
-
-END SUBROUTINE ftg_${subroutine.name}_end_capture
+  END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
@@ -40,7 +40,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
   CHARACTER(len=256) :: ftg_c
 
-  CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
+  CALL ftg_${subroutine.name}_init_serializer('input')
 
   ! REQUIRED ARGUMENTS
   #for $var in $args.requireds.usedVariables
@@ -60,7 +60,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   #for $var in $globals.usedVariables
     $ftgWrite($var)#end for
 
-  CALL ftg_${subroutine.name}_end_capture()
+  CALL ftg_${subroutine.name}_close_serializer()
 
 END SUBROUTINE ftg_${subroutine.name}_capture_input
 
@@ -76,7 +76,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, error
   CHARACTER(len=256) :: ftg_c
 
-  CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
+  CALL ftg_${subroutine.name}_init_serializer('output')
   CALL ftg_set_savepoint('output')
 
   $resetRegistrations
@@ -104,7 +104,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   #for $var in $globals.usedVariables
     $ftgWrite($var)#end for
   
-  CALL ftg_${subroutine.name}_end_capture()
+  CALL ftg_${subroutine.name}_close_serializer()
   
   CALL MPI_BARRIER (MPI_COMM_WORLD, error)
   STOP 'FTG STOP'
