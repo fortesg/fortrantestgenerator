@@ -1,9 +1,10 @@
 import os
 from generator import CodeGenerator 
-from assertions import assertType
-from source import SourceFiles, SourceFile, SubroutineFullName
+from assertions import assertType, assertTypeAll
+from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
 from templatenamespace import ExportNameSpace
 from backup import BackupFileFinder
+from printout import printLine
 
 class ExportCodeGenerator(CodeGenerator):
     
@@ -21,8 +22,12 @@ class ExportCodeGenerator(CodeGenerator):
         self.__backupFinder = backupFinder 
 
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):  # @UnusedVariable
-        print "  Add Code to Used Modules"
+        assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         
+        printLine('Add Code to Used Modules', indent = 1)
         self.__backupFinder.setBackupSuffixPrefix(self.__backupFinder.EXPORT_SUFFIX_PREFIX)
         refModules = list(self.__extractModulesFromVariableReferences(globalsReferences))
         refModules.sort(reverse = True)

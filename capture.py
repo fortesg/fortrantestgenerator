@@ -4,7 +4,7 @@ from assertions import assertType, assertTypeAll
 from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
 from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
-from linenumbers import LastUseLineFinder
+from printout import printLine
 
 class CaptureCodeGenerator(CodeGenerator):
     
@@ -35,7 +35,7 @@ class CaptureCodeGenerator(CodeGenerator):
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
-        print "  Add Code to Module under Test"
+        printLine('Add Code to Module under Test', indent = 1)
         
         subroutine = self._findSubroutine(subroutineFullName)
         originalSourceFile = subroutine.getSourceFile()

@@ -1,6 +1,7 @@
 import os
 import shutil
 from assertions import assertType, assertTypeAll
+from printout import printLine, printInline
 
 class BackupFileFinder(object):
     
@@ -43,7 +44,7 @@ class BackupFileFinder(object):
     def restore(self):
         for backupFile in self.find():
             restoreFile = self.__getOriginalFile(backupFile)
-            print '  Restore ' + backupFile
+            printLine('Restore ' + restoreFile, indent = 1)
             os.rename(backupFile, restoreFile)
             
     def extendSpecialModuleFiles(self, specialModuleFiles):
@@ -60,35 +61,35 @@ class BackupFileFinder(object):
         return specialModuleFiles
     
     def create(self, originalPath):
-        print "      Create File Backup of " + originalPath,
+        printInline('Create File Backup of ' + originalPath, indent = 2)
         backupPath = originalPath.replace(BackupFileFinder.DEFAULT_SUFFIX, self.getBackupSuffix())
         backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.getBackupSuffix())
         if (backupPath == originalPath):
             backupPath = originalPath + self.getBackupSuffix()
         if not os.path.exists(backupPath):
             shutil.copyfile(originalPath, backupPath)
-            print
+            printLine()
             return True
         elif not os.path.exists(originalPath):
             shutil.copyfile(backupPath, originalPath)
-            print
+            printLine()
             return True
         else:
-            print " >>> ALREADY EXISTS"
+            printLine(' >>> ALREADY EXISTS')
             return False
         
     def remove(self, originalPath):
-        print "      Remove File Backup of " + originalPath,
+        printInline('Remove File Backup of ' + originalPath, indent = 2)
         backupPath = originalPath.replace(BackupFileFinder.DEFAULT_SUFFIX, self.getBackupSuffix())
         backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.getBackupSuffix())
         if (backupPath == originalPath):
             backupPath = originalPath + self.getBackupSuffix()
         if os.path.exists(backupPath):
             os.remove(backupPath)
-            print
+            printLine()
             return True
         else:
-            print " >>> NOT FOUND"
+            printLine(' >>> NOT FOUND')
             return False
             
     def __getOriginalFile(self, backupFile):

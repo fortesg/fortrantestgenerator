@@ -9,6 +9,7 @@ from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
 import re
+from printout import printLine, printInline
 
 class CodeGenerator(object):
     
@@ -49,31 +50,36 @@ class CodeGenerator(object):
             ignoreRegex = re.compile('^' + self.__ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
         else:
             ignoreRegex = None
-        
-        print "  Build Call Graph"
+
+        printLine('Build Call Graph', indent = 1)
+            
+        subroutine = self._findSubroutine(subroutineFullName)
+        if subroutine is None:
+            raise LookupError("Subroutine not found: " + str(subroutineFullName))
+
         callGraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
         
-        print "  Find Interfaces"
+        printLine('Find Interfaces', indent = 1)
         useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules)
         useTraversal.parseModules(callGraph.getRoot())
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
 
-        print "  Analyse Source Code"
+        printLine('Analyse Source Code', indent = 1)
         argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
         argumentTracker.setIgnoreRegex(ignoreRegex)
         
-        print "    Find References to Type Argument Members"
+        printLine('Find References to Type Argument Members', indent = 2)
         typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callGraph)
         
         subroutine = self._findSubroutine(subroutineFullName)
         if subroutine.isFunction() and subroutine.getResultVariable().hasDerivedType():
-            print "    Find References to Type Result"
+            printLine('Find References to Type Result', indent = 2)
             typeResultReferences = argumentTracker.trackDerivedTypeResult(callGraph)
         else:
             typeResultReferences = []
         
-        print "    Find References to Global Variables"
+        printLine('Find References to Global Variables', indent = 2)
         globalsTracker = GlobalVariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callGraph)
@@ -99,17 +105,17 @@ class CodeGenerator(object):
         return self._sourceFiles.findModule(moduleName);
 
     def _processTemplate(self, sourceFilePath, lineNumber, part, templateNameSpace):
-        print "      Process Template " + os.path.basename(self.__templatePath) + " [" + part + "]" + " on file " + sourceFilePath, 
+        printInline('Process Template ' + os.path.basename(self.__templatePath) + ' [' + part + ']' + ' on file ' + sourceFilePath, indent = 2)
         source = self._readFile(sourceFilePath)
         codeToAdd = self.__loadTemplate(part, templateNameSpace)
         
         if codeToAdd:
             source = source[:lineNumber] + ["\n"] + [codeToAdd] + ["\n", "\n"] + source[lineNumber:]
             self._writeFile(sourceFilePath, source)
-            print
+            printLine()
             return True
         else:
-            print " >>> EMPTY"
+            printLine(' >>> EMPTY')
             return False
         
     def __loadTemplate(self, part, templateNameSpace):
