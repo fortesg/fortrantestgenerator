@@ -55,11 +55,11 @@
           #if $caa
             IF ($caa) THEN
           #end if
-          $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          $writeVarNameWithFilledIndicesToString($container, "ftg_name", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
           #if ($d - 1) < $container.totalDim
-            CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
+            CALL ftg_register_only(ftg_name, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
           #else
-            CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
+            CALL ftg_register_only(ftg_name, "$contType")$setRegistered($container)
           #end if 
           #if $caa
             END IF
@@ -96,21 +96,21 @@
       #end if
       #if $needsRegistration($container)
         #set $contType = $container.type
-        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
+        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
         #if $mandDims < $container.totalDim
           #set $filledContainer = $fillIndices($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-          CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
+          CALL ftg_register_only(ftg_name, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
         #else
-          CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
+          CALL ftg_register_only(ftg_name, "$contType")$setRegistered($container)
         #end if 
       #end if
     #end for
-    $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    $writeVarNameWithFilledIndicesToString($var, "ftg_name", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
     #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
     #if $mandDims < $var.totalDim
-      CALL ftg_write(ftg_c, $filled, LBOUND($filled), UBOUND($filled))
+      CALL ftg_write(ftg_name, $filled, LBOUND($filled), UBOUND($filled))
     #else
-      CALL ftg_write(ftg_c, $filled)
+      CALL ftg_write(ftg_name, $filled)
     #end if
     #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
       #if $ifCAA[-1] == '1'
