@@ -29,8 +29,10 @@ def loadFortranTestGeneratorConfiguration(configFile):
         
     config = {}
     execfile(configFile, globals(), config)
-    
-    #TODO Constants for keys
+    with open(configFile) as f:
+        code = compile(f.read(), "somefile.py", 'exec')
+        globalNamespace = globals()
+        exec(code, globalNamespace, config)
     
     configError = False
     if CFG_FCG_DIR not in config or not config[CFG_FCG_DIR]:
