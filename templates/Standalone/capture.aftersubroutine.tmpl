@@ -12,7 +12,7 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
   
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_mpi_id, error)
 
-  WRITE (basename,'(A,A,A,I2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
+  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', my_mpi_id
 
   WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), my_mpi_id
 

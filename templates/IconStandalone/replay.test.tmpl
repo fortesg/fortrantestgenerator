@@ -67,7 +67,7 @@ CONTAINS
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
 
-    WRITE (basename,'(A,A,A,I2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+    WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
     WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
     CALL ftg_set_serializer(TRIM(INPUT_DIR), TRIM(basename), 'r')
@@ -88,7 +88,7 @@ CONTAINS
 
     CALL ftg_set_savepoint('input')
   
-    WRITE (0,'(A,I2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
     
     ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
     CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
