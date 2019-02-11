@@ -54,8 +54,8 @@ CONTAINS
     CHARACTER(len=256) :: basename
     CHARACTER(len=1024) :: dir
 
-    WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
-    WRITE (dir,'(a,a)') TRIM(DATA_DIR), TRIM(stage)
+    WRITE (basename,'(A,A,A,I0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
+    WRITE (dir,'(A,A)') TRIM(DATA_DIR), TRIM(stage)
     
     CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
     CALL ftg_set_savepoint(TRIM(stage))

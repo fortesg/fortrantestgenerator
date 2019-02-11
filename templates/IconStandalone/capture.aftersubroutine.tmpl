@@ -10,9 +10,9 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
   CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
 
-  WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+  WRITE (basename,'(A,A,A,I2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
-  WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename), get_my_mpi_all_id()
+  WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
   
   mkdirerr = ''
   CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdirerr)

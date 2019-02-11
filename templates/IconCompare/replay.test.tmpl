@@ -101,9 +101,9 @@ CONTAINS
     CALL ftg_destroy_serializer()
     
     IF (failure_count == 0) THEN
-        WRITE (*,'(a,i0,a)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** TEST PASSED'
+        WRITE (*,'(A,I2,A)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** TEST PASSED'
     ELSE
-        WRITE (*,'(a,i0,a,i0)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** FAILURE: ', failure_count
+        WRITE (*,'(A,I2,A,I0)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** FAILURE: ', failure_count
     END IF
     
     total_failure_count = total_failure_count + failure_count 
@@ -125,7 +125,7 @@ CONTAINS
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
 
-    WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+    WRITE (basename,'(A,A,A,I2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
     WRITE (0,'(A)') 'FTG INIT ${subroutine.name} '//TRIM(basename)
     CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
@@ -146,7 +146,7 @@ CONTAINS
 
     CALL ftg_set_savepoint('input')
   
-    WRITE (0,'(a,i0,a)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    WRITE (0,'(A,I2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
     
     ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
     CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
@@ -178,7 +178,7 @@ CONTAINS
     
     CALL ftg_set_savepoint('output')
   
-    WRITE (0,'(a,i0,a)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    WRITE (0,'(A,I2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
     
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables

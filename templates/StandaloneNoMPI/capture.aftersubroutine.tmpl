@@ -8,7 +8,7 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
   CHARACTER(len=1024) :: basename, mkdirerr
   
-  WRITE (basename,'(a,a)') 'ftg_${subroutine.name}_', TRIM(stage)
+  WRITE (basename,'(A,A)') 'ftg_${subroutine.name}_', TRIM(stage)
 
   WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
 

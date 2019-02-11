@@ -16,8 +16,8 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage)
     INTEGER(kind=4) rank, error
 
     CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, error)
-    WRITE (basename,'(a,a,a,i0)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
-    WRITE (dir,'(a,a)') TRIM(DATA_DIR), TRIM(stage)
+    WRITE (basename,'(A,A,A,I2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', rank
+    WRITE (dir,'(A,A)') TRIM(DATA_DIR), TRIM(stage)
     
     CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
     CALL ftg_set_savepoint(TRIM(stage))
