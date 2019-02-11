@@ -28,7 +28,6 @@ def loadFortranTestGeneratorConfiguration(configFile):
         return None
         
     config = {}
-    execfile(configFile, globals(), config)
     with open(configFile) as f:
         code = compile(f.read(), "somefile.py", 'exec')
         globalNamespace = globals()
