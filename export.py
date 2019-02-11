@@ -23,6 +23,7 @@ class ExportCodeGenerator(CodeGenerator):
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):  # @UnusedVariable
         print "  Add Code to Used Modules"
         
+        self.__backupFinder.setBackupSuffixPrefix(self.__backupFinder.EXPORT_SUFFIX_PREFIX)
         refModules = list(self.__extractModulesFromVariableReferences(globalsReferences))
         refModules.sort(reverse = True)
         for refModule in refModules:

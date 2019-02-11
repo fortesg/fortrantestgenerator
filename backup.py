@@ -103,4 +103,5 @@ class BackupFileFinder(object):
         return backupFile
             
     def __getModuleName(self, filE):
-        return filE[(filE.rfind('/') + 1):filE.rfind('.')]
+        module = filE[(filE.rfind('/') + 1):] 
+        return module[:module.find('.')]
