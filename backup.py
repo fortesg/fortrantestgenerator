@@ -50,7 +50,7 @@ class BackupFileFinder(object):
     def extendSpecialModuleFiles(self, specialModuleFiles):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         backupFiles = self.find()
-        for module, filE in specialModuleFiles.iteritems():
+        for module, filE in specialModuleFiles.items():
             backupFile = self.__getBackupFile(filE)
             if backupFile in backupFiles:
                 specialModuleFiles[module] = backupFile

@@ -347,7 +347,7 @@ class GlobalsNameSpace(object):
                 modules[moduleName].append(typE.getName())
          
         self.imports = ''
-        for module, elements in modules.iteritems():
+        for module, elements in modules.items():
             self.imports += 'USE ' + module + ', ONLY: '
             for element in elements:
                 self.imports += element
@@ -390,7 +390,7 @@ class TypesNameSpace(object):
                 modules[moduleName].append(typE.getName())
          
         self.imports = ''
-        for module, typeNames in modules.iteritems():
+        for module, typeNames in modules.items():
             self.imports += '  USE ' + module + ', ONLY: '
             for typeName in typeNames:
                 self.imports += typeName + ', '
