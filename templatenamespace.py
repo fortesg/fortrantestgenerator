@@ -347,7 +347,7 @@ class GlobalsNameSpace(object):
                 modules[moduleName].append(typE.getName())
          
         self.imports = ''
-        for module, elements in modules.items():
+        for module, elements in sorted(modules.items()):
             self.imports += 'USE ' + module + ', ONLY: '
             for element in elements:
                 self.imports += element
