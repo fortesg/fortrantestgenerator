@@ -24,7 +24,7 @@ def loadFortranTestGeneratorConfiguration(configFile):
     if not os.path.isfile(configFile):
         configFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config', originalConfigFile)
     if not os.path.isfile(configFile):
-        printError('Config file not found: ' + originalConfigFile)
+        printError('Config file not found: ' + originalConfigFile, location='FortranTestGenerator')
         return None
         
     config = {}
@@ -35,26 +35,26 @@ def loadFortranTestGeneratorConfiguration(configFile):
     
     configError = False
     if CFG_FCG_DIR not in config or not config[CFG_FCG_DIR]:
-        printError('Missing config variable: ' + CFG_FCG_DIR)
+        printError('Missing config variable: ' + CFG_FCG_DIR, location='FortranTestGenerator')
         configError = True
         configError = True
     else:
         fcgDir = config[CFG_FCG_DIR]
         if not os.path.isdir(fcgDir):
-            printError('FortranCallGraph directory not found (' + CFG_FCG_DIR + '): ' + fcgDir)
+            printError('FortranCallGraph directory not found (' + CFG_FCG_DIR + '): ' + fcgDir, location='FortranTestGenerator')
             configError = True
         else:
             fcgBin = os.path.join(fcgDir, 'FortranCallGraph.py')
             if not os.path.isfile(fcgBin):
-                printError('FortranCallGraph not found in directory (' + CFG_FCG_DIR + '): ' + fcgDir)
+                printError('FortranCallGraph not found in directory (' + CFG_FCG_DIR + '): ' + fcgDir, location='FortranTestGenerator')
                 configError = True
 
     if CFG_TEMPLATE not in config or not config[CFG_TEMPLATE]:
-        printError('Missing config variable: ' + CFG_TEMPLATE)
+        printError('Missing config variable: ' + CFG_TEMPLATE, location='FortranTestGenerator')
         configError = True
 
     if CFG_TEST_SOURCE_DIR not in config or not config[CFG_TEST_SOURCE_DIR]:
-        printError(sys.stderr, 'Missing config variable: ' + CFG_TEST_SOURCE_DIR)
+        printError(sys.stderr, 'Missing config variable: ' + CFG_TEST_SOURCE_DIR, location='FortranTestGenerator')
         configError = True
 
     if CFG_MODIFY_SOURCE_DIRS not in config and CFG_MODIFY_SOURCE_DIRS_LEGACY in config:
