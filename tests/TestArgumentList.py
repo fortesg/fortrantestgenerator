@@ -83,13 +83,13 @@ class TestArgumentList(unittest.TestCase):
         self.assertTrue(self.argList.allIn().optionals())
         self.assertFalse(self.argList.allocatablesOrPointers().allOut().optionals())
         #__len__
-        self.assertEquals(5, len(self.argList))
+        self.assertEqual(5, len(self.argList))
         #__getitem__
-        self.assertEquals('arg2', self.argList[2].name())
+        self.assertEqual('arg2', self.argList[2].name())
         #__iter__
-        self.assertEquals(['arg0', 'arg1', 'arg2', 'arg3', 'arg4'], [arg.name() for arg in self.argList])
+        self.assertEqual(['arg0', 'arg1', 'arg2', 'arg3', 'arg4'], [arg.name() for arg in self.argList])
         #__reversed__
-        self.assertEquals(['arg4', 'arg3', 'arg2', 'arg1', 'arg0'], [arg.name() for arg in reversed(self.argList)])
+        self.assertEqual(['arg4', 'arg3', 'arg2', 'arg1', 'arg0'], [arg.name() for arg in reversed(self.argList)])
         #__contains__
         arg2 = Argument(self.arg2, [])
         self.assertIn(arg2, self.argList)
