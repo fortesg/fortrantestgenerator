@@ -9,7 +9,7 @@ from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
 import re
-from printout import printLine, printInline
+from printout import printLine, printInline, printDebug
 
 class CodeGenerator(object):
     
@@ -17,7 +17,7 @@ class CodeGenerator(object):
     INDENT_LENGTH = 2
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceFiles, templatePath, graphBuilder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = ''):
+    def __init__(self, sourceFiles, templatePath, graphBuilder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = '', abstractTypes = {}):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
@@ -31,9 +31,10 @@ class CodeGenerator(object):
         self.__templatePath = templatePath
         self.__graphBuilder = graphBuilder
         self.__excludeModules = excludeModules
-        self.__ignoredModulesForGlobals = ignoredModulesForGlobals;
-        self.__ignoredTypes = ignoredTypes;
-        self.__ignorePrefix = ignorePrefix; 
+        self.__ignoredModulesForGlobals = ignoredModulesForGlobals
+        self.__ignoredTypes = ignoredTypes
+        self.__ignorePrefix = ignorePrefix
+        self.__abstractTypes = abstractTypes
         
         templateDir = os.path.dirname(os.path.realpath(self.__templatePath))
         templateDirParent = os.path.abspath(os.path.join(templateDir, os.pardir))
@@ -60,13 +61,13 @@ class CodeGenerator(object):
         callGraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
         
         printLine('Find Interfaces', indent = 1)
-        useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules)
+        useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules, self.__abstractTypes)
         useTraversal.parseModules(callGraph.getRoot())
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
 
         printLine('Analyse Source Code', indent = 1)
-        argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
+        argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
         argumentTracker.setIgnoreRegex(ignoreRegex)
         
         printLine('Find References to Type Argument Members', indent = 2)
@@ -80,7 +81,7 @@ class CodeGenerator(object):
             typeResultReferences = []
         
         printLine('Find References to Global Variables', indent = 2)
-        globalsTracker = GlobalVariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
+        globalsTracker = GlobalVariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callGraph)
         

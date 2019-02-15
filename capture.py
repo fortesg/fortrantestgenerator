@@ -15,7 +15,7 @@ class CaptureCodeGenerator(CodeGenerator):
     AFTER_LAST_LINE_TEMPLATE_PART = 'captureAfterSubroutine'
     EXPORT_TEMPLATE_PART = 'export'
     
-    def __init__(self, sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = ''):
+    def __init__(self, sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
@@ -25,7 +25,7 @@ class CaptureCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir)
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
-        super(CaptureCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex)
+        super(CaptureCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
         self.__modifySourceFiles = modifySourceFiles      
         self.__testDataDir = testDataDir     
         self.__backupFinder = backupFinder
