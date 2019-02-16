@@ -109,6 +109,7 @@ def main():
         sourceFiles.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(sourceFiles.getSpecialModuleFiles()))
 
     if args.export or args.capture or args.replay:
+        printLine('Generate Code')
         generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupFinder, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix, abstractTypes)
         generator.generate(subroutineFullName)
         
