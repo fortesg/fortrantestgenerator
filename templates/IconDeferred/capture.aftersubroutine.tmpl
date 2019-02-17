@@ -1,0 +1,253 @@
+$prologue
+
+SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
+
+  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+  USE mo_mpi,          ONLY: get_my_mpi_all_id
+  USE m_ser_ftg,       ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
+
+  CHARACTER(*), INTENT(IN) :: stage, dir
+
+  CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
+
+  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+
+  WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
+  
+  mkdirerr = ''
+  CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdirerr)
+  IF (TRIM(mkdirerr) /= '') THEN
+    WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
+  END IF 
+  
+  ignore_bullshit_max_dim_size = 100000
+  ignore_bullshit_allow_negative_indices = .TRUE.
+  
+  CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
+  CALL ftg_add_serializer_metainfo('subroutine', '${subroutine.name}')
+  CALL ftg_add_serializer_metainfo('stage', stage)
+  CALL ftg_add_serializer_metainfo('mpi_all_id', get_my_mpi_all_id())
+
+END SUBROUTINE ftg_${subroutine.name}_init_for_capture
+
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
+
+  ftg_${subroutine.name}_capture_input_active =     &
+    ftg_${subroutine.name}_capture_input_enabled .AND.&
+    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_input_active
+  
+SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
+
+  USE mtime,   ONLY: calendarType
+  USE mo_mpi,  ONLY: get_my_mpi_all_id
+  USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
+  
+  ${globals.imports}
+
+  ${args.specs(intent = 'in')}
+
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+  CHARACTER(len=256) :: ftg_c
+
+  IF (ftg_${subroutine.name}_capture_input_active()) THEN
+    
+    CALL ftg_${subroutine.name}_init_for_capture('input', ftg_${subroutine.name}_input_dir)
+    CALL ftg_set_savepoint('input')
+
+    WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
+    WRITE (0,*) 'FTG WRITE INPUT DATA ${subroutine.name}', get_my_mpi_all_id()
+    
+    ! MTIME CALENDAR TYPE --> Remove this line if mtime is not used
+    CALL ftg_write("ftg_mtime_calendar", calendarType())
+
+    ! REQUIRED ARGUMENTS
+    #for $var in $args.requireds.usedVariables
+      #if $var.hasContainerWithType('t_p_comm_pattern')
+        #set $container = $var.containerWithType('t_p_comm_pattern')
+        #if $needsRegistration($container)
+          CALL ftg_write_t_p_comm_pattern("$container", $container) $setRegistered($container)
+        #end if
+      #elif $var.hasContainerWithType('t_comm_pattern')
+        #set $container = $var.containerWithType('t_comm_pattern')
+        #if $needsRegistration($container)
+          CALL ftg_write_t_comm_pattern("$container", $container) $setRegistered($container)
+        #end if
+      #else
+        $ftgWrite($var) 
+      #end if 
+    #end for
+    
+    ! OPTIONAL ARGUMENTS
+    #for $arg in $args.optionals
+        #if $arg.usedVariables
+            IF (PRESENT($arg.name)) THEN
+            #for $var in $arg.usedVariables
+              $ftgWrite($var)#end for 
+            END IF
+        #end if 
+    #end for
+    
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgWrite($var)#end for
+      
+    
+    CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
+
+    CALL ftg_destroy_savepoint()
+    WRITE (0,*) 'FTG FINALIZE INPUT DATA ${subroutine.name}', get_my_mpi_all_id()
+    CALL ftg_destroy_serializer()
+    
+  END IF
+
+END SUBROUTINE ftg_${subroutine.name}_capture_input
+
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
+
+  ftg_${subroutine.name}_capture_output_active =     &
+    ftg_${subroutine.name}_capture_output_enabled .AND.&
+    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_output_active
+  
+SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
+
+  USE mo_mpi, ONLY: work_mpi_barrier, get_my_mpi_all_id
+  USE mo_exception, ONLY: finish
+  USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
+
+  ${globals.imports}
+
+  ${args.allOut.specs(intent = 'in', allocatable = False)}
+  #if $subroutine.isFunction:
+    ${result.spec(intent = 'in', allocatable = False)}
+  #end if
+
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+  CHARACTER(len=256) :: ftg_c
+
+  IF (ftg_${subroutine.name}_capture_output_active()) THEN
+
+    CALL ftg_${subroutine.name}_init_for_capture('output', ftg_${subroutine.name}_output_dir)
+    CALL ftg_set_savepoint('output')
+
+    WRITE (0,*) 'FTG ROUND ${subroutine.name} ', ftg_${subroutine.name}_round, get_my_mpi_all_id()
+    WRITE (0,*) 'FTG WRITE output DATA ${subroutine.name}', get_my_mpi_all_id()
+
+    $resetRegistrations
+    ! REQUIRED ARGUMENTS
+    #for $var in $args.allOut.requireds.usedVariables
+      #if not $var.hasContainerWithType('t_patch')
+        $ftgWrite($var)
+      #end if 
+    #end for
+      
+    ! OPTIONAL ARGUMENTS
+    #for $arg in $args.allOut.optionals
+      #if $arg.usedVariables
+        IF (PRESENT($arg.name)) THEN
+          #for $var in $arg.usedVariables
+            $ftgWrite($var)#end for 
+        END IF
+      #end if 
+    #end for
+    
+    #if $subroutine.isFunction
+      ! RESULT
+      #for $var in $result.usedVariables
+        $ftgWrite($var)#end for
+    #end if
+    
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgWrite($var)#end for
+    
+    CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
+
+    CALL ftg_destroy_savepoint()
+    WRITE (0,*) 'FTG FINALIZE output DATA ${subroutine.name}', get_my_mpi_all_id()
+    CALL ftg_destroy_serializer()
+    
+    CALL work_mpi_barrier()
+    CALL finish('FTG EXIT', 'Output captured: ${subroutine.name}', 0)
+    
+  END IF
+
+END SUBROUTINE ftg_${subroutine.name}_capture_output
+
+SUBROUTINE ftg_write_t_p_comm_pattern_d1(fieldname, field)
+
+  USE mo_communication_types, ONLY: t_p_comm_pattern
+    
+  CHARACTER(LEN=*), INTENT(IN)      :: fieldname
+  CLASS(t_p_comm_pattern), INTENT(IN) :: field(:)
+  
+  INTEGER :: ftg_d1
+  CHARACTER(len=256) :: ftg_c
+  
+  DO ftg_d1 = LBOUND(field, 1), UBOUND(field, 1)
+    WRITE (ftg_c,'(A,I0,A)') 'field(', ftg_d1, ')%p'
+    CALL ftg_write_t_comm_pattern(ftg_c, field(ftg_d1)%p)
+  END DO
+END SUBROUTINE ftg_write_t_p_comm_pattern_d1
+
+SUBROUTINE ftg_write_t_p_comm_pattern_d0(fieldname, field)
+
+  USE mo_communication_types, ONLY: t_p_comm_pattern
+    
+  CHARACTER(LEN=*), INTENT(IN)      :: fieldname
+  CLASS(t_p_comm_pattern), INTENT(IN) :: field
+
+  CALL ftg_write_t_comm_pattern(TRIM(fieldname)//'%p', field%p)
+END SUBROUTINE ftg_write_t_p_comm_pattern_d0
+
+SUBROUTINE ftg_write_t_comm_pattern(fieldname, field)
+
+  USE mo_communication_types, ONLY: t_comm_pattern
+  USE mo_communication_orig,  ONLY: t_comm_pattern_orig
+    
+  CHARACTER(LEN=*), INTENT(IN)      :: fieldname
+  CLASS(t_comm_pattern), INTENT(IN) :: field
+
+  SELECT TYPE (field)
+    TYPE IS (t_comm_pattern_orig)
+      CALL ftg_write_t_comm_pattern_orig(fieldname, field)
+    !TODO
+    !TYPE IS (t_comm_pattern_yaxt)
+  END SELECT
+END SUBROUTINE ftg_write_t_comm_pattern
+
+SUBROUTINE ftg_write_t_comm_pattern_orig(fieldname, field)
+
+  USE mo_communication_orig, ONLY: t_comm_pattern_orig
+  USE m_ser_ftg
+
+  CHARACTER(LEN=*), INTENT(IN)      :: fieldname
+  TYPE(t_comm_pattern_orig), INTENT(IN) :: field
+  
+  CALL ftg_register_only(fieldname, "CLASS(t_comm_pattern)")
+  CALL ftg_write(TRIM(fieldname)//"%comm", field%comm)
+  CALL ftg_write(TRIM(fieldname)//"%n_pnts", field%n_pnts)
+  CALL ftg_write(TRIM(fieldname)//"%n_recv", field%n_recv)
+  CALL ftg_write(TRIM(fieldname)//"%n_send", field%n_send)
+  CALL ftg_write(TRIM(fieldname)//"%np_recv", field%np_recv)
+  CALL ftg_write(TRIM(fieldname)//"%np_send", field%np_send)
+  CALL ftg_write(TRIM(fieldname)//"%pelist_recv", field%pelist_recv, LBOUND(field%pelist_recv), UBOUND(field%pelist_recv))
+  CALL ftg_write(TRIM(fieldname)//"%pelist_send", field%pelist_send, LBOUND(field%pelist_send), UBOUND(field%pelist_send))
+  CALL ftg_write(TRIM(fieldname)//"%recv_count", field%recv_count, LBOUND(field%recv_count), UBOUND(field%recv_count))
+  CALL ftg_write(TRIM(fieldname)//"%recv_dst_blk", field%recv_dst_blk, LBOUND(field%recv_dst_blk), UBOUND(field%recv_dst_blk))
+  CALL ftg_write(TRIM(fieldname)//"%recv_dst_idx", field%recv_dst_idx, LBOUND(field%recv_dst_idx), UBOUND(field%recv_dst_idx))
+  CALL ftg_write(TRIM(fieldname)//"%recv_limits", field%recv_limits, LBOUND(field%recv_limits), UBOUND(field%recv_limits))
+  CALL ftg_write(TRIM(fieldname)//"%recv_src", field%recv_src, LBOUND(field%recv_src), UBOUND(field%recv_src))
+  CALL ftg_write(TRIM(fieldname)//"%recv_startidx", field%recv_startidx, LBOUND(field%recv_startidx), UBOUND(field%recv_startidx))
+  CALL ftg_write(TRIM(fieldname)//"%send_count", field%send_count, LBOUND(field%send_count), UBOUND(field%send_count))
+  CALL ftg_write(TRIM(fieldname)//"%send_limits", field%send_limits, LBOUND(field%send_limits), UBOUND(field%send_limits))
+  CALL ftg_write(TRIM(fieldname)//"%send_src_blk", field%send_src_blk, LBOUND(field%send_src_blk), UBOUND(field%send_src_blk))
+  CALL ftg_write(TRIM(fieldname)//"%send_src_idx", field%send_src_idx, LBOUND(field%send_src_idx), UBOUND(field%send_src_idx))
+  CALL ftg_write(TRIM(fieldname)//"%send_startidx", field%send_startidx, LBOUND(field%send_startidx), UBOUND(field%send_startidx))
+
+END SUBROUTINE ftg_write_t_comm_pattern_orig
+  
+$epilogue
