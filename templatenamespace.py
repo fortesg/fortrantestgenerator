@@ -555,6 +555,20 @@ class UsedVariable(object):
                     return UsedVariable(self.__ref.getSubReference(level)) 
         return self
     
+    def hasContainerWithType(self, typeName):
+        for level in self.__ref.getLevels():
+            variable = self.__ref.getVariable(level)
+            if variable is not None and (variable.getTypeName() == typeName or variable.getDerivedTypeName() == typeName):
+                return True
+        return False
+    
+    def containerWithType(self, typeName):
+        for level in self.__ref.getLevels():
+            variable = self.__ref.getVariable(level)
+            if variable is not None and (variable.getTypeName() == typeName or variable.getDerivedTypeName() == typeName):
+                return self.container(level)
+        return None 
+    
     def fromArgument(self):
         return self.__ref.getLevel0Variable().isArgument()
     
