@@ -52,15 +52,14 @@
     #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
       #set $container = $var.container($level)
       #set $contDim = $container.dim
-      ! $container $contDim
       #if $needsAllocationFilled($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         IF (ftg_field_exists(ftg_c)) THEN
           ftg_bounds = ftg_get_bounds(ftg_c)
-          $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)") !E
+          $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
         ELSE
-          $alloc($container, $contDim, "0", "0", "0", "0") !F
+          $alloc($container, $contDim, "0", "0", "0", "0")
         END IF
       #end if
     #end for
