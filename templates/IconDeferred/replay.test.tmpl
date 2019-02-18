@@ -1,0 +1,295 @@
+PROGRAM ftg_${subroutine.name}_test
+
+  USE mtime
+  USE mo_kind
+  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+  USE mo_exception,      ONLY: message, finish
+  USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast !ICON
+
+  USE ${module.name}, ONLY: ${subroutine.name}
+  ! Remove if capture code already deleted
+  USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
+
+  USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
+  USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
+  
+  ${globals.imports}
+  
+  ${types.imports}
+  
+IMPLICIT NONE
+
+CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
+LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
+
+
+INTEGER :: failure_count
+CHARACTER(9) :: failure_count_char
+
+CALL start_mpi('ftg_${subroutine.name}_test') !ICON
+
+CALL ftg_test_${subroutine.name}(failure_count)
+
+IF (get_my_mpi_all_id() == 0) THEN
+    IF (failure_count > 0) THEN
+        WRITE (failure_count_char,'(I0)') failure_count
+        CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(failure_count_char), 2)
+    ELSE
+        CALL message('FTG', '${subroutine.name}: TEST PASSED')
+    END IF
+END IF
+ 
+CALL stop_mpi() !ICON
+
+CONTAINS
+  
+  SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
+  
+    INTEGER, INTENT(out) :: total_failure_count
+      
+    ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+    #if $subroutine.isFunction
+        ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+    #end if
+    
+    INTEGER :: mpi_all_id, failure_count
+    
+    mpi_all_id = get_my_mpi_all_id()
+    failure_count = 0
+  
+    CALL message('FTG', '*** Run test for ${subroutine.name} ***')
+
+    ! Remove if capture code already deleted
+    ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
+    ftg_${subroutine.name}_capture_output_enabled = .FALSE.
+    
+    WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_all_id, ') * '
+    ftg_cmp_print_when_equal = .TRUE.
+    ftg_cmp_count_missing_field_as_failure = .FALSE.
+
+    CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
+    CALL ftg_${subroutine.name}_replay_input($commaList($args))
+    CALL ftg_destroy_serializer()
+
+    #if $subroutine.isFunction
+        #if $result.pointer
+            #set $assign = '=>'
+        #else
+            #set $assign = '='
+        #end if
+        ${subroutine.name}_result $assign ${subroutine.name}($commaList($args))
+    #else
+        CALL ${subroutine.name}($commaList($args))
+    #end if
+
+    ! One process after another to get nice, ordered printing
+    ! Change this if to slow
+    IF (mpi_all_id > 0) THEN
+        CALL p_recv(total_failure_count, mpi_all_id - 1, 0)
+    ELSE
+        total_failure_count = 0
+    END IF
+
+    CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)    
+    #if $subroutine.isFunction
+        #set $resultArg = $subroutine.name + '_result'
+    #else
+      #set $resultArg = ''
+    #end if  
+    CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
+    CALL ftg_destroy_serializer()
+    
+    IF (failure_count == 0) THEN
+        WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** TEST PASSED'
+    ELSE
+        WRITE (*,'(A,I0.2,A,I0)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** FAILURE: ', failure_count
+    END IF
+    
+    total_failure_count = total_failure_count + failure_count 
+
+    IF (mpi_all_id < get_my_mpi_all_comm_size() - 1) THEN
+        CALL p_send(total_failure_count, mpi_all_id + 1, 0)
+    ELSE
+        CALL p_send(total_failure_count, 0, 0)
+    END IF
+    
+    CALL p_bcast(total_failure_count, get_my_mpi_all_comm_size() - 1)
+
+  END SUBROUTINE ftg_test_${subroutine.name}
+
+  
+  SUBROUTINE ftg_${subroutine.name}_init_for_replay(stage, dir)
+
+    CHARACTER(*), INTENT(IN) :: stage, dir
+
+    CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+
+    WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+
+    WRITE (0,'(A)') 'FTG INIT ${subroutine.name} '//TRIM(basename)
+    CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
+    IF (SERIALBOX_DEBUG) THEN
+      CALL ftg_print_serializer_debuginfo()
+    END IF
+
+  END SUBROUTINE ftg_${subroutine.name}_init_for_replay
+  
+  SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
+    
+    ${args.specs(intent = 'inout', allocatable = True)}
+
+    INTEGER, DIMENSION(8) :: ftg_bounds
+    INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+    CHARACTER(len=256) :: ftg_c
+    INTEGER ftg_mtime_calendar
+
+    CALL ftg_set_savepoint('input')
+  
+    WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    
+    ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
+    CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
+    CALL setCalendar(ftg_mtime_calendar)
+
+    ! ARGUMENTS
+    #for $var in $args.usedVariables
+      #if $var.hasContainerWithType('t_p_comm_pattern')
+        #set $container = $var.containerWithType('t_p_comm_pattern')
+        #if $needsAllocation($container)
+          CALL ftg_read_t_p_comm_pattern("$container", $container) $setAllocated($container)
+        #end if
+      #elif $var.hasContainerWithType('t_comm_pattern')
+        #set $container = $var.containerWithType('t_comm_pattern')
+        #if $needsAllocation($container)
+          CALL ftg_read_t_comm_pattern("$container", $container) $setAllocated($container)
+        #end if
+      #else
+        $ftgRead($var) 
+      #end if 
+    #end for
+
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgRead($var) #end for
+
+    CALL ftg_destroy_savepoint()
+
+  END SUBROUTINE ftg_${subroutine.name}_replay_input
+  
+  SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $result, 'failure_count'))
+    
+    ${args.allOut.specs(intent = 'in', allocatable = False)}
+    #if $subroutine.isFunction:
+      ${result.spec(intent = 'in', allocatable = False)}
+    #end if
+    
+    INTEGER, INTENT(inout) :: failure_count
+    LOGICAL :: result
+    INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+    CHARACTER(len=256) :: ftg_c
+    
+    CALL ftg_set_savepoint('output')
+  
+    WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    
+    ! ARGUMENTS
+    #for $var in $args.allOut.usedVariables
+      #if not $var.hasContainerWithType('t_comm_pattern') 
+        $ftgCompare($var)
+      #end if 
+    #end for
+    
+    #if $subroutine.isFunction
+      ! RESULT
+      #for $var in $result.usedVariables
+        $ftgCompare($var)#end for
+    #end if
+    
+    ! GLOBALS
+    #for $var in $globals.usedVariables
+      $ftgCompare($var) #end for
+
+    CALL ftg_destroy_savepoint()
+    
+  END SUBROUTINE ftg_${subroutine.name}_compare_output
+  
+  SUBROUTINE ftg_read_t_p_comm_pattern_d1(fieldname, field)
+  
+    USE mo_communication_types, ONLY: t_p_comm_pattern
+    
+    CHARACTER(LEN=*), INTENT(IN)                  :: fieldname
+    CLASS(t_p_comm_pattern), POINTER, INTENT(OUT) :: field(:)
+    
+    INTEGER :: ftg_d1
+    INTEGER, DIMENSION(8) :: ftg_bounds
+    CHARACTER(len=256) :: ftg_c
+    
+    ftg_bounds = ftg_get_bounds(fieldname)
+    ALLOCATE(field(ftg_bounds(1):ftg_bounds(2)))
+    DO ftg_d1 = LBOUND(field, 1), UBOUND(field, 1)
+      WRITE (ftg_c,'(A,I0,A)') 'field(', ftg_d1, ')%p'
+      CALL ftg_read_t_comm_pattern(ftg_c, field(ftg_d1)%p)
+    END DO
+  END SUBROUTINE ftg_read_t_p_comm_pattern_d1
+  
+  SUBROUTINE ftg_read_t_p_comm_pattern_d0(fieldname, field)
+  
+    USE mo_communication_types, ONLY: t_p_comm_pattern
+    
+    CHARACTER(LEN=*), INTENT(IN)         :: fieldname
+    CLASS(t_p_comm_pattern), POINTER, INTENT(OUT) :: field
+  
+    ALLOCATE(field)
+    CALL ftg_write_t_comm_pattern(TRIM(fieldname)//'%p', field%p)
+    
+  END SUBROUTINE ftg_read_t_p_comm_pattern_d0
+  
+  SUBROUTINE ftg_read_t_comm_pattern(fieldname, field)
+  
+    USE mo_communication_types, ONLY: t_comm_pattern
+    USE mo_communication_orig,  ONLY: t_comm_pattern_orig
+    USE m_ser_ftg
+    
+    CHARACTER(LEN=*), INTENT(IN)                   :: fieldname
+    CLASS(t_comm_pattern), POINTER, INTENT(OUT)    :: field
+    TYPE(t_comm_pattern_orig), ALLOCATABLE, TARGET :: comm_pat
+  
+    ALLOCATE(t_comm_pattern_orig::field)
+    SELECT TYPE (field)
+      TYPE IS (t_comm_pattern_orig)
+        CALL ftg_read_t_comm_pattern_orig(fieldname, field)
+    END SELECT
+    !field => comm_pat
+  END SUBROUTINE ftg_read_t_comm_pattern
+  
+  SUBROUTINE ftg_read_t_comm_pattern_orig(fieldname, field)
+  
+    USE mo_communication_orig, ONLY: t_comm_pattern_orig
+  
+    CHARACTER(LEN=*), INTENT(IN)                    :: fieldname
+    TYPE(t_comm_pattern_orig), POINTER, INTENT(OUT) :: field
+    
+    CALL ftg_read(TRIM(fieldname)//"%comm", field%comm)
+    CALL ftg_read(TRIM(fieldname)//"%n_pnts", field%n_pnts)
+    CALL ftg_read(TRIM(fieldname)//"%n_recv", field%n_recv)
+    CALL ftg_read(TRIM(fieldname)//"%n_send", field%n_send)
+    CALL ftg_read(TRIM(fieldname)//"%np_recv", field%np_recv)
+    CALL ftg_read(TRIM(fieldname)//"%np_send", field%np_send)
+    CALL ftg_read(TRIM(fieldname)//"%pelist_recv", field%pelist_recv)
+    CALL ftg_read(TRIM(fieldname)//"%pelist_send", field%pelist_send)
+    CALL ftg_read(TRIM(fieldname)//"%recv_count", field%recv_count)
+    CALL ftg_read(TRIM(fieldname)//"%recv_dst_blk", field%recv_dst_blk)
+    CALL ftg_read(TRIM(fieldname)//"%recv_dst_idx", field%recv_dst_idx)
+    CALL ftg_read(TRIM(fieldname)//"%recv_limits", field%recv_limits)
+    CALL ftg_read(TRIM(fieldname)//"%recv_src", field%recv_src)
+    CALL ftg_read(TRIM(fieldname)//"%recv_startidx", field%recv_startidx)
+    CALL ftg_read(TRIM(fieldname)//"%send_count", field%send_count)
+    CALL ftg_read(TRIM(fieldname)//"%send_limits", field%send_limits)
+    CALL ftg_read(TRIM(fieldname)//"%send_src_blk", field%send_src_blk)
+    CALL ftg_read(TRIM(fieldname)//"%send_src_idx", field%send_src_idx)
+    CALL ftg_read(TRIM(fieldname)//"%send_startidx", field%send_startidx)
+  
+  END SUBROUTINE ftg_read_t_comm_pattern_orig
+  
+END PROGRAM ftg_${subroutine.name}_test
