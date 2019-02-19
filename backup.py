@@ -62,10 +62,10 @@ class BackupFileFinder(object):
     
     def create(self, originalPath):
         printInline('Create File Backup of ' + originalPath, indent = 2)
-        backupPath = originalPath.replace(BackupFileFinder.DEFAULT_SUFFIX, self.getBackupSuffix())
-        backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.getBackupSuffix())
-        if (backupPath == originalPath):
-            backupPath = originalPath + self.getBackupSuffix()
+        backupPath = originalPath
+        if not backupPath.endswith(self.getBackupSuffix()):
+            backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX, self.getBackupSuffix())
+            backupPath = backupPath.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), self.getBackupSuffix())
         if not os.path.exists(backupPath):
             shutil.copyfile(originalPath, backupPath)
             printLine()
