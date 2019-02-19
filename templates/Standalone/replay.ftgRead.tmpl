@@ -58,7 +58,6 @@
         #set $container = $fillIndices($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         IF (ftg_field_exists(ftg_c)) THEN
           ftg_bounds = ftg_get_bounds(ftg_c)
-           !A
           $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
         ELSE
           $alloc($container, $contDim, "0", "0", "0", "0")
