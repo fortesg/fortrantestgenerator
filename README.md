@@ -43,10 +43,10 @@ For the source code analysis, FTG uses the tool [FortranCallGraph](https://githu
 
 To run FTG, you will need the following software packages:
 
-* `Python 2.7` (Python 3+ is currently not supported)
-* `Cheetah Template Engine`: https://github.com/CheetahTemplate3/cheetah3
-* `Serialbox2` (>= 2.5.1): https://github.com/eth-cscs/serialbox2
-* `FortranCallGraph` (>= 1.4.0): https://github.com/fortesg/fortrancallgraph
+* Python 2.7 or 3.x
+* Cheetah Template Engine: https://github.com/CheetahTemplate3/cheetah3
+* Serialbox2 (>= 2.5.1): https://github.com/eth-cscs/serialbox2
+* FortranCallGraph (>= 1.4.0): https://github.com/fortesg/fortrancallgraph
 
 ## Quick Start Guide
 
