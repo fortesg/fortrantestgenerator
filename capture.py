@@ -37,6 +37,8 @@ class CaptureCodeGenerator(CodeGenerator):
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         printLine('Add Code to Module under Test', indent = 1)
         
+        self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)            
+
         subroutine = self._findSubroutine(subroutineFullName)
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
@@ -44,7 +46,6 @@ class CaptureCodeGenerator(CodeGenerator):
             sourceFilePath = sourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
             subroutine = SourceFile(sourceFilePath, originalSourceFile.isPreprocessed()).getSubroutine(subroutine.getName())
         
-        self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)            
         self.__backupFinder.create(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir)
         # Reihenfolge wichtig: von unten nach oben!!!
