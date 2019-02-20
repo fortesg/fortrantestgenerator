@@ -62,17 +62,18 @@ def main():
     ignoreGlobalsFromModuls = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     ignoreDerivedTypes = config[CFG_IGNORE_DERIVED_TYPES]
     abstractTypes = config[CFG_ABSTRACT_TYPES]
+    sourceDirs = config[CFG_SOURCE_DIRS]
 
     graphBuilder = GNUx86AssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
         graphBuilder = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], graphBuilder)
-    sourceFiles = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
+    sourceFiles = SourceFiles(sourceDirs, config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
     if modifySourceDir is not None:
         modifySourceFiles = SourceFiles(modifySourceDir, config[CFG_SPECIAL_MODULE_FILES])
         backupFinder = BackupFileFinder(modifySourceDir, backupSuffix) 
     else:
         modifySourceFiles = sourceFiles
-        backupFinder = BackupFileFinder(config[CFG_SOURCE_DIRS], backupSuffix) 
+        backupFinder = BackupFileFinder(sourceDirs, backupSuffix) 
         
 
     if args.export or args.capture or args.replay:
@@ -105,7 +106,7 @@ def main():
         backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)
         backupFinder.restore()
         sourceFiles.clearCache()
-    else: 
+    elif modifySourceDir == sourceDirs: 
         sourceFiles.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(sourceFiles.getSpecialModuleFiles()))
 
     if args.export or args.capture or args.replay:
