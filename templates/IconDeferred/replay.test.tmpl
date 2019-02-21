@@ -152,17 +152,20 @@ CONTAINS
     CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
     CALL setCalendar(ftg_mtime_calendar)
 
+    #set $commPatterns = []
     ! ARGUMENTS
     #for $var in $args.usedVariables
       #if $var.hasContainerWithType('t_p_comm_pattern')
         #set $container = $var.containerWithType('t_p_comm_pattern')
-        #if $needsAllocation($container)
-          CALL ftg_read_t_p_comm_pattern("$container", $container) $setAllocated($container)
+        #if $container not in $commPatterns
+          CALL ftg_read_t_p_comm_pattern_d${container.dim}("$container", $container)
+          #silent $commPatterns.append($container)
         #end if
       #elif $var.hasContainerWithType('t_comm_pattern')
         #set $container = $var.containerWithType('t_comm_pattern')
-        #if $needsAllocation($container)
-          CALL ftg_read_t_comm_pattern("$container", $container) $setAllocated($container)
+        #if $container not in $commPatterns
+          CALL ftg_read_t_comm_pattern("$container", $container)
+          #silent $commPatterns.append($container)
         #end if
       #else
         $ftgRead($var) 
@@ -222,31 +225,17 @@ CONTAINS
     USE mo_communication_types, ONLY: t_p_comm_pattern
     
     CHARACTER(LEN=*), INTENT(IN)                  :: fieldname
-    CLASS(t_p_comm_pattern), POINTER, INTENT(OUT) :: field(:)
+    TYPE(t_p_comm_pattern), INTENT(OUT) :: field(:)
     
     INTEGER :: ftg_d1
     INTEGER, DIMENSION(8) :: ftg_bounds
     CHARACTER(len=256) :: ftg_c
     
-    ftg_bounds = ftg_get_bounds(fieldname)
-    ALLOCATE(field(ftg_bounds(1):ftg_bounds(2)))
     DO ftg_d1 = LBOUND(field, 1), UBOUND(field, 1)
       WRITE (ftg_c,'(A,I0,A)') 'field(', ftg_d1, ')%p'
       CALL ftg_read_t_comm_pattern(ftg_c, field(ftg_d1)%p)
     END DO
   END SUBROUTINE ftg_read_t_p_comm_pattern_d1
-  
-  SUBROUTINE ftg_read_t_p_comm_pattern_d0(fieldname, field)
-  
-    USE mo_communication_types, ONLY: t_p_comm_pattern
-    
-    CHARACTER(LEN=*), INTENT(IN)         :: fieldname
-    CLASS(t_p_comm_pattern), POINTER, INTENT(OUT) :: field
-  
-    ALLOCATE(field)
-    CALL ftg_write_t_comm_pattern(TRIM(fieldname)//'%p', field%p)
-    
-  END SUBROUTINE ftg_read_t_p_comm_pattern_d0
   
   SUBROUTINE ftg_read_t_comm_pattern(fieldname, field)
   
