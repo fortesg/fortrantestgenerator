@@ -23,6 +23,7 @@ class CombinedCodeGenerator(CodeGenerator):
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
         super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+        self.__modifySourceFiles = modifySourceFiles
         self.__export = ExportCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, graphBuilder, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
         self.__capture = None
         self.__replay = None        
@@ -39,7 +40,7 @@ class CombinedCodeGenerator(CodeGenerator):
         
         self.__export.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
         if self.__capture:
-            self._sourceFiles.clearCache()
+            self.__modifySourceFiles.clearCache()
             self.__capture.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
         if self.__replay:
             self.__replay.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
