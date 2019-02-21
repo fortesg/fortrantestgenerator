@@ -1,5 +1,6 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
+from printout import printDebug
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -569,11 +570,45 @@ class UsedVariable(object):
                 return self.container(level)
         return None 
     
-    def fromArgument(self):
-        return self.__ref.getLevel0Variable().isArgument()
+    def fromArgument(self, *arguments):
+        if not self.__ref.getLevel0Variable().isArgument():
+            return False
+        else:
+            if not arguments:
+                return True
+            else:
+                for arg in arguments:
+                    if isinstance(arg, Argument):
+                        if arg.name() == self.__ref.getLevel0Variable().getName():
+                            return True 
+                    elif isinstance(arg, str):
+                        if arg == self.__ref.getLevel0Variable().getName():
+                            return True
+                return False
     
-    def fromGlobal(self):
-        return self.__ref.getLevel0Variable().isModuleVar()
+    def fromGlobal(self, *globalVars):
+        if not self.__ref.getLevel0Variable().isModuleVar():
+            return False
+        else:
+            if not globalVars:
+                return True
+            else:
+                for variable in globalVars:
+                    if variable == self.__ref.getLevel0Variable().getName():
+                        return True
+                return False
+    
+    def fromModule(self, *modules):
+        if not self.__ref.getLevel0Variable().isModuleVar():
+            return False
+        else:
+            if not modules:
+                return True
+            else:
+                for module in modules:
+                    if module == self.__ref.getLevel0Variable().getModule().getName():
+                        return True
+                return False
 
 class FilledVariable(UsedVariable):
     def __init__(self, reference, dim, *indices):
