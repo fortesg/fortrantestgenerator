@@ -195,7 +195,7 @@ CONTAINS
     
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables
-      #if not $var.hasContainerWithType('t_comm_pattern') 
+      #if not $var.hasContainerWithType('t_patch') 
         $ftgCompare($var)
       #end if 
     #end for
@@ -208,7 +208,10 @@ CONTAINS
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgCompare($var) #end for
+      #if not $var.fromModule('mo_real_timer')
+        $ftgCompare($var)
+      #end if
+    #end for
 
     CALL ftg_destroy_savepoint()
     
@@ -265,12 +268,13 @@ CONTAINS
   
   SUBROUTINE ftg_read_t_comm_pattern_orig(fieldname, field)
   
+    USE mo_mpi, ONLY: p_comm_work
     USE mo_communication_orig, ONLY: t_comm_pattern_orig
   
     CHARACTER(LEN=*), INTENT(IN)                    :: fieldname
     TYPE(t_comm_pattern_orig), POINTER, INTENT(OUT) :: field
     
-    CALL ftg_read(TRIM(fieldname)//"%comm", field%comm)
+    field%comm = p_comm_work
     CALL ftg_read(TRIM(fieldname)//"%n_pnts", field%n_pnts)
     CALL ftg_read(TRIM(fieldname)//"%n_recv", field%n_recv)
     CALL ftg_read(TRIM(fieldname)//"%n_send", field%n_send)

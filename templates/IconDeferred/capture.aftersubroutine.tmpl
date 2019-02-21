@@ -162,7 +162,10 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgWrite($var)#end for
+      #if not $var.fromModule('mo_real_timer')
+        $ftgWrite($var)
+      #end if
+    #end for
     
     CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 
