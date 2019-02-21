@@ -1,8 +1,8 @@
 $prologue
 
 INTERFACE ftg_write_t_p_comm_pattern
-    MODULE PROCEDURE :: ftg_write_t_p_comm_pattern_d0
-    MODULE PROCEDURE :: ftg_write_t_p_comm_pattern_d1
+    MODULE PROCEDURE ftg_write_t_p_comm_pattern_d0
+    MODULE PROCEDURE ftg_write_t_p_comm_pattern_d1
 END INTERFACE ftg_write_t_p_comm_pattern
 
 LOGICAL :: ftg_${subroutine.name}_capture_input_enabled = .TRUE.
