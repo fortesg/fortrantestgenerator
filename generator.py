@@ -128,7 +128,8 @@ class CodeGenerator(object):
         if not text:
             return text
         
-        beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ')
+        beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ', 'INTERFACE ')
+        beginWordExceptions = ('MODULE PROCEDURE')
         beginWordsBack = (' THEN')
         endWords = ('END ', 'ENDIF', 'ENDDO', 'ENDFUNCTION', 'ENDSELECT')
         borderWords = ('CONTAINS', 'ELSE', 'ELSEIF')
@@ -147,7 +148,7 @@ class CodeGenerator(object):
             if not line.startswith('#'):
                 line = (' ' * indent) + line
             lines.append(line)
-            if lineUpper.startswith(beginWords) or lineUpper.endswith(beginWordsBack) or lineUpper.startswith(borderWords):
+            if (lineUpper.startswith(beginWords) or lineUpper.endswith(beginWordsBack) or lineUpper.startswith(borderWords)) and not lineUpper.startswith(beginWordExceptions):
                 indent = indent + CodeGenerator.INDENT_LENGTH
                 
         return "\n".join(lines)
