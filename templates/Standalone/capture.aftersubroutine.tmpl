@@ -64,21 +64,24 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
     ! REQUIRED ARGUMENTS
     #for $var in $args.requireds.usedVariables
-      $ftgWrite($var)#end for
+      $ftgWrite($var) $clearLine
+    #end for
   
     ! OPTIONAL ARGUMENTS
     #for $arg in $args.optionals
       #if $arg.usedVariables
         IF (PRESENT($arg.name)) THEN
         #for $var in $arg.usedVariables
-          $ftgWrite($var)#end for 
+          $ftgWrite($var) $clearLine
+        #end for 
         END IF
       #end if 
     #end for
   
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgWrite($var)#end for
+      $ftgWrite($var) $clearLine 
+    #end for
 
     CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 
@@ -126,14 +129,16 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
     $resetRegistrations
     ! REQUIRED ARGUMENTS
     #for $var in $args.allOut.requireds.usedVariables
-      $ftgWrite($var)#end for
+      $ftgWrite($var) $clearLine
+    #end for
       
     ! OPTIONAL ARGUMENTS
     #for $arg in $args.allOut.optionals
       #if $arg.usedVariables
         IF (PRESENT($arg.name)) THEN
           #for $var in $arg.usedVariables
-            $ftgWrite($var)#end for 
+            $ftgWrite($var) $clearLine
+          #end for 
         END IF
       #end if 
     #end for
@@ -141,12 +146,14 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
     #if $subroutine.isFunction
       ! RESULT
       #for $var in $result.usedVariables
-        $ftgWrite($var)#end for
+        $ftgWrite($var) $clearLine
+      #end for
     #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgWrite($var)#end for
+      $ftgWrite($var) $clearLine
+    #end for
     
     CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
 

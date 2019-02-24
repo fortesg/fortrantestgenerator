@@ -10,6 +10,7 @@ from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
 import re
 from printout import printLine, printInline, printDebug
+from templatenamespace import TemplatesNameSpace
 
 class CodeGenerator(object):
     
@@ -122,7 +123,24 @@ class CodeGenerator(object):
     def __loadTemplate(self, part, templateNameSpace):
         template = Template(file=self.__templatePath, searchList=[templateNameSpace])
         template.part = part
-        return self._breakLines(self._indent(str(template).strip()))
+        
+        rendered = str(template).strip()
+        rendered = self._clearLines(rendered)
+        rendered = self._indent(rendered)
+        rendered = self._breakLines(rendered)
+        return rendered
+    
+    def _clearLines(self, text):
+        if not text:
+            return text
+        
+        lines = []
+        for line in text.split("\n"):
+            line = line.strip()
+            if not line == TemplatesNameSpace.CLEAR_LINE:
+                lines.append(line)
+                 
+        return "\n".join(lines)
     
     def _indent(self, text):
         if not text:

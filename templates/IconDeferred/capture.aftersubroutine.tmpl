@@ -75,7 +75,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
           CALL ftg_write_t_comm_pattern("$container", $container) $setRegistered($container)
         #end if
       #else
-        $ftgWrite($var) 
+        $ftgWrite($var) $clearLine
       #end if 
     #end for
     
@@ -84,14 +84,16 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
         #if $arg.usedVariables
             IF (PRESENT($arg.name)) THEN
             #for $var in $arg.usedVariables
-              $ftgWrite($var)#end for 
+              $ftgWrite($var) $clearLine
+            #end for 
             END IF
         #end if 
     #end for
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgWrite($var)#end for
+      $ftgWrite($var) $clearLine
+    #end for
       
     
     CALL ftg_write("ftg_${subroutine.name}_round", ftg_${subroutine.name}_round)
@@ -140,7 +142,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
     ! REQUIRED ARGUMENTS
     #for $var in $args.allOut.requireds.usedVariables
       #if not $var.hasContainerWithType('t_patch')
-        $ftgWrite($var)
+        $ftgWrite($var) $clearLine
       #end if 
     #end for
       
@@ -149,7 +151,8 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
       #if $arg.usedVariables
         IF (PRESENT($arg.name)) THEN
           #for $var in $arg.usedVariables
-            $ftgWrite($var)#end for 
+            $ftgWrite($var) $clearLine
+          #end for 
         END IF
       #end if 
     #end for
@@ -157,13 +160,14 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
     #if $subroutine.isFunction
       ! RESULT
       #for $var in $result.usedVariables
-        $ftgWrite($var)#end for
+        $ftgWrite($var) $clearLine
+      #end for
     #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
       #if not $var.fromModule('mo_real_timer')
-        $ftgWrite($var)
+        $ftgWrite($var) $clearLine
       #end if
     #end for
     

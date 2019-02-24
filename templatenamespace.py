@@ -4,6 +4,9 @@ from printout import printDebug
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
+    
+    CLEAR_LINE = '! ########## CLEAR LINE ##########'
+    
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
         assertType(subroutine, 'subroutine', Subroutine)
         assertType(typeArgumentReferences, 'typeArgumentReferences', list)
@@ -36,6 +39,9 @@ class TemplatesNameSpace(object):
         self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
+
+    def clearLine(self):
+        return TemplatesNameSpace.CLEAR_LINE
 
     def commaList(self, *elements):
         stringElements = []

@@ -10,6 +10,7 @@
       #set $container = $var.container($level)
       #set $contDim = $container.dim
       #if $needsAllocation($container)
+        
         IF (ftg_field_exists("$container")) THEN
           ftg_bounds = ftg_get_bounds("$container")
           $alloc($container, $contDim, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
@@ -78,3 +79,4 @@
     #end for
   #end if
 #end if
+$clearLine

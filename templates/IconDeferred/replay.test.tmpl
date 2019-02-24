@@ -168,13 +168,14 @@ CONTAINS
           #silent $commPatterns.append($container)
         #end if
       #else
-        $ftgRead($var) 
+        $ftgRead($var) $clearLine 
       #end if 
     #end for
 
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgRead($var) #end for
+      $ftgRead($var) $clearLine
+    #end for
 
     CALL ftg_destroy_savepoint()
 
@@ -199,20 +200,21 @@ CONTAINS
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables
       #if not $var.hasContainerWithType('t_patch') 
-        $ftgCompare($var)
+        $ftgCompare($var) $clearLine
       #end if 
     #end for
     
     #if $subroutine.isFunction
       ! RESULT
       #for $var in $result.usedVariables
-        $ftgCompare($var)#end for
+        $ftgCompare($var) $clearLine
+      #end for
     #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
       #if not $var.fromModule('mo_real_timer')
-        $ftgCompare($var)
+        $ftgCompare($var) $clearLine
       #end if
     #end for
 
