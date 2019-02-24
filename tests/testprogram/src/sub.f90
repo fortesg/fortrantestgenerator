@@ -1,7 +1,7 @@
 MODULE sub
 
 USE types
-USE globals, ONLY : set, get
+USE globals, ONLY : set, get, comm_variable
 
 IMPLICIT NONE
 
@@ -46,6 +46,7 @@ FUNCTION testsub(ra, rlog, oreal, oa)
 
   IF (PRESENT(oa)) THEN
     oa%c%r2(:,:) = oa%b(1)%i2(1:2, 1:2) * oa%b(1)%i0 + oa%c%r2(:,:)
+    oa%c%r2(1,:) = oa%c%r2(1,:) + comm_variable(1)%grid_comm_pattern%send(1)%index_no(:)
   END IF
 
   CALL set(ra%c%r2(1,1))

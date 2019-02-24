@@ -30,13 +30,15 @@ capture-IconCompare: clean ftg-IconCompare mainicon
 capture-BaseCompare: clean ftg-BaseCompare mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
-maingeneric: maingeneric.f90 sub.o types.o globals.o
+maingeneric: maingeneric.f90 sub.o globals.o types.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 	
-mainicon: mainicon.f90 sub.o types.o globals.o
+mainicon: mainicon.f90 sub.o globals.o types.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS)
 	
-sub.o : types.o globals.o
+sub.o: types.o globals.o
+
+globals.o: types.o
 
 ftg-Standalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
@@ -56,7 +58,7 @@ ftg-IconCompare: assembler
 ftg-BaseCompare: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub
 
-assembler: globals.s types.s sub.s maingeneric.s 
+assembler: types.s globals.s sub.s maingeneric.s 
 
 %.s: %.f90
 	$(FF) -c -S $(FFLAGS) $<	

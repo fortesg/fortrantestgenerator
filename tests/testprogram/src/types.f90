@@ -36,6 +36,18 @@ IMPLICIT NONE
      MODULE PROCEDURE get_model_by_id
   END INTERFACE get_jmodel
 
+  TYPE t_comm_variable
+    TYPE(t_grid_comm_pattern), POINTER :: grid_comm_pattern
+  END TYPE t_comm_variable
+
+  TYPE t_grid_comm_pattern
+    TYPE(t_process_comm_pattern), POINTER :: send(:)
+  END TYPE t_grid_comm_pattern
+
+  TYPE t_process_comm_pattern
+    INTEGER, ALLOCATABLE :: index_no(:)  ! the local index of the variable
+  END TYPE t_process_comm_pattern
+
   TYPE(testj) :: tj
 
 CONTAINS

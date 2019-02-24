@@ -1,7 +1,7 @@
 PROGRAM maingeneric
 
 USE types
-USE globals, ONLY : set
+USE globals, ONLY : set, init_comm_variable
 USE sub, ONLY : wrapper, init
 
 IMPLICIT NONE
@@ -45,6 +45,7 @@ oa%c%r2(2,1) = rank + 0.21
 oa%c%r2(2,2) = rank + 0.22
 
 CALL init_jmodels(1)
+CALL init_comm_variable()
 
 flag(:) = .TRUE.
 
