@@ -1,6 +1,5 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
-from printout import printDebug
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -154,7 +153,7 @@ class TemplatesNameSpace(object):
             allocatablesAndPointers += (pointer or allocatable)
             bot = top 
             top += var.getDimension()
-            if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
+            if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim <= totalDim):
                 if top > bot:
                     aa += '('
                     sep = ''
