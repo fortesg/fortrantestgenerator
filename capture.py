@@ -5,6 +5,7 @@ from source import SourceFiles, SourceFile, SubroutineFullName, VariableReferenc
 from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
 from printout import printLine
+from callgraph import CallGraph
 
 class CaptureCodeGenerator(CodeGenerator):
     
@@ -30,11 +31,12 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir     
         self.__backupFinder = backupFinder
 
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        assertType(callgraph, 'callgraph', CallGraph)
         printLine('Add Code to Module under Test', indent = 1)
         
         self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)            
@@ -47,7 +49,7 @@ class CaptureCodeGenerator(CodeGenerator):
             subroutine = SourceFile(sourceFilePath, originalSourceFile.isPreprocessed()).getSubroutine(subroutine.getName())
         
         self.__backupFinder.create(sourceFilePath)
-        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir)
+        templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir, callgraph)
         # Reihenfolge wichtig: von unten nach oben!!!
         self._processTemplate(sourceFilePath, subroutine.getLastLineNumber(), self.AFTER_LAST_LINE_TEMPLATE_PART, templateNameSpace)
         lastLine = subroutine.getContainsLineNumber()

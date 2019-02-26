@@ -1,16 +1,18 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
+from callgraph import CallGraph
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
     
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
     
-    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         assertType(subroutine, 'subroutine', Subroutine)
         assertType(typeArgumentReferences, 'typeArgumentReferences', list)
         assertType(typeResultReferences, 'typeResultReferences', list)
         assertType(globalsReferences, 'globalsReferences', list)
+        assertType(callgraph, 'callgraph', CallGraph)
         
         self.__subroutine = subroutine
         self._typeArgumentReferences = typeArgumentReferences
@@ -35,7 +37,7 @@ class TemplatesNameSpace(object):
             self.result = FunctionResult(subroutine.getResultVariable(), typeResultReferences)
         else:
             self.result = None
-        self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result)
+        self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result, callgraph)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
 
@@ -201,8 +203,8 @@ class TemplatesNameSpace(object):
 
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
-    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
-        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir)
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
+        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
         self.__registered = set()
         
     def needsRegistration(self, variable):
@@ -231,8 +233,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         
 class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
-    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir):
-        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir)
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
+        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)        
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
         self.__allocated = set()
@@ -289,10 +291,14 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
     
 
 class SubroutineNameSpace(object):
-    def __init__(self, subroutine, argumentList, functionResult):
+    def __init__(self, subroutine, argumentList, functionResult, callgraph):
         assertType(subroutine, 'subroutine', Subroutine)
         assertType(argumentList, 'argumentList', ArgumentList, True)
         assertType(functionResult, 'functionResult', FunctionResult, True)
+        assertType(callgraph, 'callgraph', CallGraph)
+        assert callgraph.getRoot() == subroutine.getName()
+        
+        self.__callgraph = callgraph
         
         self.name = subroutine.getSimpleName().lower()
         self.isFunction = subroutine.isFunction()
@@ -306,14 +312,16 @@ class SubroutineNameSpace(object):
         self.args = argumentList
         #DEPRECATED
         self.result = functionResult
-        
+    
+    def calls(self, subroutineName):    
+        return subroutineName in self.__callgraph
+
 
 class ModuleNameSpace(object):
     def __init__(self, moduleName):
         assertType(moduleName, 'moduleName', str)
 
         self.name = moduleName
-
 
 
 class GlobalsNameSpace(object):
@@ -414,14 +422,14 @@ class TypesNameSpace(object):
         
 class ExportNameSpace(object):
     
-    def __init__(self, moduleName, sourceFile, globalsReferences, subroutine):
+    def __init__(self, moduleName, sourceFile, globalsReferences, subroutine, callgraph):
         assertType(moduleName, 'moduleName', str)
         assertType(sourceFile, 'sourceFile', SourceFile)
         assertType(globalsReferences, 'globalsReferences', list)
         
         self.module = ModuleNameSpace(moduleName)
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
-        self.subroutine = SubroutineNameSpace(subroutine, None, None)
+        self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
         
 class ExportGlobalsNameSpace(object):
     

@@ -59,11 +59,11 @@ class CodeGenerator(object):
         if subroutine is None:
             raise LookupError("Subroutine not found: " + str(subroutineFullName))
 
-        callGraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
+        callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
         
         printLine('Find Interfaces', indent = 1)
         useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules, self.__abstractTypes)
-        useTraversal.parseModules(callGraph.getRoot())
+        useTraversal.parseModules(callgraph.getRoot())
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
 
@@ -72,28 +72,28 @@ class CodeGenerator(object):
         argumentTracker.setIgnoreRegex(ignoreRegex)
         
         printLine('Find References to Type Argument Members', indent = 2)
-        typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callGraph)
+        typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callgraph)
         
         subroutine = self._findSubroutine(subroutineFullName)
         if subroutine.isFunction() and subroutine.getResultVariable().hasDerivedType():
             printLine('Find References to Type Result', indent = 2)
-            typeResultReferences = argumentTracker.trackDerivedTypeResult(callGraph)
+            typeResultReferences = argumentTracker.trackDerivedTypeResult(callgraph)
         else:
             typeResultReferences = []
         
         printLine('Find References to Global Variables', indent = 2)
         globalsTracker = GlobalVariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
         globalsTracker.setIgnoreRegex(ignoreRegex)
-        globalsReferences = globalsTracker.trackGlobalVariables(callGraph)
+        globalsReferences = globalsTracker.trackGlobalVariables(callgraph)
         
         sourceFile = subroutine.getSourceFile()
         sourceFilePath = sourceFile.getPath()
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
-        self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
+        self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph)
         
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):
         raise NotImplementedError()
     
     def _findSubroutine(self, subroutineFullName):
