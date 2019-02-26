@@ -126,6 +126,7 @@ class CodeGenerator(object):
         
         rendered = str(template).strip()
         rendered = self._clearLines(rendered)
+        rendered = self._unifyIfs(rendered)
         rendered = self._indent(rendered)
         rendered = self._breakLines(rendered)
         return rendered
@@ -141,6 +142,54 @@ class CodeGenerator(object):
                 lines.append(line)
                  
         return "\n".join(lines)
+    
+    def _unifyIfs(self, text):
+        if not text:
+            return text
+        
+        ifRegex = re.compile(r'^IF\s+\(.*\)\s+THEN$', re.IGNORECASE)
+        endifRegex = re.compile(r'^END\s+IF$', re.IGNORECASE)
+        
+        lines = []
+        ifStack = []
+        endIfBuffer = []
+        for line in text.split("\n"):
+            if ifRegex.match(line) is not None:
+                if endIfBuffer:
+                    if ifStack[-1] == line:
+                        endIfBuffer = []
+                    else:
+                        lines += endIfBuffer
+                        endIfBuffer = []
+                        ifStack.pop()
+                        ifStack.append(line)
+                        lines.append(line)
+                else:
+                    ifStack.append(line)
+                    lines.append(line)
+            elif line == 'ELSE':
+                ifStack[-1] = line
+                lines.append(line)
+            elif endifRegex.match(line) is not None:
+                if endIfBuffer:
+                    lines += endIfBuffer
+                    endIfBuffer = []
+                    ifStack.pop()
+                endIfBuffer.append(line)
+            elif not line:
+                if endIfBuffer:
+                    endIfBuffer.append(line)
+                else:
+                    lines.append(line)
+            else:
+                if endIfBuffer:
+                    lines += endIfBuffer
+                    endIfBuffer = []
+                    ifStack.pop()
+                lines.append(line)
+#             printDebug(line + ' | ' +  str(ifStack) + ' | ' + str(endIfBuffer))
+        
+        return "\n".join(lines) 
     
     def _indent(self, text):
         if not text:
@@ -159,7 +208,6 @@ class CodeGenerator(object):
         lines = []
         indent = baseIndent
         for line in text.split("\n"):
-            line = line.strip()
             lineUpper = line.upper()
             if lineUpper.startswith(endWords) or lineUpper.startswith(borderWords):
                 indent = max(baseIndent, indent - CodeGenerator.INDENT_LENGTH)
