@@ -6,6 +6,7 @@ from capture import CaptureCodeGenerator
 from replay import ReplayCodeGenerator
 from export import ExportCodeGenerator
 from backup import BackupFileFinder
+from callgraph import CallGraph
 
 class CombinedCodeGenerator(CodeGenerator):
     
@@ -32,15 +33,16 @@ class CombinedCodeGenerator(CodeGenerator):
         if replay:
             self.__replay = ReplayCodeGenerator(self._sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
     
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        assertType(callgraph, 'callgraph', CallGraph)
         
-        self.__export.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
+        self.__export.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph)
         if self.__capture:
             self.__modifySourceFiles.clearCache()
-            self.__capture.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
+            self.__capture.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph)
         if self.__replay:
-            self.__replay.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences)
+            self.__replay.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph)
