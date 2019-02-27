@@ -78,7 +78,7 @@ CONTAINS
     CALL ftg_${subroutine.name}_replay_input($commaList($args))
     CALL ftg_destroy_serializer()
     #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
-      CALL jsbmock_start_replay(JSBACH_DIR, 'ftg_${subroutine.name}_jsbach', 'jsbach')
+      CALL ftg_${subroutine.name}_start_jsbach_replay()
     #end if
 
     #if $subroutine.isFunction
@@ -93,7 +93,7 @@ CONTAINS
     #end if
     #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
     
-      CALL jsbmock_stop() 
+      CALL ftg_${subroutine.name}_stop_jsbach_replay()
     #end if
 
     ! One process after another to get nice, ordered printing
@@ -299,5 +299,20 @@ CONTAINS
     CALL ftg_allocate_and_read_allocatable(TRIM(fieldname)//"%send_startidx", field%send_startidx)
   
   END SUBROUTINE ftg_read_t_comm_pattern_orig
+    
+  #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+  SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay()
   
+    CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
+  
+    WRITE (0,*) 'FTG START JSBACH REPLAY'
+    WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_jsbach_', get_my_mpi_all_id()
+    CALL jsbmock_start_replay(JSBACH_DIR, basename, 'jsbach')
+  
+  END SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay
+  
+  SUBROUTINE ftg_${subroutine.name}_stop_jsbach_replay()
+    CALL jsbmock_stop()
+  END SUBROUTINE ftg_${subroutine.name}_stop_jsbach_replay
+  #end if  
 END PROGRAM ftg_${subroutine.name}_test

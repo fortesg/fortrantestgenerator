@@ -12,8 +12,6 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
 
   WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
 
-  WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
-  
   mkdirerr = ''
   CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdirerr)
   IF (TRIM(mkdirerr) /= '') THEN
@@ -27,7 +25,7 @@ SUBROUTINE ftg_${subroutine.name}_init_for_capture(stage, dir)
   CALL ftg_add_serializer_metainfo('subroutine', '${subroutine.name}')
   CALL ftg_add_serializer_metainfo('stage', stage)
   CALL ftg_add_serializer_metainfo('mpi_all_id', get_my_mpi_all_id())
-
+  
 END SUBROUTINE ftg_${subroutine.name}_init_for_capture
 
 LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
@@ -256,5 +254,37 @@ SUBROUTINE ftg_write_t_comm_pattern_orig(fieldname, field)
   CALL ftg_write(TRIM(fieldname)//"%send_startidx", field%send_startidx, LBOUND(field%send_startidx), UBOUND(field%send_startidx))
 
 END SUBROUTINE ftg_write_t_comm_pattern_orig
+
+#if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture()
+
+  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+  USE mo_mpi,  ONLY: get_my_mpi_all_id
+  USE mo_jsb_interface_mock, ONLY: jsbmock_start_capture
+
+  CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
+
+  IF (ftg_${subroutine.name}_capture_input_active()) THEN
+    WRITE (0,*) 'FTG START JSBACH CAPTURE'
+    WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_jsbach_', get_my_mpi_all_id()
+
+    mkdirerr = ''
+    CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(ftg_${subroutine.name}_jsbach_dir), cmdmsg=mkdirerr)
+    IF (TRIM(mkdirerr) /= '') THEN
+      WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
+    END IF 
   
+    CALL jsbmock_start_capture(ftg_${subroutine.name}_jsbach_dir, basename, 'jsbach')
+  END IF
+
+END SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture
+
+SUBROUTINE ftg_${subroutine.name}_stop_jsbach_capture()
+  USE mo_jsb_interface_mock, ONLY: jsbmock_stop
+  
+  IF (ftg_${subroutine.name}_capture_input_active()) THEN
+    CALL jsbmock_stop()
+  END IF  
+END SUBROUTINE ftg_${subroutine.name}_stop_jsbach_capture
+#end if  
 $epilogue

@@ -3,7 +3,7 @@ $prologue
 ftg_${subroutine.name}_round = ftg_${subroutine.name}_round + 1
 CALL ftg_${subroutine.name}_capture_input($commaList($args))
 #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
-  CALL jsbmock_start_capture(ftg_${subroutine.name}_jsbach_dir, 'ftg_${subroutine.name}_jsbach', 'jsbach')
+  CALL ftg_${subroutine.name}_start_jsbach_capture()
 #end if
 
 $epilogue
