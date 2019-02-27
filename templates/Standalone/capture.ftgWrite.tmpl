@@ -11,7 +11,7 @@
         #set $contType = $container.type
         #set $contDim = $container.dim
         #if $needsRegistration($container)
-          #set $aa = $allocatedOrAssociated($container, $contDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          #set $aa = $allocatedOrAssociated($container)
           #if $aa
             IF ($aa) THEN
           #end if
@@ -26,7 +26,7 @@
         #end if
       #end for
     #end if
-    #set $aa = $allocatedOrAssociated($var, 0)
+    #set $aa = $allocatedOrAssociated($var)
     #if $aa
       IF ($aa) THEN
     #end if
@@ -50,9 +50,9 @@
         #set $container = $topContainer.container($level)
         #set $contType = $container.type
         #set $contDim = $container.dim
+        #set $filledContainer = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
         #if $needsRegistration($container)
-          #set $filledContainer = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-          #set $caa = $allocatedOrAssociated($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+          #set $caa = $allocatedOrAssociated($filledContainer)
           #if $caa
             IF ($caa) THEN
           #end if
@@ -67,7 +67,7 @@
           #end if
         #end if
       #end for
-      #set $aaNew = $allocatedOrAssociated($container, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+      #set $aaNew = $allocatedOrAssociated($filledContainer)
       #if $aaNew and $aaNew != $aa
         IF ($aaNew) THEN
         #set $ifAA += '1' 
@@ -84,7 +84,8 @@
     #set $ifCAA = ''
     #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
       #set $container = $var.container($level)
-      #set $caaNew = $allocatedOrAssociated($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+      #set $filledContainer = $fillIndices($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+      #set $caaNew = $allocatedOrAssociated($filledContainer)
       #if $caaNew and $caaNew != $caa
         IF ($caaNew) THEN
         #set $ifCAA += '1' 
@@ -99,7 +100,6 @@
         #set $contType = $container.type
         $writeVarNameWithFilledIndicesToString($container, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
         #if $mandDims < $container.totalDim
-          #set $filledContainer = $fillIndices($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
           CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
         #else
           CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)

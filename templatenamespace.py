@@ -125,52 +125,67 @@ class TemplatesNameSpace(object):
                 
         return ''
     
-    def allocatedOrAssociated(self, variable, dim, *placeholder):
+#     def allocatedOrAssociated(self, variable, dim, *placeholder):
+#         assertType(variable, 'variable', UsedVariable, True)
+#         assertType(dim, 'dim', int)
+#         assertTypeAll(placeholder, 'placeholder', str)
+#         
+#         if variable is None:
+#             return ''
+#         
+#         ref = variable.getReference()
+#         totalDim = ref.getTotalDimensions()
+#         if dim > totalDim:
+#             dim = totalDim
+#         top = 0
+#         pointer = False
+#         allocatable = False
+#         perc = ''
+#         aa = '('
+#         totalAllocatablesAndPointers = ref.getNumberOfPointerAndAllocatableLevels()
+#         allocatablesAndPointers = 0
+#         for level in ref.getLevels():
+#             var = ref.getVariable(level)
+#             if var is None:
+#                 return ''
+#             aa += perc + var.getName()
+#             perc = '%'
+#             pointer = var.isPointer()
+#             allocatable = var.isAllocatable()
+#             allocatablesAndPointers += (pointer or allocatable)
+#             bot = top 
+#             top += var.getDimension()
+#             if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
+#                 if top > bot:
+#                     aa += '('
+#                     sep = ''
+#                     for i in range(bot, top):
+#                         aa += sep + placeholder[i]
+#                         sep = ', '
+#                     aa += ')'
+#             else:
+#                 break
+#         aa += ')'
+#         if allocatable:
+#             return 'ALLOCATED' + aa
+#         elif pointer:
+#             return 'ASSOCIATED' + aa
+#         return ''
+    
+    def allocatedOrAssociated(self, variable):
         assertType(variable, 'variable', UsedVariable, True)
-        assertType(dim, 'dim', int)
-        assertTypeAll(placeholder, 'placeholder', str)
         
         if variable is None:
             return ''
         
-        ref = variable.getReference()
-        totalDim = ref.getTotalDimensions()
-        if dim > totalDim:
-            dim = totalDim
-        top = 0
-        pointer = False
-        allocatable = False
-        perc = ''
-        aa = '('
-        totalAllocatablesAndPointers = ref.getNumberOfPointerAndAllocatableLevels()
-        allocatablesAndPointers = 0
-        for level in ref.getLevels():
-            var = ref.getVariable(level)
-            if var is None:
-                return ''
-            aa += perc + var.getName()
-            perc = '%'
-            pointer = var.isPointer()
-            allocatable = var.isAllocatable()
-            allocatablesAndPointers += (pointer or allocatable)
-            bot = top 
-            top += var.getDimension()
-            if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim <= totalDim):
-                if top > bot:
-                    aa += '('
-                    sep = ''
-                    for i in range(bot, top):
-                        aa += sep + placeholder[i]
-                        sep = ', '
-                    aa += ')'
-            else:
-                break
-        aa += ')'
-        if allocatable:
-            return 'ALLOCATED' + aa
-        elif pointer:
-            return 'ASSOCIATED' + aa
-        return ''
+        if variable.allocatable():
+            return 'ALLOCATED(' + variable.expression() + ')'
+        elif variable.pointer():
+            return 'ASSOCIATED(' + variable.expression() + ')'
+        elif variable.level() > 0:
+            return self.allocatedOrAssociated(variable.container())
+        else:
+            return ''
     
     def fillIndices(self, variable, dim, *indices):
         assertType(variable, 'variable', UsedVariable)
@@ -631,6 +646,10 @@ class FilledVariable(UsedVariable):
         super(FilledVariable, self).__init__(reference)
         self.__dim = dim
         self.__indices = indices
+    
+    def container(self, level = -1):
+        container = super(FilledVariable, self).container(level)
+        return FilledVariable(container.getReference(), self.__dim, self.__indices)
         
     def expression(self):
         ref = self.getReference()
