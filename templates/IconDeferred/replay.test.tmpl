@@ -12,6 +12,9 @@ PROGRAM ftg_${subroutine.name}_test
 
   USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
   USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
+  #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+    USE mo_jsb_interface_mock, ONLY: jsbmock_start_replay, jsbmock_stop
+  #end if
   
   ${globals.imports}
   
@@ -21,6 +24,9 @@ IMPLICIT NONE
 
 CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
 CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
+#if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+  CHARACTER(*), PARAMETER :: JSBACH_DIR = '${dataDir}/ftg_${subroutine.name}_test/jsbach'
+#end if
 LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 
@@ -71,6 +77,9 @@ CONTAINS
     CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
     CALL ftg_${subroutine.name}_replay_input($commaList($args))
     CALL ftg_destroy_serializer()
+    #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+      CALL jsbmock_start_replay(JSBACH_DIR, 'ftg_${subroutine.name}_jsbach', 'jsbach')
+    #end if
 
     #if $subroutine.isFunction
         #if $result.pointer
@@ -81,6 +90,10 @@ CONTAINS
         ${subroutine.name}_result $assign ${subroutine.name}($commaList($args))
     #else
         CALL ${subroutine.name}($commaList($args))
+    #end if
+    #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+    
+      CALL jsbmock_stop() 
     #end if
 
     ! One process after another to get nice, ordered printing
@@ -93,7 +106,7 @@ CONTAINS
 
     CALL ftg_${subroutine.name}_init_for_replay('output', OUTPUT_DIR)    
     #if $subroutine.isFunction
-        #set $resultArg = $subroutine.name + '_result'
+      #set $resultArg = $subroutine.name + '_result'
     #else
       #set $resultArg = ''
     #end if  

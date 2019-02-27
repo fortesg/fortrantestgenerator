@@ -1,8 +1,20 @@
 #extends IconCompare
 
+#def captureAfterUse
+    $include('IconDeferred/capture.afteruse.tmpl')
+#end def captureAfterUse
+
 #def captureBeforeContains
     $include('IconDeferred/capture.beforecontains.tmpl')
 #end def captureBeforeContains
+
+#def captureAfterLastSpecification
+    $include('IconDeferred/capture.afterlastspecification.tmpl')
+#end def captureAfterLastSpecification
+
+#def captureBeforeEnd
+    $include('IconDeferred/capture.beforeend.tmpl')
+#end def captureBeforeEnd
 
 #def captureAfterSubroutine
     $include('IconDeferred/capture.aftersubroutine.tmpl')
