@@ -3,7 +3,7 @@ import sys
 from Cheetah.Template import Template
 from Cheetah import ImportHooks
 from assertions import assertType, assertTypeAll
-from source import SourceFiles, SubroutineFullName
+from source import SourceFiles, SubroutineFullName, Subroutine
 from trackvariable import VariableTracker
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
@@ -11,6 +11,7 @@ from supertypes import CallGraphBuilder
 import re
 from printout import printLine, printInline, printDebug
 from templatenamespace import TemplatesNameSpace
+from typefinder import TypeCollection
 
 class CodeGenerator(object):
     
@@ -91,15 +92,23 @@ class CodeGenerator(object):
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
-        self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph)
+        self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types)
         
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         raise NotImplementedError()
     
     def _findSubroutine(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         
         return self._sourceFiles.findSubroutine(subroutineFullName)
+    
+    def _setTypesToSubroutineVariables(self, subroutine, types):
+        assertType(subroutine, 'subroutine', Subroutine)
+        assertType(types, 'types', TypeCollection)
+        
+        for variable in subroutine.getVariables():
+            if variable.hasDerivedType() and not variable.isTypeAvailable() and variable.getDerivedTypeName() in types:
+                variable.setType(types[variable.getDerivedTypeName()])
     
     def _findModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
@@ -195,9 +204,10 @@ class CodeGenerator(object):
             return text
         
         beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ', 'INTERFACE ')
-        beginWordExceptions = ('MODULE PROCEDURE', 'TYPE IS')
+        beginWordExceptions = ('MODULE PROCEDURE')
         beginWordsBack = (' THEN')
         endWords = ('END ', 'ENDIF', 'ENDDO', 'ENDFUNCTION', 'ENDSELECT')
+        doubleEndWords = ('END SELECT', 'ENDSELECT')
         borderWords = ('CONTAINS', 'ELSE', 'ELSEIF')
         
         originalLines = text.split("\n")
@@ -209,6 +219,8 @@ class CodeGenerator(object):
         for line in text.split("\n"):
             lineUpper = line.upper()
             if lineUpper.startswith(endWords) or lineUpper.startswith(borderWords):
+                indent = max(baseIndent, indent - CodeGenerator.INDENT_LENGTH)
+            if lineUpper.startswith(doubleEndWords):
                 indent = max(baseIndent, indent - CodeGenerator.INDENT_LENGTH)
             if not line.startswith('#'):
                 line = (' ' * indent) + line

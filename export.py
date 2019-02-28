@@ -6,6 +6,7 @@ from templatenamespace import ExportNameSpace
 from backup import BackupFileFinder
 from printout import printLine
 from callgraph import CallGraph
+from typefinder import TypeCollection
 
 class ExportCodeGenerator(CodeGenerator):
     
@@ -22,12 +23,13 @@ class ExportCodeGenerator(CodeGenerator):
         self.__modifySourceFiles = modifySourceFiles     
         self.__backupFinder = backupFinder 
 
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):  # @UnusedVariable
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):  # @UnusedVariable
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         assertType(callgraph, 'callgraph', CallGraph)
+        assertType(types, 'types', TypeCollection)
         
         printLine('Add Code to Used Modules', indent = 1)
         self.__backupFinder.setBackupSuffixPrefix(self.__backupFinder.EXPORT_SUFFIX_PREFIX)
@@ -44,6 +46,7 @@ class ExportCodeGenerator(CodeGenerator):
                 self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
                 backup = self.__backupFinder.create(usedSourceFilePath)
                 subroutine = self._findSubroutine(subroutineFullName)
+                self._setTypesToSubroutineVariables(subroutine, types)
                 exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph)
                 result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
                 if backup and not result:

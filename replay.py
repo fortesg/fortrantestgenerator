@@ -6,6 +6,7 @@ from source import SourceFiles, VariableReference, SubroutineFullName
 from templatenamespace import ReplayTemplatesNameSpace
 from printout import printLine
 from callgraph import CallGraph
+from typefinder import TypeCollection
 
 class ReplayCodeGenerator(CodeGenerator):
     
@@ -25,12 +26,13 @@ class ReplayCodeGenerator(CodeGenerator):
         self.__testSourceDir = testSourceDir
         self.__testDataDir = testDataDir
         
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         assertType(callgraph, 'callgraph', CallGraph)
+        assertType(types, 'types', TypeCollection)
         
         printLine('Create code in new test source file', indent = 1)
         tempTestFile = os.path.join(self.__testSourceDir, self.TEMP_TEST_FILE)
@@ -39,6 +41,7 @@ class ReplayCodeGenerator(CodeGenerator):
         self._writeFile(tempTestFile, [])
         
         subroutine = self._findSubroutine(subroutineFullName)
+        self._setTypesToSubroutineVariables(subroutine, types)
         templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir, callgraph)
         self._processTemplate(tempTestFile, 0, self.TEST_TEMPLATE_PART, templateNameSpace)
         

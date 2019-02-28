@@ -6,6 +6,7 @@ from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
 from printout import printLine
 from callgraph import CallGraph
+from typefinder import TypeCollection
 
 class CaptureCodeGenerator(CodeGenerator):
     
@@ -31,12 +32,13 @@ class CaptureCodeGenerator(CodeGenerator):
         self.__testDataDir = testDataDir     
         self.__backupFinder = backupFinder
 
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph):
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         assertType(callgraph, 'callgraph', CallGraph)
+        assertType(types, 'types', TypeCollection)
         printLine('Add Code to Module under Test', indent = 1)
         
         self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)            
@@ -44,9 +46,11 @@ class CaptureCodeGenerator(CodeGenerator):
         subroutine = self._findSubroutine(subroutineFullName)
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
-        if sourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
-            sourceFilePath = sourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
-            subroutine = SourceFile(sourceFilePath, originalSourceFile.isPreprocessed()).getSubroutine(subroutine.getName())
+        self._setTypesToSubroutineVariables(subroutine, types)
+        
+        for variable in subroutine.getVariables():
+            if variable.hasDerivedType() and not variable.isTypeAvailable() and variable.getDerivedTypeName() in types:
+                variable.setType(types[variable.getDerivedTypeName()])
         
         self.__backupFinder.create(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir, callgraph)
