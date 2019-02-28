@@ -1,8 +1,0 @@
-$prologue
-
-#if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
-  CALL ftg_${subroutine.name}_stop_jsbach_capture()
-#end if
-CALL ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
-
-$epilogue

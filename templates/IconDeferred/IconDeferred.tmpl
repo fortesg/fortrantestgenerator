@@ -1,25 +1,6 @@
 #extends IconCompare
 
-#def captureAfterUse
-    $include('IconDeferred/capture.afteruse.tmpl')
-#end def captureAfterUse
-
-#def captureBeforeContains
-    $include('IconDeferred/capture.beforecontains.tmpl')
-#end def captureBeforeContains
-
-#def captureAfterLastSpecification
-    $include('IconDeferred/capture.afterlastspecification.tmpl')
-#end def captureAfterLastSpecification
-
-#def captureBeforeEnd
-    $include('IconDeferred/capture.beforeend.tmpl')
-#end def captureBeforeEnd
-
-#def captureAfterSubroutine
-    $include('IconDeferred/capture.aftersubroutine.tmpl')
-#end def captureAfterSubroutine
-
-#def replay
-    $include('IconDeferred/replay.test.tmpl')
-#end def replay
+#def ftgWrite($var)
+    #set global $ftgWrite_var = $var
+    $include('IconDeferred/capture.ftgWrite.tmpl')
+#end def ftgWrite
