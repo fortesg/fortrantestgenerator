@@ -221,8 +221,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
-        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
-        self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, False)
+        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), globalsReferences, False)
+        self.types = TypesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, False)
         self.__registered = set()
         
     def needsRegistration(self, variable):
@@ -253,8 +253,8 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
-        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)        
-        self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, True)
+        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), globalsReferences, True)        
+        self.types = TypesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, True)
         self.__allocated = set()
         
     def needsAllocationFilled(self, variable, dim, *indices): 
@@ -394,15 +394,19 @@ class GlobalsNameSpace(object):
 
 class TypesNameSpace(object):
     
-    def __init__(self, subroutine, typeArgumentReferences, globalsReferences, includeTestModule):
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, includeTestModule):
         assertType(subroutine, 'subroutine', Subroutine)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         assertType(includeTestModule, 'includeTestModule', bool)
         
         variables = set(subroutine.getDerivedTypeArguments())
-        for reference in globalsReferences:
-            variables.add(reference.getLevel0Variable())
+        for reference in typeArgumentReferences + typeResultReferences + globalsReferences:
+            for level in reference.getLevels():
+                variable = reference.getVariable(level)
+                if variable is not None:
+                    variables.add(variable)
 
         self.__types = dict()
         for variable in variables:
@@ -410,7 +414,10 @@ class TypesNameSpace(object):
                 typE = variable.getType()
                 if typE.getName() not in self.__types:
                     self.__types[typE.getName()] = typE
-                    #self.__addMemberTypesToTypSet(typE)
+                    if typE.isAbstract() and typE.hasAssignedImplementation():
+                        implType = typE.getAssignedImplementation()
+                        if implType.getName() not in self.__types:
+                            self.__types[implType.getName()] = implType
                     
         testModule = subroutine.getName().getModuleName()
         modules = dict()    
