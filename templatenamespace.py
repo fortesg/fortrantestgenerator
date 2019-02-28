@@ -537,6 +537,9 @@ class UsedVariable(object):
     def expression(self):
         return self.__ref.getExpression().lower()
     
+    def alias(self, alias, level):
+        return UsedVariable(self.__ref.getAlias(alias, level))
+    
     def level(self):
         return self.__ref.getLevel()
     
@@ -665,10 +668,6 @@ class FilledVariable(UsedVariable):
         super(FilledVariable, self).__init__(reference)
         self.__dim = dim
         self.__indices = indices
-    
-    def container(self, level = -1):
-        container = super(FilledVariable, self).container(level)
-        return FilledVariable(container.getReference(), self.__dim, *self.__indices)
         
     def expression(self):
         ref = self.getReference()
@@ -694,6 +693,16 @@ class FilledVariable(UsedVariable):
                     d += 1
                 filled += ')'
         return filled
+    
+    def container(self, level = -1):
+        container = super(FilledVariable, self).container(level)
+        return FilledVariable(container.getReference(), self.__dim, *self.__indices)
+    
+    def alias(self, alias, level):
+        container = self.container(level - 1)
+        dim = self.__dim - container.dim()
+        indices = self.__indices[container.dim():]
+        return FilledVariable(self.__ref.getAlias(alias, level), dim, indices)
 
 class Argument(object):
     
