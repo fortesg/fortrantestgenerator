@@ -649,7 +649,7 @@ class FilledVariable(UsedVariable):
     
     def container(self, level = -1):
         container = super(FilledVariable, self).container(level)
-        return FilledVariable(container.getReference(), self.__dim, self.__indices)
+        return FilledVariable(container.getReference(), self.__dim, *self.__indices)
         
     def expression(self):
         ref = self.getReference()
