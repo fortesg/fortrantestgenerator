@@ -187,7 +187,6 @@ class CodeGenerator(object):
                     endIfBuffer = []
                     ifStack.pop()
                 lines.append(line)
-#             printDebug(line + ' | ' +  str(ifStack) + ' | ' + str(endIfBuffer))
         
         return "\n".join(lines) 
     
@@ -196,7 +195,7 @@ class CodeGenerator(object):
             return text
         
         beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ', 'INTERFACE ')
-        beginWordExceptions = ('MODULE PROCEDURE')
+        beginWordExceptions = ('MODULE PROCEDURE', 'TYPE IS')
         beginWordsBack = (' THEN')
         endWords = ('END ', 'ENDIF', 'ENDDO', 'ENDFUNCTION', 'ENDSELECT')
         borderWords = ('CONTAINS', 'ELSE', 'ELSEIF')

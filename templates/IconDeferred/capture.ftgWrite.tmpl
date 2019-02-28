@@ -27,6 +27,15 @@
         #end if
       #end for
     #end if
+    #set $selectCount = 0
+    #for $level in $var.levels[:-1]
+        #set $container = $var.container($level)
+        #if $container.polymorph
+            SELECT TYPE ($container => polym$level)
+            IS TYPE ($container.dynamicType)
+            #set $selectCount = $selectCount + 1
+        #end if
+    #end for
     #set $aa = $allocatedOrAssociated($var)
     #if $aa
       IF ($aa) THEN
@@ -39,6 +48,9 @@
     #if $aa
       END IF
     #end if
+    #for _ in range(0, $selectCount)
+        END SELECT
+    #end for
   #else
   
     #set $mandDims = $var.mandatoryDimensions

@@ -509,6 +509,15 @@ class UsedVariable(object):
             return ''
         return var.getTypeName()
     
+    def polymorph(self):
+        var = self.__ref.getLevelNVariable()
+        return var is not None and var.hasDerivedType() and var.isTypeAvailable() and var.getType().isAbstract() and var.getType().hasAssignedImplementation()
+    
+    def dynamicType(self):
+        if self.polymorph():
+            return self.__ref.getLevelNVariable().getType().getAssignedImplementation().getName()
+        return ''
+    
     def hasClassType(self):
         var = self.__ref.getLevelNVariable()
         if var is None:
