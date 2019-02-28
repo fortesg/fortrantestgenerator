@@ -13,9 +13,9 @@ PROGRAM ftg_${subroutine.name}_test
   USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
   USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
   
-  ${globals.imports}
+  $globals.imports
   
-  ${types.imports}
+  $types.imports
   
 IMPLICIT NONE
 

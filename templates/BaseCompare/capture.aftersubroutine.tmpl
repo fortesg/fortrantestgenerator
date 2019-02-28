@@ -34,6 +34,7 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage)
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
   $globals.imports
+  $types.imports
 
   $args.specs(intent = 'in')
 
@@ -67,6 +68,7 @@ END SUBROUTINE ftg_${subroutine.name}_capture_input
 SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
 
   $globals.imports
+  $types.imports
 
   $args.allOut.specs(intent = 'in', allocatable = False)
   #if $subroutine.isFunction:

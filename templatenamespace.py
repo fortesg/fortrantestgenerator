@@ -38,7 +38,6 @@ class TemplatesNameSpace(object):
         else:
             self.result = None
         self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result, callgraph)
-        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.dataDir = testDataDir.rstrip('/');
 
     def clearLine(self):
@@ -172,8 +171,10 @@ class TemplatesNameSpace(object):
 #             return 'ASSOCIATED' + aa
 #         return ''
     
-    def allocatedOrAssociated(self, variable):
+    def allocatedOrAssociated(self, variable, minLevel = 0):
         assertType(variable, 'variable', UsedVariable, True)
+        assertType(minLevel, 'minLevel', int)
+        assert minLevel >= 0
         
         if variable is None:
             return ''
@@ -182,7 +183,7 @@ class TemplatesNameSpace(object):
             return 'ALLOCATED(' + variable.expression() + ')'
         elif variable.pointer():
             return 'ASSOCIATED(' + variable.expression() + ')'
-        elif variable.level() > 0:
+        elif variable.level() > minLevel:
             return self.allocatedOrAssociated(variable.container())
         else:
             return ''
@@ -220,6 +221,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
+        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
+        self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._globalsReferences, False)
         self.__registered = set()
         
     def needsRegistration(self, variable):

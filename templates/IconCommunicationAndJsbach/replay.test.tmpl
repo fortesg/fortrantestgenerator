@@ -16,9 +16,9 @@ PROGRAM ftg_${subroutine.name}_test
     USE mo_jsb_interface_mock, ONLY: jsbmock_start_replay, jsbmock_stop
   #end if
   
-  ${globals.imports}
+  $globals.imports
   
-  ${types.imports}
+  $types.imports
   
 IMPLICIT NONE
 

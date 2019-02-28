@@ -5,51 +5,39 @@
   !     $var.type, DIMENSION($var.dim)
 #else
   #if $var.referencable
-    #if $containerNeedsRegistration($var)
-      #for $level in $var.levels[:-1]
-        #set $container = $var.container($level)
+    #set $closeStatements = []
+    #for $level in $var.levels
+      #set $container = $var.container($level)
+      #if $container.polymorph
+        SELECT TYPE (polym$level => $container)
+        TYPE IS ($container.dynamicType)
+        #silent $closeStatements.append('END SELECT')
+      #else
+        #set $aa = $allocatedOrAssociated($container, $level)
+        #if $aa
+          IF ($aa) THEN
+          #silent $closeStatements.append('END IF')
+        #else
+          #silent $closeStatements.append($clearLine)
+        #end if
+      #end if
+      #if $level < $var.level and $needsRegistration($container)
         #set $contType = $container.type
-        ! $contType
-        #set $contDim = $container.dim
-        #if $needsRegistration($container)
-          #set $aa = $allocatedOrAssociated($container)
-          #if $aa
-            IF ($aa) THEN
-          #end if
-          #if $container.containsArray
-            CALL ftg_register_only("$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
-          #else
-            CALL ftg_register_only("$container", "$contType")$setRegistered($container)
-          #end if $setRegistered($container) 
-          #if $aa
-            END IF
-          #end if
+        #if $container.containsArray
+          CALL ftg_register_only("$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
+        #else
+          CALL ftg_register_only("$container", "$contType")$setRegistered($container)
         #end if
-      #end for
-    #end if
-    #set $selectCount = 0
-    #for $level in $var.levels[:-1]
-        #set $container = $var.container($level)
-        #if $container.polymorph
-            SELECT TYPE ($container => polym$level)
-            IS TYPE ($container.dynamicType)
-            #set $selectCount = $selectCount + 1
-        #end if
+        #silent $setRegistered($container) 
+      #end if
     #end for
-    #set $aa = $allocatedOrAssociated($var)
-    #if $aa
-      IF ($aa) THEN
-    #end if
     #if $var.containsArray
       CALL ftg_write("$var", $var, LBOUND($var), UBOUND($var))
     #else
       CALL ftg_write("$var", $var)
     #end if  
-    #if $aa
-      END IF
-    #end if
-    #for _ in range(0, $selectCount)
-        END SELECT
+    #for $close in reversed($closeStatements)
+        $close
     #end for
   #else
   

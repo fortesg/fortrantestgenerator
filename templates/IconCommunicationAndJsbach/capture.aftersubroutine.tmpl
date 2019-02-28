@@ -42,7 +42,8 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   USE mo_mpi,  ONLY: get_my_mpi_all_id
   USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
   
-  ${globals.imports}
+  $globals.imports
+  $types.imports
 
   ${args.specs(intent = 'in')}
 
@@ -118,7 +119,8 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   USE mo_exception, ONLY: finish
   USE m_ser_ftg, ONLY: ftg_set_savepoint, ftg_write, ftg_register_only, ftg_destroy_savepoint, ftg_destroy_serializer
 
-  ${globals.imports}
+  $globals.imports
+  $types.imports
 
   ${args.allOut.specs(intent = 'in', allocatable = False)}
   #if $subroutine.isFunction:
