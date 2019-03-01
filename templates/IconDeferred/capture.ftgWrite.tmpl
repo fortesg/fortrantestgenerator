@@ -33,7 +33,7 @@
     #end if
     #if $level < $var.level and $needsRegistration($filledContainer)
       #set $contType = $container.type
-      #if $mandDim > 0
+      #if $ad > 0
         $writeVarNameWithFilledIndicesToString($container, "ftg_c", $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
         #set $contName = 'ftg_c'
       #else 
