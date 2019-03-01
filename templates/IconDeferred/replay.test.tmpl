@@ -192,17 +192,24 @@ CONTAINS
     
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables
-      $ftgCompare($var) #end for
+      #if not $var.hasContainerWithType('t_patch') 
+        $ftgCompare($var) $clearLine
+      #end if 
+    #end for
     
     #if $subroutine.isFunction
       ! RESULT
       #for $var in $result.usedVariables
-        $ftgCompare($var)#end for
+        $ftgCompare($var) $clearLine
+      #end for
     #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgCompare($var) #end for
+      #if not $var.hasContainerWithType('t_patch') and not $var.fromModule('mo_real_timer')
+        $ftgCompare($var) $clearLine
+      #end if
+    #end for
 
     CALL ftg_destroy_savepoint()
     

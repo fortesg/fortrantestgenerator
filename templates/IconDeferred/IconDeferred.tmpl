@@ -5,10 +5,19 @@
     $include('IconDeferred/capture.ftgWrite.tmpl')
 #end def ftgWrite
 
+#def replay
+    $include('IconDeferred/replay.test.tmpl')
+#end def replay
+
 #def ftgRead($var)
     #set global $ftgRead_var = $var
     $include('IconDeferred/replay.ftgRead.tmpl')
 #end def ftgRead
+
+#def ftgReadCommunicator($var)
+    #set global $ftgRead_var = $var
+    $include('IconDeferred/replay.ftgReadCommunicator.tmpl')
+#end def ftgReadCommunicator
 
 #def ftgCompare($var)
     #set global $ftgCompare_var = $var
