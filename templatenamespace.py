@@ -604,6 +604,10 @@ class UsedVariable(object):
 
         return UsedVariable(self.__ref.getSubReference(level))
     
+    def lastname(self):
+        percPos = self.expression().rfind('%')
+        return self.expression()[percPos + 1:]
+    
     def containerByDimension(self, dim):
         cDims = 0
         for level in self.__ref.getLevels():
@@ -928,6 +932,12 @@ class ArgumentList(object):
     
     def __contains__(self, item):
         return item in self.__arguments
+
+    def __add__(self, other):
+        if isinstance(other, self.__class__):
+            return ArgumentList(self.__arguments + other.__arguments)
+        else:
+            raise TypeError("unsupported operand type(s) for +: '{}' and '{}'").format(self.__class__, type(other))
     
     def filter(self, predicate):
         return ArgumentList([arg for arg in self.__arguments if predicate(arg)])
