@@ -293,7 +293,10 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
             return ''
         
         dim = variable.dim()
-        alloc = 'ALLOCATE(' + variable.expression()
+        alloc = 'ALLOCATE('
+        if variable.polymorph():
+            alloc += variable.dynamicType() + '::'
+        alloc += variable.expression()
         if dim > 0:
             alloc += '('
             sep = ''
