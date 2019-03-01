@@ -4,3 +4,13 @@
     #set global $ftgWrite_var = $var
     $include('IconDeferred/capture.ftgWrite.tmpl')
 #end def ftgWrite
+
+#def ftgRead($var)
+    #set global $ftgRead_var = $var
+    $include('IconDeferred/replay.ftgRead.tmpl')
+#end def ftgRead
+
+#def ftgCompare($var)
+    #set global $ftgCompare_var = $var
+    $include('IconDeferred/replay.ftgCompare.tmpl')
+#end def ftgCompare
