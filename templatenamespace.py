@@ -381,16 +381,10 @@ class GlobalsNameSpace(object):
                     modules[moduleName] = []
                 modules[moduleName].append(typE.getName())
          
-        self.imports = ''
+        self.imports = []
         for module, elements in sorted(modules.items()):
-            self.imports += 'USE ' + module + ', ONLY: '
-            for element in elements:
-                self.imports += element
-                #TODO alias
-                self.imports += ', '
-            self.imports  = self.imports.strip(', ')
-            self.imports += "\n"
-        self.imports = self.imports.strip("\n")
+            self.imports.append('USE ' + module + ', ONLY: ' + ', '.join(elements))
+        self.imports = "\n".join(self.imports)
         
         exportGlobals = ExportGlobalsNameSpace(testModule, sourceFile, globalsReferences)
         self.exports = exportGlobals.exports
