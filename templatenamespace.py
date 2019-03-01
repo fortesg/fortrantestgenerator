@@ -285,14 +285,14 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
         assertType(variable, 'variable', [UsedVariable, str])
         return variable in self.__allocated
 
-    def alloc(self, variable, dim, *dimSizes): 
+    def alloc(self, variable, *dimSizes): 
         assertType(variable, 'variable', UsedVariable, True)
-        assertType(dim, 'dim', int)
         assertTypeAll(dimSizes, 'dimSizes', str)
         
         if variable is None:
             return ''
         
+        dim = variable.dim()
         alloc = 'ALLOCATE(' + variable.expression()
         if dim > 0:
             alloc += '('
