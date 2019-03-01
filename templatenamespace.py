@@ -402,22 +402,27 @@ class TypesNameSpace(object):
         assertType(includeTestModule, 'includeTestModule', bool)
         
         variables = set(subroutine.getDerivedTypeArguments())
-        for reference in typeArgumentReferences + typeResultReferences + globalsReferences:
-            for level in reference.getLevels():
-                variable = reference.getVariable(level)
-                if variable is not None:
-                    variables.add(variable)
-
+        for reference in globalsReferences:
+            variables.add(reference.getLevel0Variable())
+            
         self.__types = dict()
         for variable in variables:
             if variable.hasDerivedType() and variable.isTypeAvailable():
                 typE = variable.getType()
                 if typE.getName() not in self.__types:
                     self.__types[typE.getName()] = typE
-                    if typE.isAbstract() and typE.hasAssignedImplementation():
-                        implType = typE.getAssignedImplementation()
-                        if implType.getName() not in self.__types:
-                            self.__types[implType.getName()] = implType
+                    
+        for reference in typeArgumentReferences + typeResultReferences + globalsReferences:
+            for level in reference.getLevels():
+                variable = reference.getVariable(level)
+                if variable is not None:
+                    variables.add(variable)
+                    if variable.hasDerivedType() and variable.isTypeAvailable():
+                        typE = variable.getType()
+                        if typE.isAbstract() and typE.hasAssignedImplementation():
+                            implType = typE.getAssignedImplementation()
+                            if implType.getName() not in self.__types:
+                                self.__types[implType.getName()] = implType
                     
         testModule = subroutine.getName().getModuleName()
         modules = dict()    
