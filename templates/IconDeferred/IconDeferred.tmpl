@@ -5,6 +5,12 @@
     $include('IconDeferred/capture.ftgWrite.tmpl')
 #end def ftgWrite
 
+#def ftgWriteInner($var, $filledAlias)
+    #set global $ftgWriteInner_var = $var
+    #set global $ftgWriteInner_filleAlias = $filledAlias
+    $include('IconDeferred/capture.ftgWriteInner.tmpl')
+#end def ftgWriteInner
+
 #def replay
     $include('IconDeferred/replay.test.tmpl')
 #end def replay
