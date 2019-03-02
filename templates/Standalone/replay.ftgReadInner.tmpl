@@ -7,10 +7,12 @@
 #else 
   #set $varName = '"' + str($var) + '"'
 #end if
-#if $var.pointer
-  CALL ftg_allocate_and_read_pointer($varName, $filledAlias)
-#elif $var.allocatable
-  CALL ftg_allocate_and_read_allocatable($varName, $filledAlias)
+#if $needsAllocation($var)
+  #if $var.pointer
+    CALL ftg_allocate_and_read_pointer($varName, $filledAlias)
+  #else
+    CALL ftg_allocate_and_read_allocatable($varName, $filledAlias)
+  #end if
 #else
   CALL ftg_read($varName, $filledAlias)
 #end if 

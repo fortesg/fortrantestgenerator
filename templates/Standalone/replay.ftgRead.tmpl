@@ -23,7 +23,7 @@
       #end if
       IF (ftg_field_exists($contName)) THEN
         #if $container.dim > 0
-          ftg_bounds = ftg_get_bounds("$filledContainer")
+          ftg_bounds = ftg_get_bounds($contName)
         #end if
         $alloc($filledContainer, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
       ELSE
