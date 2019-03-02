@@ -62,7 +62,7 @@ class CodeGenerator(object):
 
         callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
         
-        printLine('Find Interfaces', indent = 1)
+        printLine('Find Interfaces and Types', indent = 1)
         useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules, self.__abstractTypes)
         useTraversal.parseModules(callgraph.getRoot())
         interfaces = useTraversal.getInterfaces()
