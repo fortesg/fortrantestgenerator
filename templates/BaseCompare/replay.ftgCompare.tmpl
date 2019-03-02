@@ -3,32 +3,54 @@
   ! *** WARNING: Type not supported by serialbox *** 
   !     $var 
   !     $var.type, DIMENSION($var.dim)
-#else 
-  #if $var.referencable
-    #if $var.containsArray
-      CALL ftg_compare("$var", $var, result, failure_count, LBOUND($var), UBOUND($var))
-    #else
-      CALL ftg_compare("$var", $var, result, failure_count)
-    #end if  
-  #else
-    #set $mandDims = $var.mandatoryDimensions
-    #set $topContainer = $var
-    #set $aa = '' 
-    #set $ifAA = ''
-    #for $d in range(1, $mandDims + 1)
-      #set $topContainer = $var.containerByDimension($d)
-      DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #end for
-    #set $caa = '' 
-    $writeVarNameWithFilledIndicesToString($var, "ftg_name", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #if $mandDims < $var.totalDim
-      CALL ftg_compare(ftg_name, $filled, result, failure_count, LBOUND($filled), UBOUND($filled))
-    #else
-      CALL ftg_compare(ftg_name, $filled, result, failure_count)
+#else
+  #set $closeStatements = []
+  #set $mandDim = $var.mandatoryDimensions
+  #set $d = 0
+  #set $ad = 0
+  #set $aliasVar = $var
+  #set $filledVar = $fillIndices($var, $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+  #set $filledAlias = $filledVar
+  #for $level in $var.levels[:-1]
+    #set $container = $aliasVar.container($level - ($var.level - $aliasVar.level))
+    #set $filledContainer = $fillIndices($container, $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+    #if $container.polymorph
+      #set $alias = 'polym' + str($level)
+      SELECT TYPE ($alias => $filledContainer)
+      TYPE IS ($container.dynamicType)
+      #silent $closeStatements.append('END SELECT')
+      #set $aliasVar = $var.alias($alias, $level) 
+      #set $filledAlias = $filledVar.alias($alias, $level) 
+      #set $ad = 0
     #end if
-    #for $d in range(1, $mandDims + 1)
-      END DO
-    #end for
+    #if $d < $mandDim
+      #set $loopDims = range($d + 1, $d + $container.dim + 1) 
+      #set $d += $container.dim
+      #set $ad += $container.dim
+      #set $cd = 0
+      #for $ld in $loopDims
+        #set $cd += 1
+        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd)
+        #silent $closeStatements.append('END DO')
+      #end for        
+    #end if      
+  #end for
+  #if $mandDim > 0
+    $writeVarNameWithFilledIndicesToString($var, "ftg_name", $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    #set $varName = 'ftg_name'
+  #else 
+    #set $varName = '"' + str($var) + '"'
   #end if
-#end if
+  #if $mandDim < $var.totalDim
+    CALL ftg_compare($varName, $filledAlias, result, failure_count, LBOUND($filledAlias), UBOUND($filledAlias))
+  #else
+    CALL ftg_compare($varName, $filledAlias, result, failure_count)
+  #end if
+  #for $close in reversed($closeStatements)
+    $close
+  #end for
+  #if 'END DO' in $closeStatements
+  
+  #end if
+#end if  
+$clearLine

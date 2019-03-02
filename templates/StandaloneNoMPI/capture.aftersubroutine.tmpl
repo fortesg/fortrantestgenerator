@@ -44,7 +44,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   ${args.specs(intent = 'in')}
 
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
-  CHARACTER(len=256) :: ftg_c
+  CHARACTER(len=256) :: ftg_name
 
   IF (ftg_${subroutine.name}_capture_input_active()) THEN
     
@@ -105,7 +105,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   #end if
 
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
-  CHARACTER(len=256) :: ftg_c
+  CHARACTER(len=256) :: ftg_name
 
   IF (ftg_${subroutine.name}_capture_output_active()) THEN
 

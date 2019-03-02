@@ -33,8 +33,8 @@
     #end if
     #if $level < $var.level and $needsRegistration($filledContainer)
       #if $ad > 0
-        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
-        #set $contName = 'ftg_c'
+        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+        #set $contName = 'ftg_name'
       #else 
         #set $contName = '"' + str($container) + '"'
       #end if

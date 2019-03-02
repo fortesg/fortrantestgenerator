@@ -154,7 +154,7 @@ CONTAINS
 
     INTEGER, DIMENSION(8) :: ftg_bounds
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
-    CHARACTER(len=256) :: ftg_c
+    CHARACTER(len=256) :: ftg_name
     INTEGER ftg_mtime_calendar
 
     CALL ftg_set_savepoint('input')
@@ -204,7 +204,7 @@ CONTAINS
     INTEGER, INTENT(inout) :: failure_count
     LOGICAL :: result
     INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
-    CHARACTER(len=256) :: ftg_c
+    CHARACTER(len=256) :: ftg_name
     
     CALL ftg_set_savepoint('output')
   
@@ -244,11 +244,11 @@ CONTAINS
     
     INTEGER :: ftg_d1
     INTEGER, DIMENSION(8) :: ftg_bounds
-    CHARACTER(len=256) :: ftg_c
+    CHARACTER(len=256) :: ftg_name
     
     DO ftg_d1 = LBOUND(field, 1), UBOUND(field, 1)
-      WRITE (ftg_c,'(A,I0,A)') 'field(', ftg_d1, ')%p'
-      CALL ftg_read_t_comm_pattern(ftg_c, field(ftg_d1)%p)
+      WRITE (ftg_name,'(A,I0,A)') 'field(', ftg_d1, ')%p'
+      CALL ftg_read_t_comm_pattern(ftg_name, field(ftg_d1)%p)
     END DO
   END SUBROUTINE ftg_read_t_p_comm_pattern_d1
   
