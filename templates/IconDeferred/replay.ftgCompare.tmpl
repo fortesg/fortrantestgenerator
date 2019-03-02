@@ -35,17 +35,7 @@
       #end for        
     #end if      
   #end for
-  #if $mandDim > 0
-    $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #set $varName = 'ftg_c'
-  #else 
-    #set $varName = '"' + str($var) + '"'
-  #end if
-  #if $mandDim < $var.totalDim
-    CALL ftg_compare($varName, $filledAlias, result, failure_count, LBOUND($filledAlias), UBOUND($filledAlias))
-  #else
-    CALL ftg_compare($varName, $filledAlias, result, failure_count)
-  #end if
+  $ftgCompareInner($var, $filledAlias)
   #for $close in reversed($closeStatements)
     $close
   #end for

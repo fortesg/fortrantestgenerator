@@ -35,3 +35,9 @@
     #set global $ftgCompare_var = $var
     $include('IconDeferred/replay.ftgCompare.tmpl')
 #end def ftgCompare
+
+#def ftgCompareInner($var, $filledAlias)
+    #set global $ftgCompareInner_var = $var
+    #set global $ftgCompareInner_filleAlias = $filledAlias
+    $include('IconDeferred/capture.ftgCompareInner.tmpl')
+#end def ftgCompareInner
