@@ -221,8 +221,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
-        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), globalsReferences, False)
-        self.types = TypesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, False)
+        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
+        self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._typeResultReferences, self._globalsReferences, False)
         self.__registered = set()
         
     def needsRegistration(self, variable):
@@ -253,8 +253,8 @@ class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
-        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), globalsReferences, True)        
-        self.types = TypesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, True)
+        self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)
+        self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._typeResultReferences, self._globalsReferences, True)
         self.__allocated = set()
         
     def needsAllocationFilled(self, variable, dim, *indices): 
