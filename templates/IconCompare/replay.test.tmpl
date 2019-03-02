@@ -4,7 +4,7 @@ PROGRAM ftg_${subroutine.name}_test
   USE mo_kind
   USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
   USE mo_exception,      ONLY: message, finish
-  USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast !ICON
+  USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_rank, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast !ICON
 
   USE ${module.name}, ONLY: ${subroutine.name}
   ! Remove if capture code already deleted
@@ -24,17 +24,17 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 
-INTEGER :: failure_count
-CHARACTER(9) :: failure_count_char
+INTEGER :: total_failure_count
+CHARACTER(9) :: total_failure_count_char
 
 CALL start_mpi('ftg_${subroutine.name}_test') !ICON
 
-CALL ftg_test_${subroutine.name}(failure_count)
+CALL ftg_test_${subroutine.name}(total_failure_count)
 
 IF (get_my_mpi_all_id() == 0) THEN
-    IF (failure_count > 0) THEN
-        WRITE (failure_count_char,'(I0)') failure_count
-        CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(failure_count_char), 2)
+    IF (total_total_failure_count > 0) THEN
+        WRITE (total_failure_count_char,'(I0)') total_failure_count
+        CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(total_failure_count_char), 2)
     ELSE
         CALL message('FTG', '${subroutine.name}: TEST PASSED')
     END IF
@@ -53,9 +53,9 @@ CONTAINS
         ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
     #end if
     
-    INTEGER :: mpi_all_id, failure_count
+    INTEGER :: mpi_rank, failure_count
     
-    mpi_all_id = get_my_mpi_all_id()
+    mpi_rank = get_my_mpi_all_id()
     failure_count = 0
   
     CALL message('FTG', '*** Run test for ${subroutine.name} ***')
@@ -64,29 +64,32 @@ CONTAINS
     ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
     ftg_${subroutine.name}_capture_output_enabled = .FALSE.
     
-    WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_all_id, ') * '
+    WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') * '
     ftg_cmp_print_when_equal = .TRUE.
     ftg_cmp_count_missing_field_as_failure = .FALSE.
 
+    ! ----------- REPLAY -----------
     CALL ftg_${subroutine.name}_init_for_replay('input', INPUT_DIR)
     CALL ftg_${subroutine.name}_replay_input($commaList($args))
     CALL ftg_destroy_serializer()
 
     #if $subroutine.isFunction
-        #if $result.pointer
-            #set $assign = '=>'
-        #else
-            #set $assign = '='
-        #end if
-        ${subroutine.name}_result $assign ${subroutine.name}($commaList($args))
+      #if $result.pointer
+        ${subroutine.name}_result => ${subroutine.name}($commaList($args))
+      #else
+        ${subroutine.name}_result = ${subroutine.name}($commaList($args))
+      #end if
     #else
-        CALL ${subroutine.name}($commaList($args))
+      CALL ${subroutine.name}($commaList($args))
     #end if
 
+    ! ----------- COMPARE -----------
     ! One process after another to get nice, ordered printing
     ! Change this if to slow
-    IF (mpi_all_id > 0) THEN
-        CALL p_recv(total_failure_count, mpi_all_id - 1, 0)
+    
+    ! TODO Ohne ICON implementieren
+    IF (mpi_rank > 0) THEN
+        CALL p_recv(total_failure_count, mpi_rank - 1, 0)
     ELSE
         total_failure_count = 0
     END IF
@@ -101,15 +104,15 @@ CONTAINS
     CALL ftg_destroy_serializer()
     
     IF (failure_count == 0) THEN
-        WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** TEST PASSED'
+        WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') *** TEST PASSED'
     ELSE
-        WRITE (*,'(A,I0.2,A,I0)') 'FTG ${subroutine.name} (', mpi_all_id, ') *** FAILURE: ', failure_count
+        WRITE (*,'(A,I0.2,A,I0)') 'FTG ${subroutine.name} (', mpi_rank, ') *** FAILURE: ', failure_count
     END IF
     
     total_failure_count = total_failure_count + failure_count 
 
-    IF (mpi_all_id < get_my_mpi_all_comm_size() - 1) THEN
-        CALL p_send(total_failure_count, mpi_all_id + 1, 0)
+    IF (mpi_rank < get_my_mpi_all_comm_size() - 1) THEN
+        CALL p_send(total_failure_count, mpi_rank + 1, 0)
     ELSE
         CALL p_send(total_failure_count, 0, 0)
     END IF
