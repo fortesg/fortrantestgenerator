@@ -154,20 +154,12 @@ CONTAINS
 
     ! ARGUMENTS
     #for $var in $args.usedVariables
-      #if ($var.container.type == 'CLASS(t_comm_pattern)' or $var.container.type == 'TYPE(t_comm_pattern_orig)') and $var.lastname == 'comm'
-        $ftgReadCommunicator($var)
-      #else
-        $ftgRead($var) 
-      #end if
+      $ftgRead($var) 
     #end for
 
     ! GLOBALS
     #for $var in $globals.usedVariables
-      #if $var.container.type == 't_comm_pattern' and $var.lastname == 'comm'
-        $ftgReadCommunicator($var)
-      #else
-        $ftgRead($var) 
-      #end if 
+      $ftgRead($var) 
     #end for
 
     CALL ftg_destroy_savepoint()

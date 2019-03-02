@@ -7,7 +7,10 @@
 #else 
   #set $varName = '"' + str($var) + '"'
 #end if
-#if $var.pointer
+#if ($var.container.type == 'CLASS(t_comm_pattern)' or $var.container.type == 'TYPE(t_comm_pattern_orig)') and $var.lastname == 'comm'
+  ! TODO: Is it actually p_comm_work ?
+  $filledAlias = p_comm_work
+#elif $var.pointer
   CALL ftg_allocate_and_read_pointer($varName, $filledAlias)
 #elif $var.allocatable
   CALL ftg_allocate_and_read_allocatable($varName, $filledAlias)
