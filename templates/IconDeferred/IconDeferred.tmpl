@@ -1,43 +1,11 @@
 #extends IconCompare
 
-#def ftgWrite($var)
-    #set global $ftgWrite_var = $var
-    $include('IconDeferred/capture.ftgWrite.tmpl')
-#end def ftgWrite
-
-#def ftgWriteInner($var, $filledAlias)
-    #set global $ftgWriteInner_var = $var
-    #set global $ftgWriteInner_filleAlias = $filledAlias
-    $include('IconDeferred/capture.ftgWriteInner.tmpl')
-#end def ftgWriteInner
-
 #def replay
     $include('IconDeferred/replay.test.tmpl')
 #end def replay
-
-#def ftgRead($var)
-    #set global $ftgRead_var = $var
-    $include('IconDeferred/replay.ftgRead.tmpl')
-#end def ftgRead
 
 #def ftgReadInner($var, $filledAlias)
     #set global $ftgReadInner_var = $var
     #set global $ftgReadInner_filleAlias = $filledAlias
     $include('IconDeferred/capture.ftgReadInner.tmpl')
 #end def ftgReadInner
-
-#def ftgReadCommunicator($var)
-    #set global $ftgRead_var = $var
-    $include('IconDeferred/replay.ftgReadCommunicator.tmpl')
-#end def ftgReadCommunicator
-
-#def ftgCompare($var)
-    #set global $ftgCompare_var = $var
-    $include('IconDeferred/replay.ftgCompare.tmpl')
-#end def ftgCompare
-
-#def ftgCompareInner($var, $filledAlias)
-    #set global $ftgCompareInner_var = $var
-    #set global $ftgCompareInner_filleAlias = $filledAlias
-    $include('IconDeferred/capture.ftgCompareInner.tmpl')
-#end def ftgCompareInner

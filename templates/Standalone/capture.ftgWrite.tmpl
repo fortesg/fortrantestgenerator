@@ -4,128 +4,66 @@
   !     $var 
   !     $var.type, DIMENSION($var.dim)
 #else
-  #if $var.referencable
-    #if $containerNeedsRegistration($var)
-      #for $level in $var.levels[:-1]
-        #set $container = $var.container($level)
-        #set $contType = $container.type
-        #set $contDim = $container.dim
-        #if $needsRegistration($container)
-          #set $aa = $allocatedOrAssociated($container)
-          #if $aa
-            IF ($aa) THEN
-          #end if
-          #if $container.containsArray
-            CALL ftg_register_only("$container", "$contType", LBOUND($container), UBOUND($container))$setRegistered($container)
-          #else
-            CALL ftg_register_only("$container", "$contType")$setRegistered($container)
-          #end if $setRegistered($container) 
-          #if $aa
-            END IF
-          #end if
-        #end if
-      #end for
-    #end if
-    #set $aa = $allocatedOrAssociated($var)
-    #if $aa
-      IF ($aa) THEN
-    #end if
-    #if $var.containsArray
-      CALL ftg_write("$var", $var, LBOUND($var), UBOUND($var))
+  #set $closeStatements = []
+  #set $mandDim = $var.mandatoryDimensions
+  #set $d = 0
+  #set $ad = 0
+  #set $aliasVar = $var
+  #set $filledVar = $fillIndices($var, $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+  #set $filledAlias = $filledVar
+  #for $level in $var.levels
+    #set $container = $aliasVar.container($level - ($var.level - $aliasVar.level))
+    #set $filledContainer = $fillIndices($container, $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+    #if $container.polymorph
+      #set $alias = 'polym' + str($level)
+      SELECT TYPE ($alias => $filledContainer)
+      TYPE IS ($container.dynamicType)
+      #silent $closeStatements.append('END SELECT')
+      #set $aliasVar = $var.alias($alias, $level) 
+      #set $filledAlias = $filledVar.alias($alias, $level) 
+      #set $ad = 0
     #else
-      CALL ftg_write("$var", $var)
-    #end if  
-    #if $aa
-      END IF
+      #set $aa = $allocatedOrAssociated($filledContainer, $level)
+      #if $aa
+        IF ($aa) THEN
+        #silent $closeStatements.append('END IF')
+      #else
+        #silent $closeStatements.append($clearLine)
+      #end if
     #end if
-  #else
+    #if $level < $var.level and $needsRegistration($filledContainer)
+      #if $ad > 0
+        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+        #set $contName = 'ftg_c'
+      #else 
+        #set $contName = '"' + str($container) + '"'
+      #end if
+      #set $contType = $container.type
+      #if $d < $container.totalDim
+        CALL ftg_register_only($contName, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))
+      #else
+        CALL ftg_register_only($contName, "$contType")
+      #end if
+      #silent $setRegistered($filledContainer) 
+    #end if
+    #if $d < $mandDim
+      #set $loopDims = range($d + 1, $d + $container.dim + 1) 
+      #set $d += $container.dim
+      #set $ad += $container.dim
+      #set $cd = 0
+      #for $ld in $loopDims
+        #set $cd += 1
+        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd)
+        #silent $closeStatements.append('END DO')
+      #end for        
+    #end if      
+  #end for
+  $ftgWriteInner($var, $filledAlias)
+  #for $close in reversed($closeStatements)
+    $close
+  #end for
+  #if 'END DO' in $closeStatements
   
-    #set $mandDims = $var.mandatoryDimensions
-    #set $topContainer = $var
-    #set $aa = '' 
-    #set $ifAA = ''
-    #for $d in range(1, $mandDims + 1)
-      #set $topContainer = $var.containerByDimension($d)
-      #for $level in $topContainer.levels
-        #set $container = $topContainer.container($level)
-        #set $contType = $container.type
-        #set $contDim = $container.dim
-        #set $filledContainer = $fillIndices($container, $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-        #if $needsRegistration($container)
-          #set $caa = $allocatedOrAssociated($filledContainer)
-          #if $caa
-            IF ($caa) THEN
-          #end if
-          $writeVarNameWithFilledIndicesToString($container, "ftg_c", $d - 1, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-          #if ($d - 1) < $container.totalDim
-            CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
-          #else
-            CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
-          #end if 
-          #if $caa
-            END IF
-          #end if
-        #end if
-      #end for
-      #set $aaNew = $allocatedOrAssociated($filledContainer)
-      #if $aaNew and $aaNew != $aa
-        IF ($aaNew) THEN
-        #set $ifAA += '1' 
-        #set $aa = $aaNew 
-      #else
-        #set $ifAA += '0'
-        #if $aaNew != $aa
-          #set $aa = $aaNew
-        #end if
-      #end if
-      DO ftg_d$d = $lbound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"), $ubound($var, $d, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #end for
-    #set $caa = '' 
-    #set $ifCAA = ''
-    #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
-      #set $container = $var.container($level)
-      #set $filledContainer = $fillIndices($container, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-      #set $caaNew = $allocatedOrAssociated($filledContainer)
-      #if $caaNew and $caaNew != $caa
-        IF ($caaNew) THEN
-        #set $ifCAA += '1' 
-        #set $caa = $caaNew 
-      #else
-        #set $ifCAA += '0'
-        #if $caaNew != $caa
-          #set $caa = $caaNew
-        #end if
-      #end if
-      #if $needsRegistration($container)
-        #set $contType = $container.type
-        $writeVarNameWithFilledIndicesToString($container, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")        
-        #if $mandDims < $container.totalDim
-          CALL ftg_register_only(ftg_c, "$contType", LBOUND($filledContainer), UBOUND($filledContainer))$setRegistered($container)
-        #else
-          CALL ftg_register_only(ftg_c, "$contType")$setRegistered($container)
-        #end if 
-      #end if
-    #end for
-    $writeVarNameWithFilledIndicesToString($var, "ftg_c", $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #set $filled = $fillIndices($var, $mandDims, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
-    #if $mandDims < $var.totalDim
-      CALL ftg_write(ftg_c, $filled, LBOUND($filled), UBOUND($filled))
-    #else
-      CALL ftg_write(ftg_c, $filled)
-    #end if
-    #for $level in sorted(set($var.levels[:-1]) - set($topContainer.levels))
-      #if $ifCAA[-1] == '1'
-        END IF
-      #end if
-      #set $ifCAA = $ifCAA[:-1]
-    #end for
-    #for $d in range(1, $mandDims + 1)
-      END DO
-      #if $ifAA[-1] == '1'
-        END IF
-      #end if
-      #set $ifAA = $ifAA[:-1]
-    #end for
   #end if
-#end if
+#end if  
 $clearLine

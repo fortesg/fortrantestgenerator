@@ -25,6 +25,12 @@
     $include('Standalone/capture.ftgWrite.tmpl')
 #end def ftgWrite
 
+#def ftgWriteInner($var, $filledAlias)
+    #set global $ftgWriteInner_var = $var
+    #set global $ftgWriteInner_filleAlias = $filledAlias
+    $include('Standalone/capture.ftgWriteInner.tmpl')
+#end def ftgWriteInner
+
 #def export
     $include('Standalone/export.beforecontains.tmpl')
 #end def export
@@ -37,3 +43,25 @@
     #set global $ftgRead_var = $var
     $include('Standalone/replay.ftgRead.tmpl')
 #end def ftgRead
+
+#def ftgReadInner($var, $filledAlias)
+    #set global $ftgReadInner_var = $var
+    #set global $ftgReadInner_filleAlias = $filledAlias
+    $include('Standalone/replay.ftgReadInner.tmpl')
+#end def ftgReadInner
+
+#def ftgReadCommunicator($var)
+    #set global $ftgRead_var = $var
+    $include('Standalone/replay.ftgReadCommunicator.tmpl')
+#end def ftgReadCommunicator
+
+#def ftgCompare($var)
+    #set global $ftgCompare_var = $var
+    $include('Standalone/replay.ftgCompare.tmpl')
+#end def ftgCompare
+
+#def ftgCompareInner($var, $filledAlias)
+    #set global $ftgCompareInner_var = $var
+    #set global $ftgCompareInner_filleAlias = $filledAlias
+    $include('Standalone/replay.ftgCompareInner.tmpl')
+#end def ftgCompareInner
