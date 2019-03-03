@@ -28,7 +28,7 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
   CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
   CALL ftg_add_serializer_metainfo('subroutine', '${subroutine.name}')
   CALL ftg_add_serializer_metainfo('stage', stage)
-  CALL ftg_add_serializer_metainfo('mpi_id', mpi_rank)
+  CALL ftg_add_serializer_metainfo('mpi_rank', mpi_rank)
   
   CALL ftg_set_savepoint(TRIM(stage))
 
