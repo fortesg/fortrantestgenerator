@@ -17,7 +17,6 @@ IMPLICIT NONE
 INTEGER, PARAMETER :: MAX_CHAR_LENGTH = 1024
 CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
 CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
-LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 INTEGER (kind=4) :: mpi_rank, mpi_size, mpi_err
 INTEGER :: total_failure_count
@@ -125,7 +124,7 @@ END SUBROUTINE ftg_${subroutine.name}_init_serializer
 SUBROUTINE ftg_${subroutine.name}_close_serializer()
 
   CALL ftg_destroy_savepoint()
-  CALL ftg_set_savepoint('output')
+  CALL ftg_destroy_serializer()
 
 END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
