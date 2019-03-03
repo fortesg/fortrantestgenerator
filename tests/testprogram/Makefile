@@ -6,10 +6,6 @@ test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI ok
 
 test-IconStandalone: clean capture-IconStandalone replay-IconStandalone ok
 
-test-IconTestbed: clean capture-IconTestbed replay-IconTestbed compare-mpi ok
-
-test-IconCompare: clean capture-IconCompare replay-IconCompare ok
-
 test-BaseCompare: clean capture-BaseCompare clean-capture-icon replay-BaseCompare ok
 
 replay-Standalone: 
@@ -21,12 +17,6 @@ replay-StandaloneNoMPI:
 replay-IconStandalone: 
 	$(MAKE) -C replay-IconStandalone replay
 	 
-replay-IconTestbed: 
-	$(MAKE) -C replay-IconTestbed replay
-	
-replay-IconCompare: 
-	$(MAKE) -C replay-IconCompare replay
-	
 replay-BaseCompare: 
 	$(MAKE) -C replay-BaseCompare replay
 	 
@@ -38,12 +28,6 @@ capture-StandaloneNoMPI:
 	 
 capture-IconStandalone: 
 	$(MAKE) -C src capture-IconStandalone
-	 
-capture-IconTestbed: 
-	$(MAKE) -C src capture-IconTestbed
-	 
-capture-IconCompare: 
-	$(MAKE) -C src capture-IconCompare
 	 
 capture-BaseCompare: 
 	$(MAKE) -C src capture-BaseCompare
@@ -69,9 +53,7 @@ clean:
 	$(MAKE) -C replay-Standalone clean
 	$(MAKE) -C replay-StandaloneNoMPI clean
 	$(MAKE) -C replay-IconStandalone clean
-	$(MAKE) -C replay-IconTestbed clean
-	$(MAKE) -C replay-IconCompare clean
 	$(MAKE) -C replay-BaseCompare clean
 	rm -Rf data/*
 	
-.PHONY: test clean clean-capture-icon clean-capture-generic replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconTestbed replay-IconCompare replay-BaseCompare
+.PHONY: test clean clean-capture-icon clean-capture-generic replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-BaseCompare

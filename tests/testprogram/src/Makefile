@@ -21,12 +21,6 @@ capture-StandaloneNoMPI: clean ftg-StandaloneNoMPI maingeneric
 capture-IconStandalone: clean ftg-IconStandalone mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
-capture-IconTestbed: clean ftg-IconTestbed mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
-
-capture-IconCompare: clean ftg-IconCompare mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
-
 capture-BaseCompare: clean ftg-BaseCompare mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
@@ -48,12 +42,6 @@ ftg-StandaloneNoMPI: assembler
 
 ftg-IconStandalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
-
-ftg-IconTestbed: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconTestbed.py sub testsub
-
-ftg-IconCompare: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconCompare.py sub testsub
 
 ftg-BaseCompare: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub
