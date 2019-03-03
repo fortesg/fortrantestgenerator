@@ -1,5 +1,7 @@
 $prologue
 
-CALL ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
+IF (ftg_${subroutine.name}_capture_output_active()) THEN
+  CALL ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
+END IF
 
 $epilogue
