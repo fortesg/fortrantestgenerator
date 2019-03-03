@@ -12,6 +12,13 @@ TYPE(t_comm_variable), ALLOCATABLE :: comm_variable(:)
 
 PUBLIC :: set, get, init_comm_variable, comm_variable
 
+
+! ================= BEGIN FORTRAN TEST GENERATOR (FTG) =======================
+
+PUBLIC :: number
+
+! ================= END FORTRAN TEST GENERATOR (FTG) =========================
+
 CONTAINS
 
 SUBROUTINE set(new)

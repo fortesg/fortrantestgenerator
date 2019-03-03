@@ -1,0 +1,21 @@
+#set $var = $ftgReadInner_var
+#set $filledAlias = $ftgReadInner_filleAlias
+#set $mandDim = $var.mandatoryDimensions
+#if $mandDim > 0
+  $writeVarNameWithFilledIndicesToString($var, "ftg_name", $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+  #set $varName = 'ftg_name'
+#else 
+  #set $varName = '"' + str($var) + '"'
+#end if
+#if ($var.container.type == 'CLASS(t_comm_pattern)' or $var.container.type == 'TYPE(t_comm_pattern_orig)') and $var.lastname == 'comm'
+  ! TODO: Is it actually p_comm_work ?
+  $filledAlias = p_comm_work
+#elif $needsAllocation($var)
+  #if $var.pointer
+    CALL ftg_allocate_and_read_pointer($varName, $filledAlias)
+  #else
+    CALL ftg_allocate_and_read_allocatable($varName, $filledAlias)
+  #end if
+#else
+  CALL ftg_read($varName, $filledAlias)
+#end if 

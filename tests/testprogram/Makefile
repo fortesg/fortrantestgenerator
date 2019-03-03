@@ -4,7 +4,7 @@ test-Standalone: clean capture-Standalone replay-Standalone ok
 
 test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI ok
 
-test-IconStandalone: clean capture-IconStandalone replay-IconStandalone compare-mpi ok
+test-IconStandalone: clean capture-IconStandalone replay-IconStandalone ok
 
 test-IconTestbed: clean capture-IconTestbed replay-IconTestbed compare-mpi ok
 

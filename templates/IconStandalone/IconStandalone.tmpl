@@ -5,5 +5,11 @@
 #end def captureAfterSubroutine
 
 #def replay
-    $include('IconStandalone/replay.test.tmpl')
+    $include('IconStandalone/replay.tmpl')
 #end def replay
+
+#def ftgReadInner($var, $filledAlias)
+    #set global $ftgReadInner_var = $var
+    #set global $ftgReadInner_filleAlias = $filledAlias
+    $include('IconDeferred/replay.ftgReadInner.tmpl')
+#end def ftgReadInner

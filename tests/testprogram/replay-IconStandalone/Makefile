@@ -14,7 +14,7 @@ MPINODES = 2
 ######################################################
 
 replay: ftg_testsub_test
-	-mpirun -n $(MPINODES) ./ftg_testsub_test
+	mpirun -n $(MPINODES) ./ftg_testsub_test
 
 ftg_testsub_test: ftg_testsub_test.f90 ../src/sub.o ../src/types.o ../src/globals.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS) $(ICONLIBS)
