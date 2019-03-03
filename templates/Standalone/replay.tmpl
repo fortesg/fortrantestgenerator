@@ -21,7 +21,6 @@ LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 INTEGER (kind=4) :: mpi_rank, mpi_size, mpi_err
 INTEGER :: total_failure_count
-CHARACTER(9) :: total_failure_count_char
 
 ! Remove if capture code already deleted
 ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
@@ -43,7 +42,7 @@ CALL ftg_test_${subroutine.name}(total_failure_count)
 
 IF (mpi_rank == 0) THEN
   IF (total_failure_count > 0) THEN
-    WRITE(*,'(A,I0,A)') '*** FTG: ${subroutine.name}: TEST FAILED, total number of failures: ', total_failure_count_char, ' ***'
+    WRITE(*,'(A,I0,A)') '*** FTG: ${subroutine.name}: TEST FAILED, total number of failures: ', total_failure_count, ' ***'
     STOP 2
   ELSE
     WRITE(*,'(A)') '*** FTG: ${subroutine.name}: TEST PASSED  ***'
