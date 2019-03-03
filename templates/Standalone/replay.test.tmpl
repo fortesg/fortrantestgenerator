@@ -20,24 +20,27 @@ CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/i
 CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
 LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
-INTEGER (kind=4) :: mpi_rank, error
+INTEGER (kind=4) :: mpi_rank, mpi_size, mpi_err
 INTEGER :: total_failure_count
 CHARACTER(9) :: total_failure_count_char
 
-CALL MPI_COMM_RANK(MPI_COMM_WORLD, mpi_rank, error)
+CALL MPI_INIT(mpi_err)
+
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, mpi_rank, mpi_err)
+CALL MPI_COMM_SIZE(MPI_COMM_WORLD, mpi_size, mpi_err)
 
 CALL ftg_test_${subroutine.name}(total_failure_count)
 
 IF (mpi_rank == 0) THEN
-    IF (total_total_failure_count > 0) THEN
-        WRITE (total_failure_count_char,'(I0)') total_failure_count
-        CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(total_failure_count_char), 2)
+    IF (total_failure_count > 0) THEN
+        WRITE(*,'(A,I0,A)') '*** FTG: ${subroutine.name}: TEST FAILED, total number of failures: ', total_failure_count_char, ' ***'
+        STOP 2
     ELSE
-        CALL message('FTG', '${subroutine.name}: TEST PASSED')
+        WRITE(*,*) '*** FTG: ${subroutine.name}: TEST PASSED  ***'
     END IF
 END IF
 
-CALL MPI_FINALIZE(error)
+CALL MPI_FINALIZE(mpi_err)
 
 CONTAINS
   
@@ -50,12 +53,12 @@ CONTAINS
         ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
     #end if
     
-    INTEGER :: failure_count
+    INTEGER :: failure_count, mpi_stat(MPI_STATUS_SIZE)
     
     failure_count = 0
   
     IF (mpi_rank == 0) THEN
-      WRITE(*,*) ('*** FTG: Run test for ${subroutine.name} ***')
+      WRITE(*,*) '*** FTG: Run test for ${subroutine.name} ***'
     END IF
     
     ! Remove if capture code already deleted
@@ -85,7 +88,7 @@ CONTAINS
     ! One process after another to get nice, ordered printing
     ! Change this if to slow
     IF (mpi_rank > 0) THEN
-        CALL p_recv(total_failure_count, mpi_rank - 1, 0)
+        CALL mpi_recv(total_failure_count, 1, MPI_INT, mpi_rank - 1, 0, MPI_COMM_WORLD, mpi_stat, mpi_err)
     ELSE
         total_failure_count = 0
     END IF
@@ -107,13 +110,11 @@ CONTAINS
     
     total_failure_count = total_failure_count + failure_count 
 
-    IF (mpi_rank < get_my_mpi_all_comm_size() - 1) THEN
-        CALL p_send(total_failure_count, mpi_rank + 1, 0)
-    ELSE
-        CALL p_send(total_failure_count, 0, 0)
+    IF (mpi_rank < mpi_size - 1) THEN
+        CALL mpi_send(total_failure_count, 1, MPI_INT, mpi_rank + 1, 0, MPI_COMM_WORLD, mpi_err)
     END IF
-    
-    CALL p_bcast(total_failure_count, get_my_mpi_all_comm_size() - 1)
+
+    CALL mpi_bcast(total_failure_count, 1, MPI_INT, mpi_size - 1, MPI_COMM_WORLD, mpi_err)
 
   END SUBROUTINE ftg_test_${subroutine.name}
 
@@ -148,11 +149,13 @@ CONTAINS
 
     ! ARGUMENTS
     #for $var in $args.usedVariables
-      $ftgRead($var) #end for
+      $ftgRead($var) $clearLine
+    #end for
 
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgRead($var) #end for
+      $ftgRead($var) $clearLine
+    #end for
 
     CALL ftg_destroy_savepoint()
 
@@ -176,17 +179,20 @@ CONTAINS
     
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables
-      $ftgCompare($var) #end for
+      $ftgCompare($var) $clearLine
+    #end for
     
     #if $subroutine.isFunction
       ! RESULT
       #for $var in $result.usedVariables
-        $ftgCompare($var)#end for
+        $ftgCompare($var) $clearLine
+      #end for
     #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgCompare($var) #end for
+      $ftgCompare($var) $clearLine
+    #end for
 
     CALL ftg_destroy_savepoint()
     

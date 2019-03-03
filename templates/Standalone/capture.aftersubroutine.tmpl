@@ -164,7 +164,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
     CALL ftg_destroy_serializer()
     
     CALL MPI_BARRIER (MPI_COMM_WORLD, error)
-    STOP 'FTG STOP'
+    STOP '*** FTG STOP ***'
 
   END IF
 

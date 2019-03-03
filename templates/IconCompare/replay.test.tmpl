@@ -24,14 +24,17 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 LOGICAL, PARAMETER :: SERIALBOX_DEBUG = .FALSE.
 
 
-INTEGER :: total_failure_count
+INTEGER :: mpi_rank, mpi_size, total_failure_count
 CHARACTER(9) :: total_failure_count_char
 
 CALL start_mpi('ftg_${subroutine.name}_test') !ICON
 
+mpi_rank = get_my_mpi_all_id()
+mpi_size = get_my_mpi_all_comm_size()
+
 CALL ftg_test_${subroutine.name}(total_failure_count)
 
-IF (get_my_mpi_all_id() == 0) THEN
+IF (mpi_rank == 0) THEN
     IF (total_failure_count > 0) THEN
         WRITE (total_failure_count_char,'(I0)') total_failure_count
         CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(total_failure_count_char), 2)
@@ -53,9 +56,8 @@ CONTAINS
         ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
     #end if
     
-    INTEGER :: mpi_rank, failure_count
+    INTEGER :: failure_count
     
-    mpi_rank = get_my_mpi_all_id()
     failure_count = 0
   
     CALL message('FTG', '*** Run test for ${subroutine.name} ***')
@@ -109,11 +111,11 @@ CONTAINS
     
     total_failure_count = total_failure_count + failure_count 
 
-    IF (mpi_rank < get_my_mpi_all_comm_size() - 1) THEN
+    IF (mpi_rank < mpi_size - 1) THEN
         CALL p_send(total_failure_count, mpi_rank + 1, 0)
     END IF
     
-    CALL p_bcast(total_failure_count, get_my_mpi_all_comm_size() - 1)
+    CALL p_bcast(total_failure_count, mpi_size - 1)
 
   END SUBROUTINE ftg_test_${subroutine.name}
 
@@ -124,7 +126,7 @@ CONTAINS
 
     CHARACTER(len=MAX_CHAR_LENGTH) :: basename
 
-    WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
+    WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
 
     WRITE (0,'(A)') 'FTG INIT ${subroutine.name} '//TRIM(basename)
     CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
@@ -145,7 +147,7 @@ CONTAINS
 
     CALL ftg_set_savepoint('input')
   
-    WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', mpi_rank, ')'
     
     ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
     CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
@@ -153,11 +155,13 @@ CONTAINS
 
     ! ARGUMENTS
     #for $var in $args.usedVariables
-      $ftgRead($var) #end for
+      $ftgRead($var) $clearLine
+    #end for
 
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgRead($var) #end for
+      $ftgRead($var) $clearLine
+    #end for
 
     CALL ftg_destroy_savepoint()
 
@@ -177,21 +181,24 @@ CONTAINS
     
     CALL ftg_set_savepoint('output')
   
-    WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', get_my_mpi_all_id(), ')'
+    WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', mpi_rank, ')'
     
     ! ARGUMENTS
     #for $var in $args.allOut.usedVariables
-      $ftgCompare($var) #end for
+      $ftgCompare($var) $clearLine
+    #end for
     
     #if $subroutine.isFunction
       ! RESULT
       #for $var in $result.usedVariables
-        $ftgCompare($var)#end for
+        $ftgCompare($var) $clearLine
+      #end for
     #end if
     
     ! GLOBALS
     #for $var in $globals.usedVariables
-      $ftgCompare($var) #end for
+      $ftgCompare($var) $clearLine
+    #end for
 
     CALL ftg_destroy_savepoint()
     
