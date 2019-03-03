@@ -4,7 +4,7 @@ PROGRAM ftg_${subroutine.name}_test
   USE mo_kind
   USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
   USE mo_exception,      ONLY: message, finish
-  USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_rank, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast !ICON
+  USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast !ICON
 
   USE ${module.name}, ONLY: ${subroutine.name}
   ! Remove if capture code already deleted
@@ -32,7 +32,7 @@ CALL start_mpi('ftg_${subroutine.name}_test') !ICON
 CALL ftg_test_${subroutine.name}(total_failure_count)
 
 IF (get_my_mpi_all_id() == 0) THEN
-    IF (total_total_failure_count > 0) THEN
+    IF (total_failure_count > 0) THEN
         WRITE (total_failure_count_char,'(I0)') total_failure_count
         CALL finish('FTG', '${subroutine.name}: TEST FAILED, total number of failures: '//TRIM(total_failure_count_char), 2)
     ELSE
@@ -86,8 +86,6 @@ CONTAINS
     ! ----------- COMPARE -----------
     ! One process after another to get nice, ordered printing
     ! Change this if to slow
-    
-    ! TODO Ohne ICON implementieren
     IF (mpi_rank > 0) THEN
         CALL p_recv(total_failure_count, mpi_rank - 1, 0)
     ELSE
@@ -113,8 +111,6 @@ CONTAINS
 
     IF (mpi_rank < get_my_mpi_all_comm_size() - 1) THEN
         CALL p_send(total_failure_count, mpi_rank + 1, 0)
-    ELSE
-        CALL p_send(total_failure_count, 0, 0)
     END IF
     
     CALL p_bcast(total_failure_count, get_my_mpi_all_comm_size() - 1)
