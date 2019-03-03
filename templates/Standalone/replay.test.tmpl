@@ -103,9 +103,9 @@ CONTAINS
     CALL ftg_destroy_serializer()
     
     IF (failure_count == 0) THEN
-        WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') *** TEST PASSED'
+        WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') *** TEST PASSED ***'
     ELSE
-        WRITE (*,'(A,I0.2,A,I0)') 'FTG ${subroutine.name} (', mpi_rank, ') *** FAILURE: ', failure_count
+        WRITE (*,'(A,I0.2,A,I0,A)') 'FTG ${subroutine.name} (', mpi_rank, ') *** FAILURE: ', failure_count, ' ***'
     END IF
     
     total_failure_count = total_failure_count + failure_count 
