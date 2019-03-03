@@ -2,7 +2,7 @@ COMPARE = $(HOME)/lib/serialbox2/python/compare/compare.py
 
 test-Standalone: clean capture-Standalone replay-Standalone ok
 
-test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI compare-nompi ok
+test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI ok
 
 test-IconStandalone: clean capture-IconStandalone replay-IconStandalone compare-mpi ok
 
