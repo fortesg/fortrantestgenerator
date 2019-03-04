@@ -152,7 +152,7 @@ SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
   CHARACTER(len=256) :: ftg_name
   INTEGER ftg_mtime_calendar
 
-  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (Rank #', mpi_rank, ')'
+  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT STARTED ${subroutine.name} (Rank #', mpi_rank, ')'
   CALL ftg_${subroutine.name}_init_serializer('input', INPUT_DIR)
   
   ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
@@ -168,8 +168,9 @@ SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
   #for $var in $globals.usedVariables
     $ftgRead($var) $clearLine
   #end for
-
+  
   CALL ftg_${subroutine.name}_close_serializer()
+  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT FINISHED ${subroutine.name} (Rank #', mpi_rank, ')'
 
 END SUBROUTINE ftg_${subroutine.name}_replay_input   
 #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
