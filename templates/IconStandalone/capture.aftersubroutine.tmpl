@@ -2,14 +2,13 @@ $prologue
 
 SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
-  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
   USE mo_mpi, ONLY: get_my_mpi_all_id
   USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ftg_set_savepoint, ftg_add_savepoint_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
 
   CHARACTER(*), INTENT(IN) :: stage, dir
 
   INTEGER :: mpi_rank
-  CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdir_err
+  CHARACTER(len=256) :: basename, mkdir_err
   
   mpi_rank = get_my_mpi_all_id()
 
