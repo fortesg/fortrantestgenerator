@@ -6,6 +6,7 @@ from callgraph import CallGraph
 class TemplatesNameSpace(object):
     
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
+    MERGE_PREFIX = '! ########## MERGE '
     
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         assertType(subroutine, 'subroutine', Subroutine)
@@ -38,10 +39,8 @@ class TemplatesNameSpace(object):
         else:
             self.result = None
         self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result, callgraph)
-        self.dataDir = testDataDir.rstrip('/');
-
-    def clearLine(self):
-        return TemplatesNameSpace.CLEAR_LINE
+        self.dataDir = testDataDir.rstrip('/')
+        self.clearLine = TemplatesNameSpace.CLEAR_LINE
 
     def commaList(self, *elements):
         stringElements = []
