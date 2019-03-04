@@ -6,14 +6,15 @@
 #else
   #set $closeStatements = []
   #set $mandDim = $var.mandatoryDimensions
+  #set $indices = ["ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4"]
   #set $d = 0
   #set $ad = 0
   #set $aliasVar = $var
-  #set $filledVar = $fillIndices($var, $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+  #set $filledVar = $fillIndices($var, $mandDim, *$indices)
   #set $filledAlias = $filledVar
   #for $level in $var.levels[:-1]
     #set $container = $aliasVar.container($level - ($var.level - $aliasVar.level))
-    #set $filledContainer = $fillIndices($container, $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+    #set $filledContainer = $fillIndices($container, $ad, *$indices[$d - $ad:])
     #if $container.polymorph
       #set $alias = 'polym' + str($level)
       SELECT TYPE ($alias => $filledContainer)
