@@ -13,13 +13,12 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, mpi_rank, mpi_err)
 
   WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
-  WRITE (0,'(A,A,A,I0)') 'FTG ROUND ', TRIM(basename), ' : ', ftg_${subroutine.name}_round
-  WRITE (0,'(A)') 'FTG WRITE STARTED '//TRIM(basename)
+  WRITE (0,'(A,A,A,I0.2,A,I0,A)') 'FTG WRITE STARTED ${subroutine.name}: ', TRIM(stage), ' (Rank #', mpi_rank, ', round: ', ftg_${subroutine.name}_round, ')'
 
   mkdir_err = ''
   CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdir_err)
   IF (TRIM(mkdir_err) /= '') THEN
-    WRITE (0,'(A,A)') 'FTG INIT *** ERROR: ', TRIM(mkdir_err)
+    WRITE (0,'(A,A,A)') 'FTG INIT *** ERROR: ', TRIM(mkdir_err), ' ***'
   END IF 
   
   ignore_bullshit_max_dim_size = 100000
@@ -42,12 +41,10 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
   CHARACTER(*), INTENT(IN) :: stage
 
   INTEGER(kind=4) mpi_rank, mpi_err
-  CHARACTER(len=1024) :: basename
   
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, mpi_rank, mpi_err)
   
-  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
-  WRITE (0,'(A)') 'FTG WRITE FINISHED '//TRIM(basename)
+  WRITE (0,'(A,A,A,I0.2,A)') 'FTG WRITE FINISHED ${subroutine.name}: ', TRIM(stage), ' (Rank #', mpi_rank, ')'
 
   CALL ftg_destroy_savepoint()
   CALL ftg_destroy_serializer()

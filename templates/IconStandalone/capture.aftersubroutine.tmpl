@@ -8,18 +8,18 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
   CHARACTER(*), INTENT(IN) :: stage, dir
 
+  INTEGER :: mpi_rank
   CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdir_err
-
-  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
-  WRITE (0,'(A,A,A,I0)') 'FTG ROUND ', TRIM(basename), ' : ', ftg_${subroutine.name}_round
-  WRITE (0,'(A)') 'FTG WRITE STARTED '//TRIM(basename)
-
-  WRITE (0,*) 'FTG INIT ${subroutine.name} '//TRIM(basename)
   
+  mpi_rank = get_my_mpi_all_id()
+
+  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
+  WRITE (0,'(A,A,A,I0.2,A,I0,A)') 'FTG WRITE STARTED ${subroutine.name}: ', TRIM(stage), ' (Rank #', mpi_rank, ', round: ', ftg_${subroutine.name}_round, ')'
+
   mkdir_err = ''
   CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(dir), cmdmsg=mkdir_err)
   IF (TRIM(mkdir_err) /= '') THEN
-    WRITE (0,'(A,A)') 'FTG INIT *** ERROR: ', TRIM(mkdir_err)
+    WRITE (0,'(A,A,A)') 'FTG INIT *** ERROR: ', TRIM(mkdir_err), ' ***'
   END IF 
   
   ignore_bullshit_max_dim_size = 100000
@@ -28,7 +28,7 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
   CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
   CALL ftg_add_serializer_metainfo('subroutine', '${subroutine.name}')
   CALL ftg_add_serializer_metainfo('stage', stage)
-  CALL ftg_add_serializer_metainfo('mpi_rank', get_my_mpi_all_id())
+  CALL ftg_add_serializer_metainfo('mpi_rank', mpi_rank)
   
   CALL ftg_set_savepoint(TRIM(stage))
 
@@ -41,10 +41,7 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
 
   CHARACTER(*), INTENT(IN) :: stage
 
-  CHARACTER(len=1024) :: basename
-  
-  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', get_my_mpi_all_id()
-  WRITE (0,'(A)') 'FTG WRITE FINISHED '//TRIM(basename)
+  WRITE (0,'(A,A,A,I0.2,A)') 'FTG WRITE FINISHED ${subroutine.name}: ', TRIM(stage), ' (Rank #', get_my_mpi_all_id(), ')'
 
   CALL ftg_destroy_savepoint()
   CALL ftg_destroy_serializer()
