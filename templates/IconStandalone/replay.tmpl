@@ -6,8 +6,6 @@ USE mo_exception,      ONLY: message, finish
 USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast, p_comm_Work !ICON
 
 USE ${module.name}, ONLY: ${subroutine.name}
-! Remove if capture code already deleted
-USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
 
 USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
 USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
@@ -27,10 +25,6 @@ CALL start_mpi('ftg_${subroutine.name}_test')
 
 mpi_rank = get_my_mpi_all_id()
 mpi_size = get_my_mpi_all_comm_size()
-
-! Remove if capture code already deleted
-ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
-ftg_${subroutine.name}_capture_output_enabled = .FALSE.
 
 WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (#', mpi_rank, ') * '
 ftg_cmp_print_when_equal = .TRUE.

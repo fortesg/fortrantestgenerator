@@ -2,7 +2,14 @@ $prologue
 
 LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
 
-  ftg_${subroutine.name}_capture_active = &
+  CHARACTER(len=1024) :: executable
+  INTEGER :: executable_len
+  
+  CALL get_command_argument(0, executable)
+  executable_len = LEN(TRIM(executable))
+
+  ftg_${subroutine.name}_capture_active =                                              &
+    executable_len >= 8 .AND. executable(executable_len-7:executable_len) == 'bin/icon' .AND. &
     ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
 
 END FUNCTION ftg_${subroutine.name}_capture_active
