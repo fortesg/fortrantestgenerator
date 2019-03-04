@@ -9,7 +9,7 @@ from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
 import re
-from printout import printLine, printInline, printDebug
+from printout import printLine, printInline
 from templatenamespace import TemplatesNameSpace
 from typefinder import TypeCollection
 

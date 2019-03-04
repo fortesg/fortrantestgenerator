@@ -1,7 +1,7 @@
 import os
 from generator import CodeGenerator 
 from assertions import assertType, assertTypeAll
-from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
+from source import SourceFiles, SubroutineFullName, VariableReference
 from templatenamespace import CaptureTemplatesNameSpace
 from backup import BackupFileFinder
 from printout import printLine

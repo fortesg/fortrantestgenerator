@@ -1,7 +1,7 @@
 import os
 from generator import CodeGenerator 
 from assertions import assertType, assertTypeAll
-from source import SourceFiles, SourceFile, VariableReference, SubroutineFullName
+from source import SourceFiles, VariableReference, SubroutineFullName
 from capture import CaptureCodeGenerator
 from replay import ReplayCodeGenerator
 from export import ExportCodeGenerator
