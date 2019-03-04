@@ -58,7 +58,7 @@
       #end for        
     #end if      
   #end for
-  $ftgWriteInner($var, $filledAlias)
+  $ftgWriteInner($var, $filledAlias) $clearLine
   #for $close in reversed($closeStatements)
     $close
   #end for
