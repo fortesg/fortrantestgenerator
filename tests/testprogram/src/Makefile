@@ -10,27 +10,30 @@ ICONINCLUDE = -I$(ICONBUILDDIR)/module
 ICONMODULES = $(ICONBUILDDIR)/src/mo_mpi.o $(ICONBUILDDIR)/src/mo_exception.o $(ICONBUILDDIR)/support/util_backtrace.o $(ICONBUILDDIR)/support/util_system.o $(ICONBUILDDIR)/externals/mtime/src/*.o
 MPINODES = 2 
 
+GENERIC_BIN = ../bin/generic
+ICON_BIN = ../bin/icon
+
 ######################################################
 
-capture-Standalone: clean ftg-Standalone maingeneric 
-	-mpirun -n $(MPINODES) ./maingeneric
+capture-Standalone: clean ftg-Standalone $(GENERIC_BIN) 
+	-mpirun -n $(MPINODES) $(GENERIC_BIN)
 
-capture-StandaloneNoMPI: clean ftg-StandaloneNoMPI maingeneric 
-	./maingeneric
+capture-StandaloneNoMPI: clean ftg-StandaloneNoMPI $(GENERIC_BIN) 
+	$(GENERIC_BIN)
 
-capture-IconStandalone: clean ftg-IconStandalone mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
+capture-IconStandalone: clean ftg-IconStandalone $(ICON_BIN) 
+	-mpirun -n $(MPINODES) $(ICON_BIN)
 
-capture-IconJsbachMock: clean ftg-IconJsbachMock mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
+capture-IconJsbachMock: clean ftg-IconJsbachMock $(ICON_BIN) 
+	-mpirun -n $(MPINODES) $(ICON_BIN)
+	
+capture-BaseCompare: clean ftg-BaseCompare $(GENERIC_BIN) 
+	-mpirun -n $(MPINODES) $(GENERIC_BIN)
 
-capture-BaseCompare: clean ftg-BaseCompare mainicon 
-	-mpirun -n $(MPINODES) ./mainicon
-
-maingeneric: maingeneric.f90 sub.o globals.o types.o
+$(GENERIC_BIN): maingeneric.f90 sub.o globals.o types.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 	
-mainicon: mainicon.f90 sub.o globals.o types.o
+$(ICON_BIN): mainicon.f90 sub.o globals.o types.o
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS)
 	
 sub.o: types.o globals.o
@@ -61,12 +64,12 @@ assembler: types.s globals.s sub.s maingeneric.s
 	$(FF) -c $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $<
 	
 clean: clean-ftg-b
-	rm -f maingeneric mainicon *.o *.mod *.s
+	rm -f $(GENERIC_BIN) $(ICON_BIN) *.o *.mod *.s
 	
 clean-capture-icon: clean-ftg-a 
-	$(MAKE) -B mainicon
+	$(MAKE) -B $(ICON_BIN)
 clean-capture-generic: clean-ftg-a 
-	$(MAKE) -B maingeneric
+	$(MAKE) -B $(GENERIC_BIN)
 	
 clean-ftg-b:
 	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_Standalone.py
