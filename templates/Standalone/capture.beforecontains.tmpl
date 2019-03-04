@@ -1,4 +1,4 @@
-$prologue $mergeBegin
+$prologue $mergeBegin('ftg')
 
 LOGICAL :: ftg_${subroutine.name}_capture_input_enabled = .TRUE.
 LOGICAL :: ftg_${subroutine.name}_capture_output_enabled = .TRUE.
@@ -9,4 +9,4 @@ CHARACTER(len=1024) :: ftg_${subroutine.name}_output_dir = '$dataDir/ftg_${subro
 
 PUBLIC :: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled, ftg_${subroutine.name}_capture_round, ftg_${subroutine.name}_input_dir, ftg_${subroutine.name}_output_dir
 
-$epilogue $mergeEnd
+$epilogue $mergeEnd('ftg')

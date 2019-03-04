@@ -1,5 +1,5 @@
 #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
-$prologue $mergeBegin
+$prologue $mergeBegin('ftg')
 
 SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture()
 
@@ -32,5 +32,5 @@ SUBROUTINE ftg_${subroutine.name}_stop_jsbach_capture()
   CALL jsbmock_stop()
 
 END SUBROUTINE ftg_${subroutine.name}_stop_jsbach_capture
-$epilogue $mergeEnd
+$epilogue $mergeEnd('ftg')
 #end if

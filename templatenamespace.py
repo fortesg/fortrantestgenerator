@@ -47,10 +47,10 @@ class TemplatesNameSpace(object):
         self.dataDir = testDataDir.rstrip('/')
         self.clearLine = TemplatesNameSpace.CLEAR_LINE
 
-    def mergeBegin(self, identifier = ''):
+    def mergeBegin(self, identifier):
         return TemplatesNameSpace.MERGE_BEGIN_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
 
-    def mergeEnd(self, identifier = ''):
+    def mergeEnd(self, identifier):
         return TemplatesNameSpace.MERGE_END_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
 
     def commaList(self, *elements):
@@ -468,10 +468,10 @@ class ExportNameSpace(object):
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
         self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
     
-    def mergeBegin(self, identifier = ''):
+    def mergeBegin(self, identifier):
         return TemplatesNameSpace.MERGE_BEGIN_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
 
-    def mergeEnd(self, identifier = ''):
+    def mergeEnd(self, identifier):
         return TemplatesNameSpace.MERGE_END_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
         
 class ExportGlobalsNameSpace(object):
