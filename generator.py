@@ -135,7 +135,8 @@ class CodeGenerator(object):
         
         rendered = str(template).strip()
         rendered = self._clearLines(rendered)
-        rendered = self._unifyIfs(rendered)
+#         rendered = self._unifyIfs(rendered)
+        rendered = self._merge(rendered)
         rendered = self._indent(rendered)
         rendered = self._breakLines(rendered)
         return rendered
@@ -150,6 +151,28 @@ class CodeGenerator(object):
             if not line == TemplatesNameSpace.CLEAR_LINE:
                 lines.append(line)
                  
+        return "\n".join(lines)
+    
+    def _merge(self, text):
+        if not text:
+            return text
+        
+        lines = []
+        begins = []
+        ends = []
+        for i, line in text.split("\n"):
+            beginMatch = TemplatesNameSpace.MERGE_BEGIN_REGEX.match(line)
+            if beginMatch is not None:
+                identifier = beginMatch.group('identifier')
+                if begins[-1] and begins[-1][0] == identifier:
+                    begins[-1][0] += "\n" + line
+                if not begins[-1] or begins[-1][0] != identifier:
+                    begins.append((identifier, i, line))
+            else:
+                endMatch = TemplatesNameSpace.MERGE_END_REGEX.match(line)
+                if endMatch is not None:
+                    identifier = endMatch.group('identifier')
+        
         return "\n".join(lines)
     
     def _unifyIfs(self, text):
