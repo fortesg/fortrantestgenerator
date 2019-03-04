@@ -38,7 +38,7 @@ def main():
     templatePath = config[CFG_TEMPLATE]
     testSourceDir = config[CFG_TEST_SOURCE_DIR]
     testDataBaseDir = config[CFG_TEST_DATA_BASE_DIR]
-    modifySourceDir = config[CFG_MODIFY_SOURCE_DIRS]
+    modifySourceDirs = config[CFG_MODIFY_SOURCE_DIRS]
         
     sys.path.append(config[CFG_FCG_DIR])
         
@@ -68,13 +68,12 @@ def main():
     if config[CFG_CACHE_DIR]:
         graphBuilder = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], graphBuilder)
     sourceFiles = SourceFiles(sourceDirs, config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
-    if modifySourceDir is not None:
-        modifySourceFiles = SourceFiles(modifySourceDir, config[CFG_SPECIAL_MODULE_FILES])
-        backupFinder = BackupFileFinder(modifySourceDir, backupSuffix) 
+    if modifySourceDirs is not None:
+        modifySourceFiles = SourceFiles(modifySourceDirs, config[CFG_SPECIAL_MODULE_FILES])
+        backupFinder = BackupFileFinder(modifySourceDirs, backupSuffix) 
     else:
         modifySourceFiles = sourceFiles
         backupFinder = BackupFileFinder(sourceDirs, backupSuffix) 
-        
 
     if args.export or args.capture or args.replay:
         moduleName = args.module;
@@ -106,7 +105,7 @@ def main():
         backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)
         backupFinder.restore()
         sourceFiles.clearCache()
-    elif modifySourceDir == sourceDirs: 
+    elif modifySourceDirs is None or modifySourceDirs == sourceDirs: 
         sourceFiles.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(sourceFiles.getSpecialModuleFiles()))
 
     if args.export or args.capture or args.replay:
