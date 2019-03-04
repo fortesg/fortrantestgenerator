@@ -93,9 +93,9 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
   
   IF (failure_count == 0) THEN
-      WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') *** TEST PASSED ***'
+      WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name}: RANK #', mpi_rank, ' OK'
   ELSE
-      WRITE (*,'(A,I0.2,A,I0,A)') 'FTG ${subroutine.name} (', mpi_rank, ') *** FAILURE: ', failure_count, ' ***'
+      WRITE (*,'(A,I0.2,A,I0,A)') 'FTG ${subroutine.name}: RANK #', mpi_rank, ' FAILED: ', failure_count, ' failures'
   END IF
   
   total_failure_count = total_failure_count + failure_count 
@@ -136,7 +136,7 @@ SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
   CHARACTER(len=256) :: ftg_name
 
-  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (', mpi_rank, ')'
+  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (Rank #', mpi_rank, ')'
   CALL ftg_${subroutine.name}_init_serializer('input', INPUT_DIR)
 
   ! ARGUMENTS
@@ -165,7 +165,7 @@ SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resul
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
   CHARACTER(len=256) :: ftg_name
   
-  WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (', mpi_rank, ')'
+  WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (Rank #', mpi_rank, ')'
   CALL ftg_${subroutine.name}_init_serializer('output', OUTPUT_DIR)
   
   failure_count = 0
