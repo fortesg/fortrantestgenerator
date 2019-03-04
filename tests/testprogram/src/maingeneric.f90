@@ -13,6 +13,7 @@ TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag(4)
 REAL :: out, result
+CLASS(abstr), ALLOCATABLE :: av
 
 CALL MPI_INIT(ierror)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
@@ -47,14 +48,16 @@ oa%c%r2(2,2) = rank + 0.22
 CALL init_jmodels(1)
 CALL init_comm_variable()
 
+ALLOCATE(concr::av)
+
 flag(:) = .TRUE.
 
 CALL set(109.0)
 
 IF (MOD(rank, 2) == 0) THEN
-  result = wrapper(a, flag, oa = oa)
+  result = wrapper(a, flag, av, oa = oa)
 ELSE
-  result = wrapper(a, flag, out, oa)
+  result = wrapper(a, flag, av, out, oa)
   PRINT*, 'node', rank, ' out: ', out
 END IF
 

@@ -48,6 +48,24 @@ IMPLICIT NONE
     INTEGER, ALLOCATABLE :: index_no(:)  ! the local index of the variable
   END TYPE t_process_comm_pattern
 
+  TYPE, ABSTRACT :: abstr
+    CONTAINS
+    PROCEDURE (int_deff), DEFERRED :: deff
+  END TYPE abstr
+
+  ABSTRACT INTERFACE
+    INTEGER FUNCTION int_deff(this)
+      IMPORT abstr
+      CLASS(abstr), INTENT(inout) :: this
+    END FUNCTION int_deff
+  END INTERFACE
+
+  TYPE, EXTENDS(abstr) :: concr
+    INTEGER :: internal = 0
+    CONTAINS
+    PROCEDURE :: deff => impl
+  END TYPE concr
+
   TYPE(testj) :: tj
 
 CONTAINS
@@ -75,4 +93,9 @@ CONTAINS
     END IF
   END SUBROUTINE init_jmodels
 
+  INTEGER FUNCTION impl(this)
+      CLASS(concr), INTENT(inout) :: this
+      this%internal = this%internal + 1
+      impl = this%internal
+  END FUNCTION impl
 END MODULE types

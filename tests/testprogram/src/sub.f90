@@ -18,20 +18,22 @@ SUBROUTINE init(start)
   self = start
 END SUBROUTINE init
 
-FUNCTION wrapper(ra, rlog, oreal, oa)
+FUNCTION wrapper(ra, rlog, abstractVar, oreal, oa)
   TYPE(testa), INTENT(inout) :: ra
   LOGICAL, INTENT(in) :: rlog(4)
+  CLASS(abstr), INTENT(inout) :: abstractVar
   REAL, INTENT(out), OPTIONAL :: oreal
   TYPE(testa), INTENT(inout), OPTIONAL :: oa
   REAL :: wrapper
 
-  wrapper = testsub(ra, rlog, oreal, oa)
+  wrapper = testsub(ra, rlog, abstractVar, oreal, oa)
 END FUNCTION wrapper
 
-FUNCTION testsub(ra, rlog, oreal, oa)
+FUNCTION testsub(ra, rlog, abstractVar, oreal, oa)
 
   TYPE(testa), INTENT(inout) :: ra
   LOGICAL, INTENT(in) :: rlog(4)
+  CLASS(abstr), INTENT(inout) :: abstractVar
   REAL, INTENT(out), OPTIONAL :: oreal
   TYPE(testa), INTENT(inout), OPTIONAL :: oa
   TYPE(jmodel) :: jm
@@ -41,7 +43,7 @@ FUNCTION testsub(ra, rlog, oreal, oa)
   REAL, POINTER :: testsub
 
   IF (rlog(1)) THEN
-    ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:) + self
+    ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:) + self + abstractVar%deff()
   END IF
 
   IF (PRESENT(oa)) THEN
