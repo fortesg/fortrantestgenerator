@@ -12,7 +12,6 @@ $types.imports
   
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: MAX_CHAR_LENGTH = 1024
 CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
 CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
 
@@ -75,7 +74,7 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
   CHARACTER(*), INTENT(IN) :: stage, dir
 
-  CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+  CHARACTER(len=1024) :: basename
 
   basename = 'ftg_${subroutine.name}_'//TRIM(stage)
   

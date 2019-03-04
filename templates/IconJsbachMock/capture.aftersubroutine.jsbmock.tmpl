@@ -3,11 +3,10 @@ $prologue
 
 SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture()
 
-  USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
   USE mo_mpi,  ONLY: get_my_mpi_all_id
   USE mo_jsb_interface_mock, ONLY: jsbmock_start_capture
 
-  CHARACTER(len=MAX_CHAR_LENGTH) :: basename, mkdirerr
+  CHARACTER(len=1024) :: basename, mkdirerr
 
   IF (ftg_${subroutine.name}_capture_input_active()) THEN
     WRITE (0,'(A,I0.2,A)') 'FTG START JSBACH CAPTURE ${subroutine.name} (Rank #', get_my_mpi_all_id(), ')'

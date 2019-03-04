@@ -48,7 +48,7 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
 END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
 LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
-
+  
   ftg_${subroutine.name}_capture_input_active =         &
     ftg_${subroutine.name}_capture_input_enabled .AND.  &
     ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round

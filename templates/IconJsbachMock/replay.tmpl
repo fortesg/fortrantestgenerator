@@ -2,7 +2,6 @@ PROGRAM ftg_${subroutine.name}_test
 
 USE mtime
 USE mo_kind
-USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
 USE mo_exception,      ONLY: message, finish
 USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast, p_comm_Work !ICON
 
@@ -127,7 +126,7 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
   CHARACTER(*), INTENT(IN) :: stage, dir
 
-  CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+  CHARACTER(len=1024) :: basename
 
   WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
   
@@ -177,7 +176,7 @@ END SUBROUTINE ftg_${subroutine.name}_replay_input
 
 SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay()
 
-  CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+  CHARACTER(len=1024) :: basename
 
   WRITE (0,'(A,I0.2,A)') 'FTG START JSBACH REPLAY ${subroutine.name} (Rank #', mpi_rank, ')'
   WRITE (basename,'(A,I0.2)') 'ftg_${subroutine.name}_jsbach_', mpi_rank
