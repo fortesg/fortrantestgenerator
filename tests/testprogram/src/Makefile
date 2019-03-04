@@ -21,6 +21,9 @@ capture-StandaloneNoMPI: clean ftg-StandaloneNoMPI maingeneric
 capture-IconStandalone: clean ftg-IconStandalone mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
+capture-IconJsbachMock: clean ftg-IconJsbachMock mainicon 
+	-mpirun -n $(MPINODES) ./mainicon
+
 capture-BaseCompare: clean ftg-BaseCompare mainicon 
 	-mpirun -n $(MPINODES) ./mainicon
 
@@ -42,6 +45,9 @@ ftg-StandaloneNoMPI: assembler
 
 ftg-IconStandalone: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
+
+ftg-IconJsbachMock: assembler
+	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconJsbachMock.py sub testsub
 
 ftg-BaseCompare: assembler
 	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub

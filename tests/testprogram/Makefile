@@ -6,6 +6,8 @@ test-StandaloneNoMPI: clean capture-StandaloneNoMPI replay-StandaloneNoMPI ok
 
 test-IconStandalone: clean capture-IconStandalone replay-IconStandalone ok
 
+test-IconJsbachMock: clean capture-IconStandalone replay-IconJsbachMock ok
+
 test-BaseCompare: clean capture-BaseCompare clean-capture-icon replay-BaseCompare ok
 
 replay-Standalone: 
@@ -16,6 +18,9 @@ replay-StandaloneNoMPI:
 	
 replay-IconStandalone: 
 	$(MAKE) -C replay-IconStandalone replay
+	
+replay-IconJsbachMock: 
+	$(MAKE) -C replay-IconJsbachMock replay
 	 
 replay-BaseCompare: 
 	$(MAKE) -C replay-BaseCompare replay
@@ -28,6 +33,9 @@ capture-StandaloneNoMPI:
 	 
 capture-IconStandalone: 
 	$(MAKE) -C src capture-IconStandalone
+	 
+capture-IconJsbachMock: 
+	$(MAKE) -C src capture-IconJsbachMock
 	 
 capture-BaseCompare: 
 	$(MAKE) -C src capture-BaseCompare
@@ -53,7 +61,8 @@ clean:
 	$(MAKE) -C replay-Standalone clean
 	$(MAKE) -C replay-StandaloneNoMPI clean
 	$(MAKE) -C replay-IconStandalone clean
+	$(MAKE) -C replay-IconJsbachMock clean
 	$(MAKE) -C replay-BaseCompare clean
 	rm -Rf data/*
 	
-.PHONY: test clean clean-capture-icon clean-capture-generic replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-BaseCompare
+.PHONY: test clean clean-capture-icon clean-capture-generic replay-Standalone replay-StandaloneNoMPI replay-IconStandalone replay-IconJsbachMock replay-BaseCompare
