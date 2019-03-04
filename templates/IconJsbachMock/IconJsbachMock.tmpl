@@ -1,0 +1,30 @@
+#extends IconStandalone
+
+#def captureAfterUse
+  #super
+  $include('IconJsbachMock/capture.afteruse.jsbmock.tmpl')
+#end def captureAfterUse
+
+#def captureBeforeContains
+  #super
+  $include('IconJsbachMock/capture.beforecontains.jsbmock.tmpl')
+#end def captureBeforeContains
+
+#def captureAfterLastSpecification
+  #super
+  $include('IconJsbachMock/capture.afterlastspecification.jsbmock.tmpl')
+#end def captureAfterLastSpecification
+
+#def captureBeforeEnd
+  $include('IconJsbachMock/capture.beforeend.jsbmock.tmpl')
+  #super
+#end def captureBeforeEnd
+
+#def captureAfterSubroutine
+  #super
+  $include('IconJsbachMock/capture.aftersubroutine.jsbmock.tmpl')
+#end def captureAfterSubroutine
+
+#def replay
+  $include('IconJsbachMock/replay.tmpl')
+#end def replay

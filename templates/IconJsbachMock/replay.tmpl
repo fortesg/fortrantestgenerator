@@ -1,0 +1,235 @@
+PROGRAM ftg_${subroutine.name}_test
+
+USE mtime
+USE mo_kind
+USE mo_impl_constants, ONLY: MAX_CHAR_LENGTH
+USE mo_exception,      ONLY: message, finish
+USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast, p_comm_Work !ICON
+
+USE ${module.name}, ONLY: ${subroutine.name}
+! Remove if capture code already deleted
+USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
+
+USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
+USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
+#if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+  USE mo_jsb_interface_mock, ONLY: jsbmock_start_replay, jsbmock_stop
+#end if
+
+$globals.imports
+$types.imports
+  
+IMPLICIT NONE
+
+CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
+#if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+  CHARACTER(*), PARAMETER :: JSBACH_DIR = '${dataDir}/ftg_${subroutine.name}_test/jsbach'
+#end if
+
+INTEGER :: mpi_rank, mpi_size, total_failure_count
+CHARACTER(9) :: total_failure_count_char
+
+CALL start_mpi('ftg_${subroutine.name}_test')
+
+mpi_rank = get_my_mpi_all_id()
+mpi_size = get_my_mpi_all_comm_size()
+
+! Remove if capture code already deleted
+ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
+ftg_${subroutine.name}_capture_output_enabled = .FALSE.
+
+WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (#', mpi_rank, ') * '
+ftg_cmp_print_when_equal = .TRUE.
+ftg_cmp_count_missing_field_as_failure = .FALSE.
+
+CALL message('FTG', '*** Run test for ${subroutine.name} ***')	
+
+CALL ftg_test_${subroutine.name}(total_failure_count)
+
+IF (mpi_rank == 0) THEN
+  IF (total_failure_count > 0) THEN
+    WRITE (total_failure_count_char,'(I0)') total_failure_count
+    CALL finish('FTG', '${subroutine.name}: *** TEST FAILED, total number of failures: '//TRIM(total_failure_count_char)//' ***', 2)
+  ELSE
+    CALL message('FTG', '${subroutine.name}: *** TEST PASSED ***')
+  END IF
+END IF
+ 
+CALL stop_mpi()
+
+CONTAINS
+  
+SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
+
+  INTEGER, INTENT(out) :: total_failure_count
+    
+  ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+  #if $subroutine.isFunction
+      ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+  #end if
+  
+  INTEGER :: failure_count
+  
+  ! ----------- REPLAY -----------
+  CALL ftg_${subroutine.name}_replay_input($commaList($args))
+  #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+    CALL ftg_${subroutine.name}_start_jsbach_replay()
+  #end if
+
+  #if $subroutine.isFunction
+    #if $result.pointer
+      ${subroutine.name}_result => ${subroutine.name}($commaList($args))
+    #else
+      ${subroutine.name}_result = ${subroutine.name}($commaList($args))
+    #end if
+  #else
+    CALL ${subroutine.name}($commaList($args))
+  #end if
+  #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+    
+    CALL ftg_${subroutine.name}_stop_jsbach_replay()
+  #end if
+
+  ! ----------- COMPARE -----------
+  ! One process after another to get nice, ordered printing
+  ! Change this if to slow
+  IF (mpi_rank > 0) THEN
+      CALL p_recv(total_failure_count, mpi_rank - 1, 0)
+  ELSE
+      total_failure_count = 0
+  END IF
+  
+  #if $subroutine.isFunction
+      #set $resultArg = $subroutine.name + '_result'
+  #else
+    #set $resultArg = ''
+  #end if  
+  CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
+  
+  IF (failure_count == 0) THEN
+      WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name}: RANK #', mpi_rank, ' OK'
+  ELSE
+      WRITE (*,'(A,I0.2,A,I0,A)') 'FTG ${subroutine.name}: RANK #', mpi_rank, ' FAILED: ', failure_count, ' failures'
+  END IF
+  
+  total_failure_count = total_failure_count + failure_count 
+
+  IF (mpi_rank < mpi_size - 1) THEN
+      CALL p_send(total_failure_count, mpi_rank + 1, 0)
+  END IF
+  
+  CALL p_bcast(total_failure_count, mpi_size - 1)
+
+END SUBROUTINE ftg_test_${subroutine.name}
+
+SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
+
+  CHARACTER(*), INTENT(IN) :: stage, dir
+
+  CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+
+  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
+  
+  CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
+  CALL ftg_set_savepoint(stage)
+
+END SUBROUTINE ftg_${subroutine.name}_init_serializer
+
+SUBROUTINE ftg_${subroutine.name}_close_serializer()
+
+  CALL ftg_destroy_savepoint()
+  CALL ftg_destroy_serializer()
+
+END SUBROUTINE ftg_${subroutine.name}_close_serializer
+
+SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
+  
+  ${args.specs(intent = 'inout', allocatable = True)}
+
+  INTEGER, DIMENSION(8) :: ftg_bounds
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+  CHARACTER(len=256) :: ftg_name
+  INTEGER ftg_mtime_calendar
+
+  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT DATA ${subroutine.name} (Rank #', mpi_rank, ')'
+  CALL ftg_${subroutine.name}_init_serializer('input', INPUT_DIR)
+  
+  ! MTIME CALENDAR TYPE --> Remove these lines if mtime is not used
+  CALL ftg_read("ftg_mtime_calendar", ftg_mtime_calendar)
+  CALL setCalendar(ftg_mtime_calendar)
+
+  ! ARGUMENTS
+  #for $var in $args.usedVariables
+    $ftgRead($var) $clearLine
+  #end for
+
+  ! GLOBALS
+  #for $var in $globals.usedVariables
+    $ftgRead($var) $clearLine
+  #end for
+
+  CALL ftg_${subroutine.name}_close_serializer()
+
+END SUBROUTINE ftg_${subroutine.name}_replay_input   
+#if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
+
+SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay()
+
+  CHARACTER(len=MAX_CHAR_LENGTH) :: basename
+
+  WRITE (0,'(A,I0.2,A)') 'FTG START JSBACH REPLAY ${subroutine.name} (Rank #', mpi_rank, ')'
+  WRITE (basename,'(A,I0.2)') 'ftg_${subroutine.name}_jsbach_', mpi_rank
+  CALL jsbmock_start_replay(JSBACH_DIR, basename, 'jsbach')
+
+END SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay
+
+SUBROUTINE ftg_${subroutine.name}_stop_jsbach_replay()
+  
+  WRITE (0,'(A,I0.2,A)') 'FTG STOP JSBACH REPLAY ${subroutine.name} (Rank #', mpi_rank, ')'
+  CALL jsbmock_stop()
+
+END SUBROUTINE ftg_${subroutine.name}_stop_jsbach_replay
+#end if  
+
+SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $result, 'failure_count'))
+  
+  ${args.allOut.specs(intent = 'in', allocatable = False)}
+  #if $subroutine.isFunction:
+    ${result.spec(intent = 'in', allocatable = False)}
+  #end if
+  
+  INTEGER, INTENT(out) :: failure_count
+  LOGICAL :: result
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
+  CHARACTER(len=256) :: ftg_name
+  
+  WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (Rank #', mpi_rank, ')'
+  CALL ftg_${subroutine.name}_init_serializer('output', OUTPUT_DIR)
+  
+  failure_count = 0
+  
+  ! ARGUMENTS
+  #for $var in $args.allOut.usedVariables
+    #if not $var.hasContainerWithType('t_patch') 
+      $ftgCompare($var) $clearLine
+    #end if 
+  #end for
+  
+  #if $subroutine.isFunction
+    ! RESULT
+    #for $var in $result.usedVariables
+      $ftgCompare($var) $clearLine
+    #end for
+  #end if
+  
+  ! GLOBALS
+  #for $var in $globals.usedVariables
+    #if not $var.hasContainerWithType('t_patch') and not $var.fromModule('mo_real_timer')
+      $ftgCompare($var) $clearLine
+    #end if
+  #end for
+  
+END SUBROUTINE ftg_${subroutine.name}_compare_output
+
+END PROGRAM ftg_${subroutine.name}_test
