@@ -1,5 +1,12 @@
 $prologue
 
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
+
+  ftg_${subroutine.name}_capture_active = &
+    ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_active
+
 SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
   USE mpi
@@ -51,14 +58,6 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
 
 END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
-
-  ftg_${subroutine.name}_capture_input_active =         &
-    ftg_${subroutine.name}_capture_input_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_input_active
-  
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
   USE m_ser_ftg, ONLY: ftg_write, ftg_register_only
@@ -99,14 +98,6 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   CALL ftg_${subroutine.name}_close_serializer('input')
 
 END SUBROUTINE ftg_${subroutine.name}_capture_input
-
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
-
-  ftg_${subroutine.name}_capture_output_active =         &
-    ftg_${subroutine.name}_capture_output_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_output_active
   
 SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
 

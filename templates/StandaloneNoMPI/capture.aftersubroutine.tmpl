@@ -1,5 +1,12 @@
 $prologue
 
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
+
+  ftg_${subroutine.name}_capture_active = &
+    ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_active
+
 SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
   USE m_ser_ftg,         ONLY: ftg_set_serializer, ftg_add_serializer_metainfo, ftg_set_savepoint, ftg_add_savepoint_metainfo, ignore_bullshit_max_dim_size, ignore_bullshit_allow_negative_indices
@@ -45,14 +52,6 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
 
 END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
-
-  ftg_${subroutine.name}_capture_input_active =       &
-    ftg_${subroutine.name}_capture_input_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_input_active
-  
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
   USE m_ser_ftg, ONLY: ftg_write, ftg_register_only
@@ -94,14 +93,6 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
 END SUBROUTINE ftg_${subroutine.name}_capture_input
 
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
-
-  ftg_${subroutine.name}_capture_output_active =       &
-    ftg_${subroutine.name}_capture_output_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_output_active
-  
 SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
 
   USE m_ser_ftg, ONLY: ftg_write, ftg_register_only

@@ -1,5 +1,12 @@
 $prologue
 
+LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
+
+  ftg_${subroutine.name}_capture_active = &
+    ftg_${subroutine.name}_round == ftg_${subroutine.name}_capture_round
+
+END FUNCTION ftg_${subroutine.name}_capture_active
+
 SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
 
   USE mo_mpi, ONLY: get_my_mpi_all_id
@@ -46,14 +53,6 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
   CALL ftg_destroy_serializer()
 
 END SUBROUTINE ftg_${subroutine.name}_close_serializer
-
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_input_active()
-  
-  ftg_${subroutine.name}_capture_input_active =         &
-    ftg_${subroutine.name}_capture_input_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_input_active
   
 SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
@@ -100,14 +99,6 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
 
 END SUBROUTINE ftg_${subroutine.name}_capture_input
 
-LOGICAL FUNCTION ftg_${subroutine.name}_capture_output_active()
-
-  ftg_${subroutine.name}_capture_output_active =         &
-    ftg_${subroutine.name}_capture_output_enabled .AND.  &
-    ftg_${subroutine.name}_round .EQ. ftg_${subroutine.name}_capture_round
-
-END FUNCTION ftg_${subroutine.name}_capture_output_active
-  
 SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
 
   USE mo_mpi, ONLY: work_mpi_barrier
@@ -164,5 +155,7 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   CALL finish('FTG EXIT', 'Output captured: ${subroutine.name}', 0)
 
 END SUBROUTINE ftg_${subroutine.name}_capture_output
-  
+
+
+
 $epilogue
