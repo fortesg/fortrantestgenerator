@@ -27,7 +27,7 @@
 
 #def ftgWriteInner($var, $filledAlias)
     #set global $ftgWriteInner_var = $var
-    #set global $ftgWriteInner_filleAlias = $filledAlias
+    #set global $ftgWriteInner_filledAlias = $filledAlias
     $include('Standalone/capture.ftgWriteInner.tmpl')
 #end def ftgWriteInner
 
@@ -46,7 +46,7 @@
 
 #def ftgReadInner($var, $filledAlias)
     #set global $ftgReadInner_var = $var
-    #set global $ftgReadInner_filleAlias = $filledAlias
+    #set global $ftgReadInner_filledAlias = $filledAlias
     $include('Standalone/replay.ftgReadInner.tmpl')
 #end def ftgReadInner
 
@@ -57,6 +57,6 @@
 
 #def ftgCompareInner($var, $filledAlias)
     #set global $ftgCompareInner_var = $var
-    #set global $ftgCompareInner_filleAlias = $filledAlias
+    #set global $ftgCompareInner_filledAlias = $filledAlias
     $include('Standalone/replay.ftgCompareInner.tmpl')
 #end def ftgCompareInner
