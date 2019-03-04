@@ -1,10 +1,10 @@
 #if $globals.exports or $module.name == $subroutine.moduleName and $subroutine.export
-  $prologue
+  $prologue $mergeBegin
   
   $globals.exports
   #if $module.name == $subroutine.moduleName
     $subroutine.export
   #end if
   
-  $epilogue  
+  $epilogue $mergeEnd
 #end if

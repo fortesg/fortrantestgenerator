@@ -1,12 +1,17 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
 from callgraph import CallGraph
+import re
+import random
+import string
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
     
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
-    MERGE_PREFIX = '! ########## MERGE '
+    MERGE_BEGIN_PREFIX = '! #### MERGE BEGIN'
+    MERGE_END_PREFIX   = '! #### MERGE END'
+    MERGE_KEY = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
     
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
         assertType(subroutine, 'subroutine', Subroutine)
@@ -41,6 +46,12 @@ class TemplatesNameSpace(object):
         self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result, callgraph)
         self.dataDir = testDataDir.rstrip('/')
         self.clearLine = TemplatesNameSpace.CLEAR_LINE
+
+    def mergeBegin(self, identifier = ''):
+        return TemplatesNameSpace.MERGE_BEGIN_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
+
+    def mergeEnd(self, identifier = ''):
+        return TemplatesNameSpace.MERGE_END_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
 
     def commaList(self, *elements):
         stringElements = []
@@ -456,6 +467,12 @@ class ExportNameSpace(object):
         self.module = ModuleNameSpace(moduleName)
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
         self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
+    
+    def mergeBegin(self, identifier = ''):
+        return TemplatesNameSpace.MERGE_BEGIN_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
+
+    def mergeEnd(self, identifier = ''):
+        return TemplatesNameSpace.MERGE_END_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
         
 class ExportGlobalsNameSpace(object):
     

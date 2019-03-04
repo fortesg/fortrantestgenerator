@@ -1,4 +1,4 @@
-$prologue
+$prologue $mergeBegin
 
 LOGICAL FUNCTION ftg_${subroutine.name}_capture_active()
 
@@ -163,6 +163,4 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
 
 END SUBROUTINE ftg_${subroutine.name}_capture_output
 
-
-
-$epilogue
+$epilogue $mergeEnd
