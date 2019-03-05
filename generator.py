@@ -133,7 +133,7 @@ class CodeGenerator(object):
         template = Template(file=self.__templatePath, searchList=[templateNameSpace])
         template.part = part
         text = str(template).strip()
-        return self._postProcessor.process(text)
+        return self._postProcessor.process(text, part)
     
     def _readFile(self, path):
         f = open(path, 'r')
