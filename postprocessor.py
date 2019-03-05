@@ -19,25 +19,24 @@ class CodePostProcessor(object):
     
     def process(self, text):
                 
-        rendered = self.__clearLines(text)
-        rendered = self.__unifyIfs(rendered)
+        rendered = self.__clearAndMerge(text)
+#         rendered = self.__unifyIfs(rendered)
 #         rendered = self.__merge(rendered)
         rendered = self.__indent(rendered)
         rendered = self.__breakLines(rendered)
         
         return rendered
     
-    def __clearLines(self, text):
+    def __clearAndMerge(self, text):
         if not text:
             return text
         
         lines = []
         for line in text.split("\n"):
             line = line.strip()
-            if not line == CodePostProcessor.CLEAR_LINE:
-                lines.append(line)
-                 
-        return "\n".join(lines)
+            if line == CodePostProcessor.CLEAR_LINE:
+                continue
+            lines.append(line)
     
     def __merge(self, text):
         if not text:
