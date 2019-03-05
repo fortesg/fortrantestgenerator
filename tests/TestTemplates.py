@@ -14,7 +14,8 @@ sys.path.append(FTG_DIR + '/templates/Standalone')
 FCG_DIR = TEST_DIR + '/../../fortrancallgraph'
 sys.path.append(FCG_DIR)
 
-from templatenamespace import ArgumentList, FunctionResult
+from templatenamespace import ArgumentList
+from postprocessor import CodePostProcessor
 
 class TestTemplate(unittest.TestCase):
     @classmethod
@@ -70,9 +71,17 @@ class TestTemplate(unittest.TestCase):
                 self.args = ArgumentList([])
                 self.result = None
                 self.dataDir = 'DATADIR'
+                self.clearLine = CodePostProcessor.CLEAR_LINE
+                self.__postProcessor = CodePostProcessor()
              
             def commaList(self, *elements):
                 return ', '.join(map(str, elements))
+            
+            def mergeBegin(self, key):
+                return self.__postProcessor.mergeBeginTag(key)
+            
+            def mergeEnd(self, key):
+                return self.__postProcessor.mergeEndTag(key)
         
         template = Template(file=FTG_DIR + '/templates/IconStandalone/IconStandalone.tmpl', searchList=[DummyNamespace()])
         template.part = 'captureBeforeContains'
