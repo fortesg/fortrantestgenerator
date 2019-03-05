@@ -8,7 +8,7 @@ SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture()
 
   CHARACTER(len=1024) :: basename, mkdirerr
 
-  IF (ftg_${subroutine.name}_capture_input_active()) THEN
+  IF (ftg_${subroutine.name}_capture_active()) THEN
     WRITE (0,'(A,I0.2,A)') 'FTG START JSBACH CAPTURE ${subroutine.name} (Rank #', get_my_mpi_all_id(), ')'
     WRITE (basename,'(A,I0.2)') 'ftg_${subroutine.name}_jsbach_', get_my_mpi_all_id()
 
