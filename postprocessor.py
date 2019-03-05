@@ -1,7 +1,7 @@
 import random
 import string
 import re
-from printout import printDebug
+from printout import printDebug, printLine
 
 class CodePostProcessor(object):
 
@@ -9,17 +9,17 @@ class CodePostProcessor(object):
     INDENT_LENGTH = 2
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
     MERGE_SESSION_ID_LENGTH = 5
-    MERGE_REGEX = re.compile(r'! #### MERGE (P?<part>(BEGIN|END)) [a-z0-9]{5} (P?<key>.*) ###')
+    MERGE_REGEX = re.compile(r'.*(?P<merge>! #### MERGE (?P<part>(BEGIN|END)) [a-z0-9]{5} (?P<key>.*) ####).*')
     
     def __init__(self):
         charSet = string.ascii_lowercase + string.digits
         self.mergeSession = ''.join(random.choice(charSet) for _ in range(CodePostProcessor.MERGE_SESSION_ID_LENGTH)) 
     
     def mergeBeginTag(self, key):
-        return '! #### MERGE BEGIN ' + self.mergeSession + ' ' + str(key) + ' ###'
+        return '! #### MERGE BEGIN ' + self.mergeSession + ' ' + str(key) + ' ####'
 
     def mergeEndTag(self, key):
-        return '! #### MERGE END ' + self.mergeSession + ' ' + str(key) + ' ###'
+        return '! #### MERGE END ' + self.mergeSession + ' ' + str(key) + ' ####'
     
     def process(self, text):
         if not text:
@@ -29,6 +29,7 @@ class CodePostProcessor(object):
         lines = self.__clearAndMerge(lines)
         lines = self.__indent(lines)
         lines = self.__breakLines(lines)
+#         printLine("\n".join(lines))
         return "\n".join(lines)
     
     def __clearAndMerge(self, lines):
@@ -144,6 +145,8 @@ class CodeBlock():
     def __init__(self, key, parent):
         self.key = key
         self.parent = parent
+        self.isBlock = True
+        self.isLine = False 
         self.__begin = []
         self.__content = []    
         self.__end = []
@@ -156,6 +159,9 @@ class CodeBlock():
     
     def end(self, element):
         self.__end.append(element)
+        
+    def empty(self):
+        return False
     
     def root(self):
         return self.parent is None
@@ -167,14 +173,44 @@ class CodeBlock():
         return not self.root() and self.__end
         
     def render(self):
-        return [code.render() for code in self.__begin + self.__content + self.__end]
-        
+        i = 0
+        mergedContent = []
+        while i < len(self.__content):
+            if self.__content[i].isLine or i == len(self.__content) - 1:
+                mergedContent.append(self.__content[i])
+                i += 1
+            else:
+                emptyLines = []
+                j = i + 1
+                while j < len(self.__content) and self.__content[j].empty():
+                    emptyLines.append(self.__content[j])
+                    j += 1
+                if j < len(self.__content) and self.__content[j].isBlock and self.__content[j].__begin == self.__content[i].__begin and self.__content[j].__end == self.__content[i].__end:
+                    self.__content[j].__content = self.__content[i].__content + self.__content[j].__content
+                    emptyLines = []
+                else:
+                    mergedContent.append(self.__content[i])
+                    mergedContent += emptyLines
+                i = j
+        return [rendered for code in self.__begin + mergedContent + self.__end for rendered in code.render()]
+    
 class CodeLine():
     def __init__(self, line):
         self.__line = line
+        self.isBlock = False
+        self.isLine = True
+    
+    def __eq__(self, other):
+        return isinstance(other, CodeLine) and other.__line == self.__line
+    
+    def __ne__(self, other):
+        return not other == self
+    
+    def __str__(self):
+        return self.__line
     
     def empty(self):
         return not self.__line
         
     def render(self):
-        return self.__line
+        return [self.__line]
