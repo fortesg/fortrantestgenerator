@@ -61,7 +61,7 @@
   #for $close in reversed($closeStatements)
     $close
   #end for
-  #if 'END DO' in $closeStatements
+  #if 'END DO' in [s[0:6] for s in $closeStatements]
   
   #end if
 #end if  
