@@ -54,7 +54,7 @@ def loadFortranTestGeneratorConfiguration(configFile):
         configError = True
 
     if CFG_TEST_SOURCE_DIR not in config or not config[CFG_TEST_SOURCE_DIR]:
-        printError(sys.stderr, 'Missing config variable: ' + CFG_TEST_SOURCE_DIR, location='FortranTestGenerator')
+        printError('Missing config variable: ' + CFG_TEST_SOURCE_DIR, location='FortranTestGenerator')
         configError = True
 
     if CFG_MODIFY_SOURCE_DIRS not in config and CFG_MODIFY_SOURCE_DIRS_LEGACY in config:
