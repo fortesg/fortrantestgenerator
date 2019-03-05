@@ -1,16 +1,18 @@
 import random
 import string
+import re
 
 class CodePostProcessor(object):
 
     MAX_LINE_LENGTH = 132
     INDENT_LENGTH = 2
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
-    MERGE_KEY_LENGTH = 5
+    MERGE_SESSION_ID_LENGTH = 5
+    MERGE_REGEX = re.compile(r'! #### MERGE (P?<part>(BEGIN|END)) [a-z0-9]{5} (P?<key>.*) ###')
     
     def __init__(self):
         charSet = string.ascii_lowercase + string.digits
-        self.mergeSession = ''.join(random.choice(charSet) for _ in range(CodePostProcessor.MERGE_KEY_LENGTH)) 
+        self.mergeSession = ''.join(random.choice(charSet) for _ in range(CodePostProcessor.MERGE_SESSION_ID_LENGTH)) 
     
     def mergeBeginTag(self, key):
         return '! #### MERGE BEGIN ' + self.mergeSession + ' ' + str(key) + ' ###'
@@ -29,14 +31,23 @@ class CodePostProcessor(object):
         return "\n".join(lines)
     
     def __clearAndMerge(self, lines):
-        rendered = []
+        rootBlock = CodeBlock('')
         for line in lines:
             line = line.strip()
             if line == CodePostProcessor.CLEAR_LINE:
                 continue
-            rendered.append(line)
+            cLine = CodeLine(line)
+            match = CodePostProcessor.MERGE_REGEX.match(line)
+            if match is not None:
+                if match.group('part') == 'BEGIN':
+                    pass
+                else:
+                    pass
+            else:
+                pass
+            rootBlock.content.append(cLine)
             
-        return rendered
+        return rootBlock.render()
     
     def __indent(self, lines):
         beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ', 'INTERFACE ')
@@ -108,13 +119,18 @@ class CodePostProcessor(object):
         return mask
     
 class CodeBlock():
-    def __init__(self, begin = None):
+    def __init__(self, key):
+        self.key = key
         self.begin = []
-        if begin is not None:
-            self.begin.append(CodeLine(begin))    
         self.content = []    
         self.end = []
+        
+    def render(self):
+        return [code.render() for code in self.begin + self.content + self.end]
         
 class CodeLine():
     def __init__(self, line):
         self.line = line
+        
+    def render(self):
+        return self.line
