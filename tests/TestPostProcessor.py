@@ -32,7 +32,7 @@ a = a + 1
 
 b = a
 '''
-        self.assertEqual(expected, self.post.process(text))
+        self.assertEqual(expected, self.post.process(text, 'testClearLine'))
     
     def testNestingNoMerge(self):
         text = '''
@@ -59,7 +59,7 @@ TYPE IS (test) ! #### MERGE BEGIN abcde 789 ####
   t%a = a
 END SWITCH ! #### MERGE END abcde 789 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testNestingNoMerge')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
     
     def testMergeIf(self):
@@ -91,7 +91,7 @@ IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
   END IF ! #### MERGE END abcde 456 ####
 END IF ! #### MERGE END abcde 123 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testMergeIf')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
     
     def testDontMergeIf(self):
@@ -127,7 +127,7 @@ IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
   END IF ! #### MERGE END abcde 456 ####
 END IF ! #### MERGE END abcde 123 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testDontMergeIf')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
         
     def testMergeSwitch(self):
@@ -160,7 +160,7 @@ TYPE IS (test) ! #### MERGE BEGIN abcde 789 ####
   t%b = b
 END SWITCH ! #### MERGE END abcde 789 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testMergeSwitch')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
             
     def testNotMatchingKeys(self):
@@ -196,7 +196,7 @@ IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
   END IF ! #### MERGE END abcde 456 ####
 END IF ! #### MERGE END abcde 123 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testNotMatchingKeys')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
         
     def testMissingBegin(self):
@@ -236,7 +236,7 @@ IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
   END IF ! #### MERGE END abcde 456 ####
 END IF ! #### MERGE END abcde 123 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testMissingBegin')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
                 
     def testMissingEnd(self):
@@ -276,7 +276,7 @@ IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
   END IF
 END IF ! #### MERGE END abcde 123 ####
 '''
-        actual = self.post.process(text)
+        actual = self.post.process(text, 'testMissingEnd')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
                 
         

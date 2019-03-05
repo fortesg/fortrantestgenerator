@@ -1,7 +1,7 @@
 import random
 import string
 import re
-from printout import printDebug, printLine
+from printout import printDebug, printLine, printWarning
 
 class CodePostProcessor(object):
 
@@ -21,19 +21,19 @@ class CodePostProcessor(object):
     def mergeEndTag(self, key):
         return '! #### MERGE END ' + self.mergeSession + ' ' + str(key) + ' ####'
     
-    def process(self, text):
+    def process(self, text, templateName = ''):
         if not text:
             return text
         
         lines = str(text).split("\n")
-        lines = self.__clearAndMerge(lines)
+        lines = self.__clearAndMerge(lines, templateName)
         lines = self.__indent(lines)
         lines = self.__breakLines(lines)
 #         printLine("\n".join(lines))
         return "\n".join(lines)
     
-    def __clearAndMerge(self, lines):
-        rootBlock = CodeBlock('', None)
+    def __clearAndMerge(self, lines, templateName):
+        rootBlock = CodeBlock(None)
         cBlock = rootBlock
         for line in lines:
             line = line.strip()
@@ -44,24 +44,34 @@ class CodePostProcessor(object):
             if match is not None:
                 key = match.group('key')
                 if match.group('part') == 'BEGIN':
-                    if cBlock.new() and cBlock.key == key:
-                        cBlock.begin(cLine)
+                    if cBlock.new() and cBlock.beginKey == key:
+                        cBlock.begin(cLine, key)
                     else:
                         if cBlock.closed():
                             cBlock = cBlock.parent
-                        newBlock = CodeBlock(key, cBlock)
-                        newBlock.begin(cLine)
+                        newBlock = CodeBlock(cBlock)
+                        newBlock.begin(cLine, key)
                         cBlock.content(newBlock)
                         cBlock = newBlock
                 else: # END
-                    if cBlock.closed() and cBlock.key != key:
+                    if cBlock.closed() and cBlock.endKey != key:
                         cBlock = cBlock.parent
-                    cBlock.end(cLine)
+                    if not cBlock.root(): 
+                        if key != cBlock.beginKey:
+                            printWarning("Merge keys don't match - BEGIN: " + str(cBlock.beginKey) + ", END: " + str(key), location = templateName)
+                        cBlock.end(cLine, key)
+                    else:
+                        cBlock.content(cLine)
+                        printWarning("Merge tags not sound, too many END tags", location = templateName)
                     # TODO: What if cBLock.key != key?
             else:
                 if cBlock.closed():
                     cBlock = cBlock.parent
                 cBlock.content(cLine)
+        
+        lastContent = rootBlock.lastContent()
+        if lastContent is not None and lastContent.isBlock and not lastContent.closed():
+            printWarning("Merge tags not sound, too many BEGIN tags", location = templateName)
             
         return rootBlock.render()
     
@@ -142,8 +152,9 @@ class CodePostProcessor(object):
         return mask
     
 class CodeBlock():
-    def __init__(self, key, parent):
-        self.key = key
+    def __init__(self, parent):
+        self.beginKey = ''
+        self.endKey = ''
         self.parent = parent
         self.isBlock = True
         self.isLine = False 
@@ -151,14 +162,16 @@ class CodeBlock():
         self.__content = []    
         self.__end = []
     
-    def begin(self, element):
+    def begin(self, element, key):
         self.__begin.append(element)
+        self.beginKey = key
     
     def content(self, element):
         self.__content.append(element)
     
-    def end(self, element):
+    def end(self, element, key):
         self.__end.append(element)
+        self.endKey = key
         
     def empty(self):
         return False
@@ -171,6 +184,11 @@ class CodeBlock():
     
     def closed(self):
         return not self.root() and self.__end
+    
+    def lastContent(self):
+        if not self.__content:
+            return None
+        return self.__content[-1]
         
     def render(self):
         i = 0
