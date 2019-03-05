@@ -82,7 +82,6 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   CHARACTER(len=256) :: ftg_name
 
   CALL ftg_${subroutine.name}_init_serializer('output')
-  CALL ftg_set_savepoint('output')
 
   $resetRegistrations
   ! REQUIRED ARGUMENTS
@@ -93,10 +92,11 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   ! OPTIONAL ARGUMENTS
   #for $arg in $args.allOut.optionals
     #if $arg.usedVariables
-      IF (PRESENT($arg.name)) THEN
+      IF (PRESENT($arg.name)) THEN $mergeBegin('present')
         #for $var in $arg.usedVariables
-          $ftgWrite($var)#end for 
-      END IF
+          $ftgWrite($var)
+        #end for 
+      END IF $mergeEnd('present')
     #end if 
   #end for
   

@@ -6,34 +6,33 @@
 #else
   #set $closeStatements = []
   #set $mandDim = $var.mandatoryDimensions
+  #set $indices = ['ftg_d1', 'ftg_d2', 'ftg_d3', 'ftg_d4', 'ftg_d5', 'ftg_d6']
   #set $d = 0
   #set $ad = 0
   #set $aliasVar = $var
-  #set $filledVar = $fillIndices($var, $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+  #set $filledVar = $fillIndices($var, $mandDim, *$indices)
   #set $filledAlias = $filledVar
   #for $level in $var.levels
     #set $container = $aliasVar.container($level - ($var.level - $aliasVar.level))
-    #set $filledContainer = $fillIndices($container, $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+    #set $filledContainer = $fillIndices($container, $ad, *$indices[$d - $ad:])
     #if $container.polymorph
       #set $alias = 'polym' + str($level)
-      SELECT TYPE ($alias => $filledContainer)
-      TYPE IS ($container.dynamicType)
-      #silent $closeStatements.append('END SELECT')
+      SELECT TYPE ($alias => $filledContainer) $mergeBegin('switch' + str($level))
+      TYPE IS ($container.dynamicType) $mergeBegin('switch' + str($level))
+      #silent $closeStatements.append('END SELECT ' + $mergeEnd('switch' + str($level)))
       #set $aliasVar = $var.alias($alias, $level) 
       #set $filledAlias = $filledVar.alias($alias, $level) 
       #set $ad = 0
     #else
       #set $aa = $allocatedOrAssociated($filledContainer, $level)
       #if $aa
-        IF ($aa) THEN
-        #silent $closeStatements.append('END IF')
-      #else
-        #silent $closeStatements.append($clearLine)
+        IF ($aa) THEN $mergeBegin('if' + str($level))
+        #silent $closeStatements.append('END IF ' + $mergeEnd('if' + str($level)))
       #end if
     #end if
     #if $level < $var.level and $needsRegistration($filledContainer)
       #if $ad > 0
-        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $ad, *("ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")[$d - $ad:])
+        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $ad, *$indices[$d - $ad:])
         #set $contName = 'ftg_name'
       #else 
         #set $contName = '"' + str($container) + '"'
@@ -53,13 +52,13 @@
       #set $cd = 0
       #for $ld in $loopDims
         #set $cd += 1
-        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd)
-        #silent $closeStatements.append('END DO')
+        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
+        #silent $closeStatements.append('END DO ' + $mergeEnd('do' + str($level)))
       #end for        
     #end if      
   #end for
   #if $mandDim > 0
-    $writeVarNameWithFilledIndicesToString($var, "ftg_name", $mandDim, "ftg_d1", "ftg_d2", "ftg_d3", "ftg_d4")
+    $writeVarNameWithFilledIndicesToString($var, 'ftg_name', $mandDim, 'ftg_d1', 'ftg_d2', 'ftg_d3', 'ftg_d4', 'ftg_d5', 'ftg_d6')
     #set $varName = 'ftg_name'
   #else 
     #set $varName = '"' + str($var) + '"'
@@ -72,8 +71,7 @@
   #for $close in reversed($closeStatements)
     $close
   #end for
-  #if 'END DO' in $closeStatements
+  #if 'END DO' in [s[0:6] for s in $closeStatements]
   
   #end if
 #end if  
-$clearLine

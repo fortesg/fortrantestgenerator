@@ -42,9 +42,9 @@ SUBROUTINE ftg_test_${subroutine.name}(failure_count)
 
   INTEGER, INTENT(out) :: failure_count
     
-  ${args.specs(intent = '', allocatable = True, charLengthZero = True)}
+  $args.specs(intent = '', allocatable = True, charLengthZero = True)
   #if $subroutine.isFunction
-      ${result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)}
+      $result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)
   #end if
   
   ! ----------- REPLAY -----------
@@ -92,7 +92,7 @@ END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
 SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
   
-  ${args.specs(intent = 'inout', allocatable = True)}
+  $args.specs(intent = 'inout', allocatable = True)
 
   INTEGER, DIMENSION(8) :: ftg_bounds
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, ftg_d5, ftg_d6
@@ -118,9 +118,9 @@ END SUBROUTINE ftg_${subroutine.name}_replay_input
 
 SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $result, 'failure_count'))
   
-  ${args.allOut.specs(intent = 'in', allocatable = False)}
+  $args.allOut.specs(intent = 'in', allocatable = False)
   #if $subroutine.isFunction:
-    ${result.spec(intent = 'in', allocatable = False)}
+    $result.spec(intent = 'in', allocatable = False)
   #end if
   
   INTEGER, INTENT(out) :: failure_count
