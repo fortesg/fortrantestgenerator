@@ -17,17 +17,17 @@
     #set $filledContainer = $fillIndices($container, $ad, *$indices[$d - $ad:])
     #if $container.polymorph
       #set $alias = 'polym' + str($level)
-      SELECT TYPE ($alias => $filledContainer)
-      TYPE IS ($container.dynamicType)
-      #silent $closeStatements.append('END SELECT')
+      SELECT TYPE ($alias => $filledContainer) $mergeBegin('switch' + str($level))
+      TYPE IS ($container.dynamicType) $mergeBegin('switch' + str($level))
+      #silent $closeStatements.append('END SELECT ' + $mergeEnd('switch' + str($level)))
       #set $aliasVar = $var.alias($alias, $level) 
       #set $filledAlias = $filledVar.alias($alias, $level) 
       #set $ad = 0
     #else
       #set $aa = $allocatedOrAssociated($filledContainer, $level)
       #if $aa
-        IF ($aa) THEN
-        #silent $closeStatements.append('END IF')
+        IF ($aa) THEN $mergeBegin('if' + str($level))
+        #silent $closeStatements.append('END IF ' + $mergeEnd('if' + str($level)))
       #else
         #silent $closeStatements.append($clearLine)
       #end if
@@ -54,8 +54,8 @@
       #set $cd = 0
       #for $ld in $loopDims
         #set $cd += 1
-        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd)
-        #silent $closeStatements.append('END DO')
+        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
+        #silent $closeStatements.append('END DO ' + $mergeEnd('do' + str($level)))
       #end for        
     #end if      
   #end for

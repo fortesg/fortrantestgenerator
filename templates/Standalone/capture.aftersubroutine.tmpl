@@ -80,11 +80,11 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   ! OPTIONAL ARGUMENTS
   #for $arg in $args.optionals
     #if $arg.usedVariables
-      IF (PRESENT($arg.name)) THEN
+      IF (PRESENT($arg.name)) THEN $mergeBegin('present')
       #for $var in $arg.usedVariables
         $ftgWrite($var) $clearLine
       #end for 
-      END IF
+      END IF $mergeEnd('present')
     #end if 
   #end for
 
@@ -127,11 +127,11 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   ! OPTIONAL ARGUMENTS
   #for $arg in $args.allOut.optionals
     #if $arg.usedVariables
-      IF (PRESENT($arg.name)) THEN
+      IF (PRESENT($arg.name)) THEN $mergeBegin('present')
         #for $var in $arg.usedVariables
           $ftgWrite($var) $clearLine
         #end for 
-      END IF
+      END IF $mergeEnd('present')
     #end if 
   #end for
   
