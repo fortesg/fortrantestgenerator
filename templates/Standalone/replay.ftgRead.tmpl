@@ -44,8 +44,6 @@
       #if $aa
         IF ($aa) THEN $mergeBegin('if' + str($level))
         #silent $closeStatements.append('END IF ' + $mergeEnd('if' + str($level)))
-      #else
-        #silent $closeStatements.append($clearLine)
       #end if
     #end if
     #if $d < $mandDim
