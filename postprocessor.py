@@ -20,8 +20,6 @@ class CodePostProcessor(object):
     def process(self, text):
                 
         rendered = self.__clearAndMerge(text)
-#         rendered = self.__unifyIfs(rendered)
-#         rendered = self.__merge(rendered)
         rendered = self.__indent(rendered)
         rendered = self.__breakLines(rendered)
         
@@ -37,75 +35,6 @@ class CodePostProcessor(object):
             if line == CodePostProcessor.CLEAR_LINE:
                 continue
             lines.append(line)
-    
-    def __merge(self, text):
-        if not text:
-            return text
-        
-        lines = []
-        begins = []
-        ends = []
-        for i, line in text.split("\n"):
-            beginMatch = CodePostProcessor.MERGE_BEGIN_REGEX.match(line)
-            if beginMatch is not None:
-                identifier = beginMatch.group('identifier')
-                if begins[-1] and begins[-1][0] == identifier:
-                    begins[-1][0] += "\n" + line
-                if not begins[-1] or begins[-1][0] != identifier:
-                    begins.append((identifier, i, line))
-            else:
-                endMatch = CodePostProcessor.MERGE_END_REGEX.match(line)
-                if endMatch is not None:
-                    identifier = endMatch.group('identifier')
-        
-        return "\n".join(lines)
-    
-    def __unifyIfs(self, text):
-        if not text:
-            return text
-        
-        ifRegex = re.compile(r'^IF\s+\(.*\)\s+THEN$', re.IGNORECASE)
-        endifRegex = re.compile(r'^END\s+IF$', re.IGNORECASE)
-        
-        lines = []
-        ifStack = []
-        endIfBuffer = []
-        for line in text.split("\n"):
-            if ifRegex.match(line) is not None:
-                if endIfBuffer:
-                    if ifStack[-1] == line:
-                        endIfBuffer = []
-                    else:
-                        lines += endIfBuffer
-                        endIfBuffer = []
-                        ifStack.pop()
-                        ifStack.append(line)
-                        lines.append(line)
-                else:
-                    ifStack.append(line)
-                    lines.append(line)
-            elif line == 'ELSE':
-                ifStack[-1] = line
-                lines.append(line)
-            elif endifRegex.match(line) is not None:
-                if endIfBuffer:
-                    lines += endIfBuffer
-                    endIfBuffer = []
-                    ifStack.pop()
-                endIfBuffer.append(line)
-            elif not line:
-                if endIfBuffer:
-                    endIfBuffer.append(line)
-                else:
-                    lines.append(line)
-            else:
-                if endIfBuffer:
-                    lines += endIfBuffer
-                    endIfBuffer = []
-                    ifStack.pop()
-                lines.append(line)
-        
-        return "\n".join(lines) 
     
     def __indent(self, text):
         if not text:
