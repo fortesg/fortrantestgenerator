@@ -25,13 +25,13 @@ class CodePostProcessor(object):
         return "\n".join(lines)
     
     def __clearAndMerge(self, lines, templateName):
-        rootBlock = CodeBlock(None)
+        rootBlock = _CodeBlock(None)
         cBlock = rootBlock
         for line in lines:
             line = line.strip()
             if line == CodePostProcessor.CLEAR_LINE:
                 continue
-            cLine = CodeLine(line)
+            cLine = _CodeLine(line)
             match = CodePostProcessor.MERGE_REGEX.match(line)
             if match is not None:
                 key = match.group('key')
@@ -41,7 +41,7 @@ class CodePostProcessor(object):
                     else:
                         if cBlock.closed():
                             cBlock = cBlock.parent
-                        newBlock = CodeBlock(cBlock)
+                        newBlock = _CodeBlock(cBlock)
                         newBlock.begin(cLine, key)
                         cBlock.content(newBlock)
                         cBlock = newBlock
@@ -143,7 +143,7 @@ class CodePostProcessor(object):
                 
         return mask
     
-class CodeBlock():
+class _CodeBlock():
     def __init__(self, parent):
         self.beginKey = ''
         self.endKey = ''
@@ -204,14 +204,14 @@ class CodeBlock():
                 i = j
         return [rendered for code in self.__begin + mergedContent + self.__end for rendered in code.render()]
     
-class CodeLine():
+class _CodeLine():
     def __init__(self, line):
         self.__line = line
         self.isBlock = False
         self.isLine = True
     
     def __eq__(self, other):
-        return isinstance(other, CodeLine) and other.__line == self.__line
+        return isinstance(other, _CodeLine) and other.__line == self.__line
     
     def __ne__(self, other):
         return not other == self
