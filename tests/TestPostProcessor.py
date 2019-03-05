@@ -17,7 +17,22 @@ class TestPostProcessor(unittest.TestCase):
     
     def testEmpty(self):
         text = ''
-        self.assertEqual('', self.post.process(text))
+        expected = ''
+        self.assertEqual(expected, self.post.process(text))
+    
+    def testClearLine(self):
+        text = '''
+        a = a + 1
+        ! ########## CLEAR LINE ##########
+        
+        b = a
+        '''
+        expected = '''
+a = a + 1
+
+b = a
+'''
+        self.assertEqual(expected, self.post.process(text))
     
 if __name__ == "__main__":
     unittest.main()
