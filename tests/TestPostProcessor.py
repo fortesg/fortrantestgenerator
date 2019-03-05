@@ -163,7 +163,7 @@ END SWITCH ! #### MERGE END abcde 789 ####
         actual = self.post.process(text)
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
             
-    def testNotSound(self):
+    def testNotMatchingKeys(self):
         text = '''
         IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
           a = a + 1
@@ -194,10 +194,91 @@ IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
   IF (b == 2) THEN ! #### MERGE BEGIN abcde 456 ####
     a = a * b
   END IF ! #### MERGE END abcde 456 ####
-END IF ! #### MERGE END abcde 012 ####
+END IF ! #### MERGE END abcde 123 ####
 '''
         actual = self.post.process(text)
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
+        
+    def testMissingBegin(self):
+        text = '''
+        IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+          a = a + 1
+          IF (a == 1) THEN ! #### MERGE BEGIN abcde 456 ####
+            b = a
+          END IF ! #### MERGE END abcde 456 ####
+        END IF ! #### MERGE END abcde 123 ####
+
+
+        IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+          IF (a == 1) THEN ! #### MERGE BEGIN abcde 789 ####
+            b = a + 45
+          END IF ! #### MERGE END abcde 789 ####
+          IF (b == 2) THEN
+            a = a * b
+          END IF ! #### MERGE END abcde 456 ####
+        END IF ! #### MERGE END abcde 123 ####
+        '''
+        expected = '''
+IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+  a = a + 1
+  IF (a == 1) THEN ! #### MERGE BEGIN abcde 456 ####
+    b = a
+  END IF ! #### MERGE END abcde 456 ####
+END IF ! #### MERGE END abcde 123 ####
+
+
+IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+  IF (a == 1) THEN ! #### MERGE BEGIN abcde 789 ####
+    b = a + 45
+  END IF ! #### MERGE END abcde 789 ####
+  IF (b == 2) THEN
+    a = a * b
+  END IF ! #### MERGE END abcde 456 ####
+END IF ! #### MERGE END abcde 123 ####
+'''
+        actual = self.post.process(text)
+        self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
+                
+    def testMissingEnd(self):
+        text = '''
+        IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+          a = a + 1
+          IF (a == 1) THEN ! #### MERGE BEGIN abcde 456 ####
+            b = a
+          END IF ! #### MERGE END abcde 456 ####
+        END IF ! #### MERGE END abcde 123 ####
+
+
+        IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+          IF (a == 1) THEN ! #### MERGE BEGIN abcde 789 ####
+            b = a + 45
+          END IF ! #### MERGE END abcde 789 ####
+          IF (b == 2) THEN ! #### MERGE BEGIN abcde 789 ####
+            a = a * b
+          END IF
+        END IF ! #### MERGE END abcde 123 ####
+        '''
+        expected = '''
+IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+  a = a + 1
+  IF (a == 1) THEN ! #### MERGE BEGIN abcde 456 ####
+    b = a
+  END IF ! #### MERGE END abcde 456 ####
+END IF ! #### MERGE END abcde 123 ####
+
+
+IF (a > b) THEN ! #### MERGE BEGIN abcde 123 ####
+  IF (a == 1) THEN ! #### MERGE BEGIN abcde 789 ####
+    b = a + 45
+  END IF ! #### MERGE END abcde 789 ####
+  IF (b == 2) THEN ! #### MERGE BEGIN abcde 789 ####
+    a = a * b
+  END IF
+END IF ! #### MERGE END abcde 123 ####
+'''
+        actual = self.post.process(text)
+        self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
+                
         
 if __name__ == "__main__":
     unittest.main()
