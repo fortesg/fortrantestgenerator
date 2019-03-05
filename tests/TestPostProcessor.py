@@ -48,16 +48,16 @@ b = a
         END SWITCH ! #### MERGE END 789 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
-SWITCH TYPE (t) ! #### MERGE BEGIN 789 ####
-TYPE IS (test) ! #### MERGE BEGIN 789 ####
+  END IF
+END IF
+SWITCH TYPE (t)
+TYPE IS (test)
   t%a = a
-END SWITCH ! #### MERGE END 789 ####
+END SWITCH
 '''
         actual = self.post.process(text, 'testNestingNoMerge')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
@@ -80,16 +80,16 @@ END SWITCH ! #### MERGE END 789 ####
         END IF ! #### MERGE END 123 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
     b = a + 45
-  END IF ! #### MERGE END 456 ####
-  IF (b == 2) THEN ! #### MERGE BEGIN 456 ####
+  END IF
+  IF (b == 2) THEN
     a = a * b
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
+  END IF
+END IF
 '''
         actual = self.post.process(text, 'testMergeIf')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
@@ -114,18 +114,18 @@ END IF ! #### MERGE END 123 ####
         END IF ! #### MERGE END 123 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
-  END IF ! #### MERGE END 456 ####
-  IF (a == 1) THEN ! #### MERGE BEGIN 789 ####
+  END IF
+  IF (a == 1) THEN
     b = a + 45
-  END IF ! #### MERGE END 789 ####
-  IF (b == 2) THEN ! #### MERGE BEGIN 456 ####
+  END IF
+  IF (b == 2) THEN
     a = a * b
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
+  END IF
+END IF
 '''
         actual = self.post.process(text, 'testDontMergeIf')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
@@ -148,17 +148,17 @@ END IF ! #### MERGE END 123 ####
         END SWITCH ! #### MERGE END 789 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
-SWITCH TYPE (t) ! #### MERGE BEGIN 789 ####
-TYPE IS (test) ! #### MERGE BEGIN 789 ####
+  END IF
+END IF
+SWITCH TYPE (t)
+TYPE IS (test)
   t%a = a
   t%b = b
-END SWITCH ! #### MERGE END 789 ####
+END SWITCH
 '''
         actual = self.post.process(text, 'testMergeSwitch')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
@@ -181,20 +181,20 @@ END SWITCH ! #### MERGE END 789 ####
         END IF ! #### MERGE END 123 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 012 ####
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
-  IF (a == 1) THEN ! #### MERGE BEGIN 789 ####
+  END IF
+END IF
+IF (a > b) THEN
+  IF (a == 1) THEN
     b = a + 45
-  END IF ! #### MERGE END 789 ####
-  IF (b == 2) THEN ! #### MERGE BEGIN 456 ####
+  END IF
+  IF (b == 2) THEN
     a = a * b
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
+  END IF
+END IF
 '''
         actual = self.post.process(text, 'testNotMatchingKeys')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
@@ -219,22 +219,22 @@ END IF ! #### MERGE END 123 ####
         END IF ! #### MERGE END 123 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
+  END IF
+END IF
 
 
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
-  IF (a == 1) THEN ! #### MERGE BEGIN 789 ####
+IF (a > b) THEN
+  IF (a == 1) THEN
     b = a + 45
-  END IF ! #### MERGE END 789 ####
+  END IF
   IF (b == 2) THEN
     a = a * b
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
+  END IF
+END IF
 '''
         actual = self.post.process(text, 'testMissingBegin')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
@@ -259,22 +259,22 @@ END IF ! #### MERGE END 123 ####
         END IF ! #### MERGE END 123 ####
         '''
         expected = '''
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
+IF (a > b) THEN
   a = a + 1
-  IF (a == 1) THEN ! #### MERGE BEGIN 456 ####
+  IF (a == 1) THEN
     b = a
-  END IF ! #### MERGE END 456 ####
-END IF ! #### MERGE END 123 ####
+  END IF
+END IF
 
 
-IF (a > b) THEN ! #### MERGE BEGIN 123 ####
-  IF (a == 1) THEN ! #### MERGE BEGIN 789 ####
+IF (a > b) THEN
+  IF (a == 1) THEN
     b = a + 45
-  END IF ! #### MERGE END 789 ####
-  IF (b == 2) THEN ! #### MERGE BEGIN 789 ####
+  END IF
+  IF (b == 2) THEN
     a = a * b
   END IF
-END IF ! #### MERGE END 123 ####
+END IF
 '''
         actual = self.post.process(text, 'testMissingEnd')
         self.assertEqual(expected, actual, '==== expected ====\n@' + expected + '@\n==== actual ====\n@' + actual + '@')
