@@ -34,6 +34,7 @@ class CodePostProcessor(object):
             cLine = _CodeLine(line)
             match = CodePostProcessor.MERGE_REGEX.match(line)
             if match is not None:
+                cLine.mergeTag = match.group('merge')
                 key = match.group('key')
                 if match.group('part') == 'BEGIN':
                     if cBlock.new() and cBlock.beginKey == key:
@@ -207,6 +208,7 @@ class _CodeBlock():
 class _CodeLine():
     def __init__(self, line):
         self.__line = line
+        self.mergeTag = None
         self.isBlock = False
         self.isLine = True
     
@@ -223,4 +225,7 @@ class _CodeLine():
         return not self.__line
         
     def render(self):
-        return [self.__line]
+        line = self.__line
+        if self.mergeTag is not None:
+            line = line.replace(self.mergeTag, '').strip()
+        return [line]
