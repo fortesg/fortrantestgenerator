@@ -1,25 +1,18 @@
-import random
-import string
 import re
-from printout import printDebug, printLine, printWarning
+from printout import printWarning
 
 class CodePostProcessor(object):
 
     MAX_LINE_LENGTH = 132
     INDENT_LENGTH = 2
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
-    MERGE_SESSION_ID_LENGTH = 5
-    MERGE_REGEX = re.compile(r'.*(?P<merge>! #### MERGE (?P<part>(BEGIN|END)) [a-z0-9]{5} (?P<key>.*) ####).*')
-    
-    def __init__(self):
-        charSet = string.ascii_lowercase + string.digits
-        self.mergeSession = ''.join(random.choice(charSet) for _ in range(CodePostProcessor.MERGE_SESSION_ID_LENGTH)) 
+    MERGE_REGEX = re.compile(r'.*(?P<merge>! #### MERGE (?P<part>(BEGIN|END)) (?P<key>.*) ####).*')
     
     def mergeBeginTag(self, key):
-        return '! #### MERGE BEGIN ' + self.mergeSession + ' ' + str(key) + ' ####'
+        return '! #### MERGE BEGIN ' + str(key) + ' ####'
 
     def mergeEndTag(self, key):
-        return '! #### MERGE END ' + self.mergeSession + ' ' + str(key) + ' ####'
+        return '! #### MERGE END ' + str(key) + ' ####'
     
     def process(self, text, templateName = ''):
         if not text:
@@ -29,7 +22,6 @@ class CodePostProcessor(object):
         lines = self.__clearAndMerge(lines, templateName)
         lines = self.__indent(lines)
         lines = self.__breakLines(lines)
-#         printLine("\n".join(lines))
         return "\n".join(lines)
     
     def __clearAndMerge(self, lines, templateName):
