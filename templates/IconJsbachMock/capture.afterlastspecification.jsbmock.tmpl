@@ -1,6 +1,6 @@
 #if $subroutine.calls('__mo_jsb_interface_MOD_interface_full')
 $prologue $mergeBegin('ftg')
-
+$mergeBegin('ftg')
 IF (ftg_${subroutine.name}_capture_input_enabled .AND. ftg_${subroutine.name}_capture_active()) THEN
   CALL ftg_${subroutine.name}_start_jsbach_capture()
 END IF
