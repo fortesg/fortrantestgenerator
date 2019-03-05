@@ -11,7 +11,7 @@ from typefinder import TypeCollection
 
 class CombinedCodeGenerator(CodeGenerator):
     
-    def __init__(self, capture, replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
+    def __init__(self, capture, replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}, measureTime = False):
         assertType(capture, 'capture', bool)
         assertType(replay, 'replay', bool)
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
@@ -24,7 +24,7 @@ class CombinedCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir)
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
-        super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+        super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes, measureTime)
         self.__modifySourceFiles = modifySourceFiles
         self.__export = ExportCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
         self.__capture = None

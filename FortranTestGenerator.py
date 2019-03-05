@@ -19,6 +19,7 @@ def parseArguments(argParser):
     argParser.add_argument('-c', '--capture', action="store_true", help='Generate Capture Code')
     argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-r', '--replay', action="store_true", help='Generate Replay Code')
+    argParser.add_argument('-m', '--measure', action="store_true", help='Measure Time')
     argParser.add_argument('-cf', '--configFile', type=str, help='Import configuration from this file.');
     argParser.add_argument('module', nargs='?', default=None, help='Module name');
     argParser.add_argument('subroutine', nargs='?', default=None, help='Subroutine or function name');
@@ -112,7 +113,7 @@ def main():
     if args.export or args.capture or args.replay:
         printLine('Generate Code')
         postProcessor = CodePostProcessor()
-        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, postProcessor, backupFinder, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix, abstractTypes)
+        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, postProcessor, backupFinder, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix, abstractTypes, args.measure)
         generator.generate(subroutineFullName)
         
 if __name__ == "__main__":

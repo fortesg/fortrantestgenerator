@@ -12,12 +12,13 @@ from supertypes import CallGraphBuilder
 from printout import printLine, printInline
 from typefinder import TypeCollection
 from postprocessor import CodePostProcessor
+import time
 
 class CodeGenerator(object):
     
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = '', abstractTypes = {}):
+    def __init__(self, sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = '', abstractTypes = {}, measureTime = False):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
@@ -27,6 +28,7 @@ class CodeGenerator(object):
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredModulesForGlobals, 'ignoredModulesForGlobals', str)        
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)        
+        assertType(measureTime, 'measureTime', bool)        
         
         self._sourceFiles = sourceFiles
         self.__templatePath = templatePath
@@ -37,6 +39,7 @@ class CodeGenerator(object):
         self.__ignoredTypes = ignoredTypes
         self.__ignorePrefix = ignorePrefix
         self.__abstractTypes = abstractTypes
+        self.__measureTime = measureTime
         
         templateDir = os.path.dirname(os.path.realpath(self.__templatePath))
         templateDirParent = os.path.abspath(os.path.join(templateDir, os.pardir))
@@ -53,20 +56,32 @@ class CodeGenerator(object):
             ignoreRegex = re.compile('^' + self.__ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
         else:
             ignoreRegex = None
-
-        printLine('Build Call Graph', indent = 1)
             
         subroutine = self._findSubroutine(subroutineFullName)
         if subroutine is None:
             raise LookupError("Subroutine not found: " + str(subroutineFullName))
 
+        self.__time()
+        timeSum = 0
+        printLine('Build Call Graph', indent = 1)
+
         callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
+        
+        time = self.__time()
+        timeSum += time
+        if self.__measureTime:
+            printLine(time, indent = 1)
         
         printLine('Find Interfaces and Types', indent = 1)
         useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules, self.__abstractTypes)
         useTraversal.parseModules(callgraph.getRoot())
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
+        
+        time = self.__time()
+        timeSum += time
+        if self.__measureTime:
+            printLine(time, indent = 1)
 
         printLine('Analyse Source Code', indent = 1)
         argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
@@ -92,7 +107,17 @@ class CodeGenerator(object):
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
+        time = self.__time()
+        timeSum += time
+        if self.__measureTime:
+            printLine(time, indent = 1)
+        
         self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types)
+        
+        time = self.__time()
+        timeSum += time
+        if self.__measureTime:
+            printLine(time, indent = 1)
         
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         raise NotImplementedError()
@@ -146,3 +171,9 @@ class CodeGenerator(object):
         f = open(path, 'w')
         f.writelines(lines)
         f.close()
+
+    def __time(self):
+        try:
+            return time.perf_counter()  # @UndefinedVariable
+        except AttributeError:
+            return 0
