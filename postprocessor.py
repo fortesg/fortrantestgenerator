@@ -1,28 +1,28 @@
 import random
 import string
-import re
 
 class CodePostProcessor(object):
 
     MAX_LINE_LENGTH = 132
     INDENT_LENGTH = 2
     CLEAR_LINE = '! ########## CLEAR LINE ##########'
-    MERGE_BEGIN_PREFIX = '! #### MERGE BEGIN'
-    MERGE_END_PREFIX   = '! #### MERGE END'
-    MERGE_KEY = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
+    MERGE_KEY_LENGTH = 5
     
-    def mergeBeginTag(self, identifier):
-        return CodePostProcessor.MERGE_BEGIN_PREFIX + ' ' + CodePostProcessor.MERGE_KEY + ' ' + str(identifier)
+    def __init__(self):
+        charSet = string.ascii_lowercase + string.digits
+        self.mergeSession = ''.join(random.choice(charSet) for _ in range(CodePostProcessor.MERGE_KEY_LENGTH)) 
+    
+    def mergeBeginTag(self, key):
+        return '! #### MERGE BEGIN ' + self.mergeSession + ' ' + str(key) + ' ###'
 
-    def mergeEndTag(self, identifier):
-        return CodePostProcessor.MERGE_END_PREFIX + ' ' + CodePostProcessor.MERGE_KEY + ' ' + str(identifier)
+    def mergeEndTag(self, key):
+        return '! #### MERGE END ' + self.mergeSession + ' ' + str(key) + ' ###'
     
     def process(self, text):
-                
-        rendered = self.__clearAndMerge(text)
+        rendered = str(text)
+        rendered = self.__clearAndMerge(rendered)
         rendered = self.__indent(rendered)
         rendered = self.__breakLines(rendered)
-        
         return rendered
     
     def __clearAndMerge(self, text):
@@ -35,6 +35,8 @@ class CodePostProcessor(object):
             if line == CodePostProcessor.CLEAR_LINE:
                 continue
             lines.append(line)
+            
+        return "\n".join(lines)
     
     def __indent(self, text):
         if not text:
