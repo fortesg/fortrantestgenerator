@@ -13,7 +13,7 @@ class ReplayCodeGenerator(CodeGenerator):
     TEST_TEMPLATE_PART = 'replay'
     TEMP_TEST_FILE = 'ftg_temp_test.f90'
     
-    def __init__(self, sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
+    def __init__(self, sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
@@ -22,7 +22,7 @@ class ReplayCodeGenerator(CodeGenerator):
         if not os.path.isdir(testDataDir):
             raise IOError("Not a directory: " + testDataDir);
 
-        super(ReplayCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)        
+        super(ReplayCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)        
         self.__testSourceDir = testSourceDir
         self.__testDataDir = testDataDir
         
@@ -42,7 +42,7 @@ class ReplayCodeGenerator(CodeGenerator):
         
         subroutine = self._findSubroutine(subroutineFullName)
         self._setTypesToSubroutineVariables(subroutine, types)
-        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir, callgraph)
+        templateNameSpace = ReplayTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir, callgraph, self._postProcessor)
         self._processTemplate(tempTestFile, 0, self.TEST_TEMPLATE_PART, templateNameSpace)
         
         testModuleName = self.__findModuleNameInTestFile(tempTestFile)

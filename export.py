@@ -12,14 +12,14 @@ class ExportCodeGenerator(CodeGenerator):
     
     EXPORT_TEMPLATE_PART = 'export'
     
-    def __init__(self, sourceFiles, modifySourceFiles, templatePath, graphBuilder, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
+    def __init__(self, sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
             raise IOError("Template file not found: " + templatePath)
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
-        super(ExportCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+        super(ExportCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
         self.__modifySourceFiles = modifySourceFiles     
         self.__backupFinder = backupFinder 
 
@@ -47,7 +47,7 @@ class ExportCodeGenerator(CodeGenerator):
                 backup = self.__backupFinder.create(usedSourceFilePath)
                 subroutine = self._findSubroutine(subroutineFullName)
                 self._setTypesToSubroutineVariables(subroutine, types)
-                exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph)
+                exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph, self._postProcessor)
                 result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
                 if backup and not result:
                     self.__backupFinder.remove(usedSourceFilePath)

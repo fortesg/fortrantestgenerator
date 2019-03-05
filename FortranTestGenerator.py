@@ -11,6 +11,8 @@ import argparse;
 from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
     CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE, CFG_FCG_DIR
 from printout import printLine
+from markdown.postprocessors import Postprocessor
+from postprocessor import CodePostProcessor
 
 def parseArguments(argParser):
     argParser.add_argument('-a', '--restoreCapture', action="store_true", help='Restore only Capture Backup Files')
@@ -110,7 +112,8 @@ def main():
 
     if args.export or args.capture or args.replay:
         printLine('Generate Code')
-        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, backupFinder, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix, abstractTypes)
+        postProcessor = CodePostProcessor()
+        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, postProcessor, backupFinder, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix, abstractTypes)
         generator.generate(subroutineFullName)
         
 if __name__ == "__main__":

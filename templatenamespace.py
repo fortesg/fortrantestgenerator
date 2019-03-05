@@ -1,28 +1,23 @@
 from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable
 from callgraph import CallGraph
-import re
-import random
-import string
+from postprocessor import CodePostProcessor
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
     
-    CLEAR_LINE = '! ########## CLEAR LINE ##########'
-    MERGE_BEGIN_PREFIX = '! #### MERGE BEGIN'
-    MERGE_END_PREFIX   = '! #### MERGE END'
-    MERGE_KEY = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(5))
-    
-    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph, postProcessor):
         assertType(subroutine, 'subroutine', Subroutine)
         assertType(typeArgumentReferences, 'typeArgumentReferences', list)
         assertType(typeResultReferences, 'typeResultReferences', list)
         assertType(globalsReferences, 'globalsReferences', list)
         assertType(callgraph, 'callgraph', CallGraph)
+        assertType(postProcessor, 'postProcessor', CodePostProcessor)
         
         self.__subroutine = subroutine
         self._typeArgumentReferences = typeArgumentReferences
         self._typeResultReferences = typeResultReferences
+        self._postProcessor = postProcessor
         
         self._globalsReferences = []
         for reference in globalsReferences:
@@ -45,13 +40,13 @@ class TemplatesNameSpace(object):
             self.result = None
         self.subroutine = SubroutineNameSpace(subroutine, self.args, self.result, callgraph)
         self.dataDir = testDataDir.rstrip('/')
-        self.clearLine = TemplatesNameSpace.CLEAR_LINE
+        self.clearLine = CodePostProcessor.CLEAR_LINE
 
     def mergeBegin(self, identifier):
-        return TemplatesNameSpace.MERGE_BEGIN_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
+        return self._postProcessor.mergeBeginTag(identifier)
 
     def mergeEnd(self, identifier):
-        return TemplatesNameSpace.MERGE_END_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
+        return self._postProcessor.mergeEndTag(identifier)
 
     def commaList(self, *elements):
         stringElements = []
@@ -229,8 +224,8 @@ class TemplatesNameSpace(object):
 
 class CaptureTemplatesNameSpace(TemplatesNameSpace):
 
-    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
-        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph, postProcessor):
+        super(CaptureTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph, postProcessor)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, False)
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._typeResultReferences, self._globalsReferences, False)
         self.__registered = set()
@@ -261,8 +256,8 @@ class CaptureTemplatesNameSpace(TemplatesNameSpace):
         
 class ReplayTemplatesNameSpace(TemplatesNameSpace):
  
-    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph):
-        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph)
+    def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph, postProcessor):
+        super(ReplayTemplatesNameSpace, self).__init__(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph, postProcessor)
         self.globals = GlobalsNameSpace(subroutine, subroutine.getSourceFile(), self._globalsReferences, True)
         self.types = TypesNameSpace(subroutine, self._typeArgumentReferences, self._typeResultReferences, self._globalsReferences, True)
         self.__allocated = set()
@@ -459,20 +454,22 @@ class TypesNameSpace(object):
         
 class ExportNameSpace(object):
     
-    def __init__(self, moduleName, sourceFile, globalsReferences, subroutine, callgraph):
+    def __init__(self, moduleName, sourceFile, globalsReferences, subroutine, callgraph, postProcessor):
         assertType(moduleName, 'moduleName', str)
         assertType(sourceFile, 'sourceFile', SourceFile)
         assertType(globalsReferences, 'globalsReferences', list)
+        
+        self._postProcessor = postProcessor
         
         self.module = ModuleNameSpace(moduleName)
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
         self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
     
     def mergeBegin(self, identifier):
-        return TemplatesNameSpace.MERGE_BEGIN_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
+        return self._postProcessor.mergeBeginTag(identifier)
 
     def mergeEnd(self, identifier):
-        return TemplatesNameSpace.MERGE_END_PREFIX + ' ' + TemplatesNameSpace.MERGE_KEY + ' ' + str(identifier)
+        return self._postProcessor.mergeEndTag(identifier)
         
 class ExportGlobalsNameSpace(object):
     

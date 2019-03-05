@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from Cheetah.Template import Template
 from Cheetah import ImportHooks
 from assertions import assertType, assertTypeAll
@@ -8,10 +9,10 @@ from trackvariable import VariableTracker
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
-import re
 from printout import printLine, printInline
 from templatenamespace import TemplatesNameSpace
 from typefinder import TypeCollection
+from postprocessor import CodePostProcessor
 
 class CodeGenerator(object):
     
@@ -19,12 +20,13 @@ class CodeGenerator(object):
     INDENT_LENGTH = 2
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceFiles, templatePath, graphBuilder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = '', abstractTypes = {}):
+    def __init__(self, sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = '', abstractTypes = {}):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
             raise IOError("Template file not found: " + templatePath)
         assertType(graphBuilder, 'graphBuilder', CallGraphBuilder)
+        assertType(postProcessor, 'postProcessor', CodePostProcessor)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredModulesForGlobals, 'ignoredModulesForGlobals', str)        
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)        
@@ -32,6 +34,7 @@ class CodeGenerator(object):
         self._sourceFiles = sourceFiles
         self.__templatePath = templatePath
         self.__graphBuilder = graphBuilder
+        self._postProcessor = postProcessor
         self.__excludeModules = excludeModules
         self.__ignoredModulesForGlobals = ignoredModulesForGlobals
         self.__ignoredTypes = ignoredTypes
@@ -136,7 +139,7 @@ class CodeGenerator(object):
         rendered = str(template).strip()
         rendered = self._clearLines(rendered)
 #         rendered = self._unifyIfs(rendered)
-        rendered = self._merge(rendered)
+#         rendered = self._merge(rendered)
         rendered = self._indent(rendered)
         rendered = self._breakLines(rendered)
         return rendered
@@ -148,7 +151,7 @@ class CodeGenerator(object):
         lines = []
         for line in text.split("\n"):
             line = line.strip()
-            if not line == TemplatesNameSpace.CLEAR_LINE:
+            if not line == CodePostProcessor.CLEAR_LINE:
                 lines.append(line)
                  
         return "\n".join(lines)
@@ -161,7 +164,7 @@ class CodeGenerator(object):
         begins = []
         ends = []
         for i, line in text.split("\n"):
-            beginMatch = TemplatesNameSpace.MERGE_BEGIN_REGEX.match(line)
+            beginMatch = CodePostProcessor.MERGE_BEGIN_REGEX.match(line)
             if beginMatch is not None:
                 identifier = beginMatch.group('identifier')
                 if begins[-1] and begins[-1][0] == identifier:
@@ -169,7 +172,7 @@ class CodeGenerator(object):
                 if not begins[-1] or begins[-1][0] != identifier:
                     begins.append((identifier, i, line))
             else:
-                endMatch = TemplatesNameSpace.MERGE_END_REGEX.match(line)
+                endMatch = CodePostProcessor.MERGE_END_REGEX.match(line)
                 if endMatch is not None:
                     identifier = endMatch.group('identifier')
         
