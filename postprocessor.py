@@ -19,29 +19,26 @@ class CodePostProcessor(object):
         return '! #### MERGE END ' + self.mergeSession + ' ' + str(key) + ' ###'
     
     def process(self, text):
-        rendered = str(text)
-        rendered = self.__clearAndMerge(rendered)
-        rendered = self.__indent(rendered)
-        rendered = self.__breakLines(rendered)
-        return rendered
-    
-    def __clearAndMerge(self, text):
         if not text:
             return text
         
-        lines = []
-        for line in text.split("\n"):
+        lines = str(text).split("\n")
+        lines = self.__clearAndMerge(lines)
+        lines = self.__indent(lines)
+        lines = self.__breakLines(lines)
+        return "\n".join(lines)
+    
+    def __clearAndMerge(self, lines):
+        rendered = []
+        for line in lines:
             line = line.strip()
             if line == CodePostProcessor.CLEAR_LINE:
                 continue
-            lines.append(line)
+            rendered.append(line)
             
-        return "\n".join(lines)
+        return rendered
     
-    def __indent(self, text):
-        if not text:
-            return text
-        
+    def __indent(self, lines):
         beginWords = ('PROGRAM ', 'MODULE ', 'SUBROUTINE ', 'FUNCTION ', 'INTERFACE ', 'TYPE ', 'DO ', 'SELECT ', 'INTERFACE ')
         beginWordExceptions = ('MODULE PROCEDURE')
         beginWordsBack = (' THEN')
@@ -49,13 +46,12 @@ class CodePostProcessor(object):
         doubleEndWords = ('END SELECT', 'ENDSELECT')
         borderWords = ('CONTAINS', 'ELSE', 'ELSEIF')
         
-        originalLines = text.split("\n")
-        firstLine = originalLines[0]
+        firstLine = lines[0]
         baseIndent = len(firstLine) - len(firstLine.lstrip())
         
-        lines = []
+        rendered = []
         indent = baseIndent
-        for line in text.split("\n"):
+        for line in lines:
             lineUpper = line.upper()
             if lineUpper.startswith(endWords) or lineUpper.startswith(borderWords):
                 indent = max(baseIndent, indent - CodePostProcessor.INDENT_LENGTH)
@@ -63,15 +59,15 @@ class CodePostProcessor(object):
                 indent = max(baseIndent, indent - CodePostProcessor.INDENT_LENGTH)
             if not line.startswith('#'):
                 line = (' ' * indent) + line
-            lines.append(line)
+            rendered.append(line)
             if (lineUpper.startswith(beginWords) or lineUpper.endswith(beginWordsBack) or lineUpper.startswith(borderWords)) and not lineUpper.startswith(beginWordExceptions):
                 indent = indent + CodePostProcessor.INDENT_LENGTH
                 
-        return "\n".join(lines)
+        return rendered
         
-    def __breakLines(self, text):
-        lines = []
-        for line in text.split("\n"):
+    def __breakLines(self, lines):
+        rendered = []
+        for line in lines:
             stringMask = self.__stringMask(line)
             while len(line) > CodePostProcessor.MAX_LINE_LENGTH:
                 i = CodePostProcessor.MAX_LINE_LENGTH - 2
@@ -81,12 +77,12 @@ class CodePostProcessor(object):
                     i -= 1
                     while "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=>".find(line[i]) >= 0:
                         i -= 1
-                lines.append(line[:i + 1].rstrip() + " &")
+                rendered.append(line[:i + 1].rstrip() + " &")
                 indent =  ' ' * (len(line) - len(line.lstrip())) + "&  "
                 line = indent + line[i + 1:]
             else:        
-                lines.append(line)
-        return "\n".join(lines)
+                rendered.append(line)
+        return rendered
     
     def __stringMask(self, line):
         mask = []
