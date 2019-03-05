@@ -180,3 +180,15 @@ class CodePostProcessor(object):
                 mask.append(inString)
                 
         return mask
+    
+class CodeBlock():
+    def __init__(self, begin = None):
+        self.begin = []
+        if begin is not None:
+            self.begin.append(CodeLine(begin))    
+        self.content = []    
+        self.end = []
+        
+class CodeLine():
+    def __init__(self, line):
+        self.line = line
