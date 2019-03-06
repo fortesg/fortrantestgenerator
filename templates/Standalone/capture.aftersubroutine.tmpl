@@ -78,14 +78,10 @@ SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
   #end for
 
   ! OPTIONAL ARGUMENTS
-  #for $arg in $args.optionals
-    #if $arg.usedVariables
-      IF (PRESENT($arg.name)) THEN $mergeBegin('present')
-      #for $var in $arg.usedVariables
-        $ftgWrite($var) $clearLine
-      #end for 
-      END IF $mergeEnd('present')
-    #end if 
+  #for $var in $args.optionals.usedVariables
+    IF (PRESENT($var.container(0))) THEN $mergeBegin('present')
+      $ftgWrite($var) $clearLine
+    END IF $mergeEnd('present')
   #end for
 
   ! GLOBALS
@@ -125,14 +121,10 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   #end for
     
   ! OPTIONAL ARGUMENTS
-  #for $arg in $args.allOut.optionals
-    #if $arg.usedVariables
-      IF (PRESENT($arg.name)) THEN $mergeBegin('present')
-        #for $var in $arg.usedVariables
-          $ftgWrite($var) $clearLine
-        #end for 
-      END IF $mergeEnd('present')
-    #end if 
+  #for $var in $args.allOut.optionals.usedVariables
+    IF (PRESENT($var.container(0))) THEN $mergeBegin('present')
+      $ftgWrite($var) $clearLine
+    END IF $mergeEnd('present')
   #end for
   
   #if $subroutine.isFunction
