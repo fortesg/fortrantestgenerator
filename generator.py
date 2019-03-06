@@ -67,7 +67,7 @@ class CodeGenerator(object):
         printLine('Build Call Graph', indent = 1)
         callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName, self._settings.clearCache)
 
-        if self._settings.measureTime: self.__time(1)
+        if self._settings.measureTime: self.__time(2)
         
         printLine('Find Interfaces and Types', indent = 1)
         useTraversal = UseTraversal(self._sourceFiles, self._settings.excludeModules, self._settings.abstractTypes)
@@ -75,7 +75,7 @@ class CodeGenerator(object):
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
         
-        if self._settings.measureTime: self.__time(1)
+        if self._settings.measureTime: self.__time(2)
 
         printLine('Analyse Source Code', indent = 1)
         argumentTracker = VariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
@@ -101,11 +101,11 @@ class CodeGenerator(object):
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
-        if self._settings.measureTime: self.__time(1)
+        if self._settings.measureTime: self.__time(2)
         
         self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types)
         
-        if self._settings.measureTime: self.__time(1, True, 1)
+        if self._settings.measureTime: self.__time(2, True, 1)
         
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         raise NotImplementedError()
@@ -173,7 +173,10 @@ class CodeGenerator(object):
         now = time.perf_counter()  # @UndefinedVariable
         printLine('*** Duration: ' + secFormat.format(now - self.__lastTime) + ' Seconds ***', indent = indent)
         if printTotal:
-            printLine('****** Total: ' + secFormat.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
+            totalAsterisk = '******'
+            if totalIndent < indent:
+                totalAsterisk += (indent - totalIndent) * 2 * '*'
+            printLine(totalAsterisk + ' Total: ' + secFormat.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
         self.__lastTime = now
         
 class CodeGeneratorSettings(object):
