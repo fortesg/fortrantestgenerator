@@ -18,22 +18,30 @@ class CodeGenerator(object):
     
     DEFAULT_SUFFIX = '.f90'
     
-    def __init__(self, sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignorePrefix = '', abstractTypes = {}, measureTime = False):
+    def __init__(self, sourceFiles, templatePath, graphBuilder, postProcessor, settings):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
             raise IOError("Template file not found: " + templatePath)
         assertType(graphBuilder, 'graphBuilder', CallGraphBuilder)
         assertType(postProcessor, 'postProcessor', CodePostProcessor)
-        assertTypeAll(excludeModules, 'excludeModules', str)
-        assertTypeAll(ignoredModulesForGlobals, 'ignoredModulesForGlobals', str)        
-        assertTypeAll(ignoredTypes, 'ignoredTypes', str)        
-        assertType(measureTime, 'measureTime', bool)        
+        
+        assertType(settings, 'settings', CodeGeneratorSettings)
+        assertTypeAll(settings.excludeModules, 'settings.excludeModules', str)
+        assertTypeAll(settings.ignoredModulesForGlobals, 'settings.ignoredModulesForGlobals', str)        
+        assertTypeAll(settings.ignoredTypes, 'settings.ignoredTypes', str)        
+        assertType(settings.ignorePrefix, 'settings.ignorePrefix', str)        
+        assertType(settings.abstractTypes, 'settings.abstractTypes', dict)        
+        assertTypeAll(settings.abstractTypes, 'settings.abstractTypes', str)        
+        assertType(settings.measureTime, 'settings.measureTime', bool)        
+        assertType(settings.clearCache, 'settings.clearCache', bool)        
         
         self._sourceFiles = sourceFiles
         self.__templatePath = templatePath
         self.__graphBuilder = graphBuilder
         self._postProcessor = postProcessor
+        self._settings = settings
+        
         self.__excludeModules = excludeModules
         self.__ignoredModulesForGlobals = ignoredModulesForGlobals
         self.__ignoredTypes = ignoredTypes
@@ -174,3 +182,15 @@ class CodeGenerator(object):
         if printTotal:
             printLine('****** Total: ' + secFormat.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
         self.__lastTime = now
+        
+class CodeGeneratorSettings(object):
+    
+    def ___init__(self):
+        self.excludeModules = []
+        self.ignoredModulesForGlobals = []
+        self.ignoredTypes   = []
+        self.abstractTypes  = []
+        self.measureTime    = False
+        self.clearCache     = False
+
+        
