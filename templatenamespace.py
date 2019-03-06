@@ -1,7 +1,8 @@
 from assertions import assertType, assertTypeAll
-from source import Subroutine, SourceFile, VariableReference, Variable
+from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName
 from callgraph import CallGraph
 from postprocessor import CodePostProcessor
+import callgraph
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
@@ -32,7 +33,7 @@ class TemplatesNameSpace(object):
                     reference.setLevel0Variable(alias)
             self._globalsReferences.append(reference)
             
-        self.module = ModuleNameSpace(subroutine.getModuleName())
+        self.module = ModuleNameSpace(subroutine.getModuleName(), callgraph)
         self.args = ArgumentList(subroutine.getArguments(), typeArgumentReferences)
         if subroutine.isFunction():
             self.result = FunctionResult(subroutine.getResultVariable(), typeResultReferences)
@@ -346,11 +347,21 @@ class SubroutineNameSpace(object):
 
 
 class ModuleNameSpace(object):
-    def __init__(self, moduleName):
+    def __init__(self, moduleName, callgraph):
         assertType(moduleName, 'moduleName', str)
+        assertType(callgraph, 'callgraph', CallGraph)
 
+        self.__callgraph = callgraph
         self.name = moduleName
 
+    def calledHere(self, subroutineName):
+        if SubroutineFullName.validFullName(subroutineName):
+            subroutineFullName = SubroutineFullName(subroutineName)
+            if subroutineName in self.__callgraph:
+                for caller in self.__callgraph.getCallers(subroutineFullName):
+                    if caller.getModuleName() == self.name:
+                        return True
+        return False
 
 class GlobalsNameSpace(object):
     
@@ -463,7 +474,7 @@ class ExportNameSpace(object):
         
         self._postProcessor = postProcessor
         
-        self.module = ModuleNameSpace(moduleName)
+        self.module = ModuleNameSpace(moduleName, callgraph)
         self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
         self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
     
@@ -897,14 +908,12 @@ class VariableSpecificationBuilder():
         if self.__intent is not None:
             alias.setIntent(self.__intent)
         if self.__allocatable is not None:
-            if self.__allocatable: 
-                if alias.getDimension() > 0 or alias.hasClassType():
+            if self.__allocatable and (alias.getDimension() > 0 or alias.hasClassType()) and not alias.isPointer():
                     alias.setAllocatable(True)
-                alias.setPointer(False)
             else:
                 alias.setAllocatable(False)
         if self.__pointer is not None:
-            if self.__pointer: 
+            if self.__pointer and not alias.isAllocatable(): 
                 alias.setPointer(True)
                 alias.setAllocatable(False)
             else:
