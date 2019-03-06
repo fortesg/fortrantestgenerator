@@ -2,7 +2,6 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName
 from callgraph import CallGraph
 from postprocessor import CodePostProcessor
-import callgraph
 
 # TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
