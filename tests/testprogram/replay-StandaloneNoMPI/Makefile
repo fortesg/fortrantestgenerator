@@ -1,4 +1,4 @@
-FTGROOT = $(HOME)/workspace/fortrantestgenerator
+FTG = $(HOME)/workspace/fortrantestgenerator/FortranTestGenerator.py
 SBROOT = $(HOME)/lib/serialbox2
 FF = gfortran
 
@@ -15,7 +15,7 @@ ftg_testsub_test: ftg_testsub_test.f90 ../src/sub.o ../src/types.o ../src/global
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $^ $(LIBS)
 
 ftg_testsub_test.f90: 
-	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
+	$(FTG) -r -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
 	
 clean:
 	rm -f ftg_testsub_test *.f90

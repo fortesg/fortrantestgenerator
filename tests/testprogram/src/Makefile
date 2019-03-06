@@ -1,4 +1,4 @@
-FTGROOT = $(HOME)/workspace/fortrantestgenerator
+FTG = $(HOME)/workspace/fortrantestgenerator/FortranTestGenerator.py
 SB2ROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 FF = $(HOME)/lib/mpich/bin/mpif90
@@ -41,19 +41,19 @@ sub.o: types.o globals.o
 globals.o: types.o
 
 ftg-Standalone: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
+	$(FTG) -bc -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
 
 ftg-StandaloneNoMPI: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
+	$(FTG) -bc -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
 
 ftg-IconStandalone: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
+	$(FTG) -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
 
 ftg-IconJsbachMock: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_IconJsbachMock.py sub testsub
+	$(FTG) -bc -cf ../config_fortrantestgenerator_test_IconJsbachMock.py sub testsub
 
 ftg-BaseCompare: assembler
-	$(FTGROOT)/FortranTestGenerator.py -bc -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub
+	$(FTG) -bc -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub
 
 assembler: types.s globals.s sub.s maingeneric.s 
 
@@ -72,10 +72,10 @@ clean-capture-generic: clean-ftg-a
 	$(MAKE) -B $(GENERIC_BIN)
 	
 clean-ftg-b:
-	$(FTGROOT)/FortranTestGenerator.py -b -cf ../config_fortrantestgenerator_test_Standalone.py
+	$(FTG) -b -cf ../config_fortrantestgenerator_test_Standalone.py
 	
 clean-ftg-a:
-	$(FTGROOT)/FortranTestGenerator.py -a -cf ../config_fortrantestgenerator_test_Standalone.py
+	$(FTG) -a -cf ../config_fortrantestgenerator_test_Standalone.py
 	
 clean-o:
 	rm -f *.o

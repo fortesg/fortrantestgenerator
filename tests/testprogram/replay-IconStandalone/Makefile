@@ -1,4 +1,4 @@
-FTGROOT = $(HOME)/workspace/fortrantestgenerator
+FTG = $(HOME)/workspace/fortrantestgenerator/FortranTestGenerator.py
 SBROOT = $(HOME)/lib/serialbox2
 ICONBUILDDIR = $(HOME)/workspace/icon/build/x86_64-unknown-linux-gnu
 FF = $(HOME)/lib/mpich/bin/mpif90
@@ -20,7 +20,7 @@ ftg_testsub_test: ftg_testsub_test.f90 ../src/sub.o ../src/types.o ../src/global
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS) $(ICONLIBS)
 
 ftg_testsub_test.f90: 
-	$(FTGROOT)/FortranTestGenerator.py -r -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
+	$(FTG) -r -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
 	
 clean:
 	rm -f ftg_testsub_test *.f90
