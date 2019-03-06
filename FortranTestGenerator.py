@@ -19,6 +19,7 @@ def parseArguments(argParser):
     argParser.add_argument('-e', '--export', action="store_true", help='Generate Export Code')
     argParser.add_argument('-r', '--replay', action="store_true", help='Generate Replay Code')
     argParser.add_argument('-m', '--measure', action="store_true", help='Measure Time')
+    argParser.add_argument('-cc', '--clearCache', action="store_true", help='Create a new call graph instead of using a cached one.');
     argParser.add_argument('-cf', '--configFile', type=str, help='Import configuration from this file.');
     argParser.add_argument('module', nargs='?', default=None, help='Module name');
     argParser.add_argument('subroutine', nargs='?', default=None, help='Subroutine or function name');
@@ -121,7 +122,7 @@ def main():
         generatorSettings.ignorePrefix   = ftgPrefix
         generatorSettings.abstractTypes  = abstractTypes
         generatorSettings.measureTime    = args.measure
-        generatorSettings.clearCache     = False
+        generatorSettings.clearCache     = args.clearCache
         generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, postProcessor, backupFinder, generatorSettings)
         generator.generate(subroutineFullName)
         

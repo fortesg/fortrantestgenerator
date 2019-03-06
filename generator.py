@@ -65,7 +65,7 @@ class CodeGenerator(object):
         if self._settings.measureTime: self.__initTime()
         
         printLine('Build Call Graph', indent = 1)
-        callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
+        callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName, self._settings.clearCache)
 
         if self._settings.measureTime: self.__time(1)
         
