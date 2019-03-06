@@ -25,10 +25,11 @@
   $include('IconJsbachMock/capture.aftersubroutine.jsbmock.tmpl')
 #end def captureAfterSubroutine
 
-#def export
+#def exportBeforeContains
     #super
-    $include('IconJsbachMock/export.jsbmock.tmpl')
-#end def export
+    $include('IconJsbachMock/export.beforecontains.tmpl')
+#end def exportBeforeContains
+
 
 #def replay
   $include('IconJsbachMock/replay.tmpl')
