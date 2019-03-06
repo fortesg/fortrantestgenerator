@@ -247,6 +247,12 @@ I have done it like this:
 
 Please see the note on that above. Unfortunately, ICON contains a lot of such variables, especially in the derived types. Just add `=> NULL()` to all of the declarations if possible.
 
+#### 6. JSBACH
+
+Due to its dynamic data structures JSBACH cannot be analyzed properly by FortranCallGraph. Therefore, I have created a mock interface that captures and replays the output of the original JSBACH interface: https://github.com/fortesg/jsbach-mock.
+The template `IconJsbachMock` makes use of this interface.
+
+
 ## License
 
 [GNU General Public License v3.0](LICENSE)
