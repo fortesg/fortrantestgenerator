@@ -168,9 +168,9 @@ class CodeGenerator(object):
             self.__measureTime
 
     def __time(self, indent = 0, printTotal = False, totalIndent = 0):
-        format = '{:8.4f}'
+        secFormat = '{:8.4f}'
         now = time.perf_counter()  # @UndefinedVariable
-        printLine('*** Duration: ' + format.format(now - self.__lastTime) + ' Seconds ***', indent = indent)
+        printLine('*** Duration: ' + secFormat.format(now - self.__lastTime) + ' Seconds ***', indent = indent)
         if printTotal:
-            printLine('****** Total: ' + format.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
+            printLine('****** Total: ' + secFormat.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
         self.__lastTime = now
