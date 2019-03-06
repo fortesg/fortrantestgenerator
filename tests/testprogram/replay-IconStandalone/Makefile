@@ -20,7 +20,7 @@ ftg_testsub_test: ftg_testsub_test.f90 ../src/sub.o ../src/types.o ../src/global
 	$(FF) -o $@ $(FFLAGS) $(INCLUDE) $(ICONINCLUDE) $^ $(ICONMODULES) $(LIBS) $(ICONLIBS)
 
 ftg_testsub_test.f90: 
-	$(FTG) -r -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
+	$(FTG) -rm -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
 	
 clean:
 	rm -f ftg_testsub_test *.f90

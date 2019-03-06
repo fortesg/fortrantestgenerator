@@ -41,19 +41,19 @@ sub.o: types.o globals.o
 globals.o: types.o
 
 ftg-Standalone: assembler
-	$(FTG) -bc -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
+	$(FTG) -bcm -cf ../config_fortrantestgenerator_test_Standalone.py sub testsub
 
 ftg-StandaloneNoMPI: assembler
-	$(FTG) -bc -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
+	$(FTG) -bcm -cf ../config_fortrantestgenerator_test_StandaloneNoMPI.py sub testsub
 
 ftg-IconStandalone: assembler
-	$(FTG) -bc -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
+	$(FTG) -bcm -cf ../config_fortrantestgenerator_test_IconStandalone.py sub testsub
 
 ftg-IconJsbachMock: assembler
-	$(FTG) -bc -cf ../config_fortrantestgenerator_test_IconJsbachMock.py sub testsub
+	$(FTG) -bcm -cf ../config_fortrantestgenerator_test_IconJsbachMock.py sub testsub
 
 ftg-BaseCompare: assembler
-	$(FTG) -bc -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub
+	$(FTG) -bcm -cf ../config_fortrantestgenerator_test_BaseCompare.py sub testsub
 
 assembler: types.s globals.s sub.s maingeneric.s 
 
