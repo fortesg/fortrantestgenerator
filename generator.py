@@ -9,7 +9,7 @@ from trackvariable import VariableTracker
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
-from printout import printLine, printInline
+from printout import printLine, printInline, printWarning
 from typefinder import TypeCollection
 from postprocessor import CodePostProcessor
 import time
@@ -61,16 +61,12 @@ class CodeGenerator(object):
         if subroutine is None:
             raise LookupError("Subroutine not found: " + str(subroutineFullName))
 
-        self.__time()
-        timeSum = 0
-        printLine('Build Call Graph', indent = 1)
-
-        callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
+        if self.__measureTime: self.__initTime()
         
-        time = self.__time()
-        timeSum += time
-        if self.__measureTime:
-            printLine(time, indent = 1)
+        printLine('Build Call Graph', indent = 1)
+        callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
+
+        if self.__measureTime: self.__time(1)
         
         printLine('Find Interfaces and Types', indent = 1)
         useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules, self.__abstractTypes)
@@ -78,10 +74,7 @@ class CodeGenerator(object):
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
         
-        time = self.__time()
-        timeSum += time
-        if self.__measureTime:
-            printLine(time, indent = 1)
+        if self.__measureTime: self.__time(1)
 
         printLine('Analyse Source Code', indent = 1)
         argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
@@ -107,17 +100,11 @@ class CodeGenerator(object):
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
-        time = self.__time()
-        timeSum += time
-        if self.__measureTime:
-            printLine(time, indent = 1)
+        if self.__measureTime: self.__time(1)
         
         self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types)
         
-        time = self.__time()
-        timeSum += time
-        if self.__measureTime:
-            printLine(time, indent = 1)
+        if self.__measureTime: self.__time(1, True, 1)
         
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         raise NotImplementedError()
@@ -172,8 +159,18 @@ class CodeGenerator(object):
         f.writelines(lines)
         f.close()
 
-    def __time(self):
+    def __initTime(self):
         try:
-            return time.perf_counter()  # @UndefinedVariable
+            self.__startTime = time.perf_counter()  # @UndefinedVariable
+            self.__lastTime = self.__startTime
         except AttributeError:
-            return 0
+            printWarning('Time measurement not support with your Python version (<3.3)')
+            self.__measureTime
+
+    def __time(self, indent = 0, printTotal = False, totalIndent = 0):
+        format = '{:8.4f}'
+        now = time.perf_counter()  # @UndefinedVariable
+        printLine('*** Duration: ' + format.format(now - self.__lastTime) + ' Seconds ***', indent = indent)
+        if printTotal:
+            printLine('****** Total: ' + format.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
+        self.__lastTime = now
