@@ -112,7 +112,7 @@ class CodePostProcessor(object):
                     i -= 1
                 if line[i] != ' ':
                     i -= 1
-                    while "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=>".find(line[i]) >= 0:
+                    while "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=>/".find(line[i]) >= 0:
                         i -= 1
                 rendered.append(line[:i + 1].rstrip() + " &")
                 indent =  ' ' * (len(line) - len(line.lstrip())) + "&  "
