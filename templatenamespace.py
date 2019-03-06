@@ -63,6 +63,7 @@ class TemplatesNameSpace(object):
         return ', '.join(stringElements)
 
     def lbound(self, variable, dim, *placeholder):
+        '''DEPRECATED: work with fillIndices instead'''
         assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(placeholder, 'placeholder', str)
@@ -73,6 +74,7 @@ class TemplatesNameSpace(object):
         return ''
     
     def ubound(self, variable, dim, *placeholder):
+        '''DEPRECATED: work with fillIndices instead'''
         assertType(variable, 'variable', UsedVariable, True)
         assertType(dim, 'dim', int)
         assertTypeAll(placeholder, 'placeholder', str)
