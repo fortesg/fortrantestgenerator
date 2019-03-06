@@ -15,7 +15,6 @@ class CaptureCodeGenerator(CodeGenerator):
     AFTER_LAST_SPECIFICATION_TEMPLATE_PART = 'captureAfterLastSpecification'
     BEFORE_END_TEMPLATE_PART = 'captureBeforeEnd'
     AFTER_LAST_LINE_TEMPLATE_PART = 'captureAfterSubroutine'
-    EXPORT_TEMPLATE_PART = 'export'
     
     def __init__(self, sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, postProcessor, backupFinder, settings):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
@@ -61,11 +60,11 @@ class CaptureCodeGenerator(CodeGenerator):
             lastLine = subroutine.getLastLineNumber()
         self._processTemplate(sourceFilePath, lastLine - 1, self.BEFORE_END_TEMPLATE_PART, templateNameSpace)
         lastSpecificationLineNumber = subroutine.getLastSpecificationLineNumber()
-        lastSpecificationLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
+        lastSpecificationLineNumber = self._shiftLineNumberByPreprocesserorEndifs(subroutine, lastSpecificationLineNumber)
         self._processTemplate(sourceFilePath, lastSpecificationLineNumber, self.AFTER_LAST_SPECIFICATION_TEMPLATE_PART, templateNameSpace)
         self._processTemplate(sourceFilePath, subroutine.getModule().getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, templateNameSpace)
         lastUseLineNumber = subroutine.getModule().getLastUseLineNumber()
-        lastUseLineNumber = self.__shiftLineNumberByPreprocesserorEndifs(subroutine.getModule(), lastUseLineNumber)
+        lastUseLineNumber = self._shiftLineNumberByPreprocesserorEndifs(subroutine.getModule(), lastUseLineNumber)
         self._processTemplate(sourceFilePath, lastUseLineNumber, self.AFTER_USE_TEMPLATE_PART, templateNameSpace)
 
     def _findSubroutine(self, subroutineFullName):
@@ -86,22 +85,3 @@ class CaptureCodeGenerator(CodeGenerator):
                         modules.add(module)
         
         return modules
-    
-    def __shiftLineNumberByPreprocesserorEndifs(self, subroutine, fromLineNumber):
-        found = False
-        toLineNumber = -1
-        for i, _, j in subroutine.getStatements():
-            if found:
-                toLineNumber = i
-                break
-            elif j >= fromLineNumber:
-                found = True
-                toLineNumber = j
-        
-        shiftedLineNumber = fromLineNumber
-        for lineNumber in range(fromLineNumber, toLineNumber):
-            line = subroutine.getLine(lineNumber)
-            if line.strip() == '#endif':
-                shiftedLineNumber = lineNumber
-                
-        return shiftedLineNumber

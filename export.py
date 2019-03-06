@@ -10,7 +10,8 @@ from typefinder import TypeCollection
 
 class ExportCodeGenerator(CodeGenerator):
     
-    EXPORT_TEMPLATE_PART = 'export'
+    AFTER_USE_TEMPLATE_PART = 'exportAfterUse'
+    BEFORE_CONTAINS_TEMPLATE_PART = 'exportBeforeContains'
     
     def __init__(self, sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, settings):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
@@ -48,7 +49,10 @@ class ExportCodeGenerator(CodeGenerator):
                 subroutine = self._findSubroutine(subroutineFullName)
                 self._setTypesToSubroutineVariables(subroutine, types)
                 exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph, self._postProcessor)
-                result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.EXPORT_TEMPLATE_PART, exportTemplateNameSpace)
+                result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, exportTemplateNameSpace)
+                lastUseLineNumber = refModule.getLastUseLineNumber()
+                lastUseLineNumber = self._shiftLineNumberByPreprocesserorEndifs(refModule, lastUseLineNumber)
+                result = self._processTemplate(usedSourceFilePath, lastUseLineNumber, self.AFTER_USE_TEMPLATE_PART, exportTemplateNameSpace) or result
                 if backup and not result:
                     self.__backupFinder.remove(usedSourceFilePath)
 
