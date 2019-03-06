@@ -234,6 +234,13 @@ I have done it like this:
 
 [My FortranTestGenerator configuration file for ICON](https://github.com/fortesg/config-examples/blob/master/icon/config_fortrantestgenerator.py)
 
+My FCG configuration chooses the `*_orig` subtypes of `t_comm_pattern` and `t_comm_pattern_collection` as the one and only implementations. If you are working with yaxt, please change the configuration accordingly:
+
+```python
+ABSTRACT_TYPE_IMPLEMENTATIONS = {'t_comm_pattern':'t_comm_pattern_orig',
+                                 't_comm_pattern_collection':'t_comm_pattern_collection_orig'}
+```
+
 #### 4. Compiling the tests
   
 * When using the `icon_standalone` template, just put the generated test files into the `src/tests` directory:
