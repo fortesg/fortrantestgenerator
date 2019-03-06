@@ -11,7 +11,7 @@ from typefinder import TypeCollection
 
 class CombinedCodeGenerator(CodeGenerator):
     
-    def __init__(self, capture, replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}, measureTime = False):
+    def __init__(self, capture, replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, backupFinder, settings):
         assertType(capture, 'capture', bool)
         assertType(replay, 'replay', bool)
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
@@ -24,15 +24,15 @@ class CombinedCodeGenerator(CodeGenerator):
             raise IOError("Not a directory: " + testDataDir)
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
-        super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes, measureTime)
+        super(CombinedCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, settings)
         self.__modifySourceFiles = modifySourceFiles
-        self.__export = ExportCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+        self.__export = ExportCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, settings)
         self.__capture = None
         self.__replay = None        
         if capture:
-            self.__capture = CaptureCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, postProcessor, backupFinder, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+            self.__capture = CaptureCodeGenerator(self._sourceFiles, modifySourceFiles, templatePath, testDataDir, graphBuilder, postProcessor, backupFinder, settings)
         if replay:
-            self.__replay = ReplayCodeGenerator(self._sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+            self.__replay = ReplayCodeGenerator(self._sourceFiles, templatePath, testSourceDir, testDataDir, graphBuilder, postProcessor, settings)
     
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)

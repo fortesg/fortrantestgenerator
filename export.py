@@ -12,14 +12,14 @@ class ExportCodeGenerator(CodeGenerator):
     
     EXPORT_TEMPLATE_PART = 'export'
     
-    def __init__(self, sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, excludeModules = [], ignoredModulesForGlobals = [], ignoredTypes = [], ignoreRegex = '', abstractTypes = {}):
+    def __init__(self, sourceFiles, modifySourceFiles, templatePath, graphBuilder, postProcessor, backupFinder, settings):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertType(templatePath, 'templatePath', str)
         if not os.path.isfile(templatePath):
             raise IOError("Template file not found: " + templatePath)
         assertType(backupFinder, 'backupFinder', BackupFileFinder)
 
-        super(ExportCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, excludeModules, ignoredModulesForGlobals, ignoredTypes, ignoreRegex, abstractTypes)
+        super(ExportCodeGenerator, self).__init__(sourceFiles, templatePath, graphBuilder, postProcessor, settings)
         self.__modifySourceFiles = modifySourceFiles     
         self.__backupFinder = backupFinder 
 

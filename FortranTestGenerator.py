@@ -11,7 +11,6 @@ import argparse;
 from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
     CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE, CFG_FCG_DIR
 from printout import printLine
-from postprocessor import CodePostProcessor
 
 def parseArguments(argParser):
     argParser.add_argument('-a', '--restoreCapture', action="store_true", help='Restore only Capture Backup Files')
@@ -48,7 +47,9 @@ def main():
     CFG_SPECIAL_MODULE_FILES, CFG_CACHE_DIR, CFG_SOURCE_DIRS, CFG_SOURCE_FILES_PREPROCESSED, CFG_ABSTRACT_TYPES
     from source import SubroutineFullName, SourceFiles
     from backup import BackupFileFinder
-    from combined import CombinedCodeGenerator
+    from postprocessor import CodePostProcessor
+    from generator import CodeGeneratorSettings
+    from combined import CombinedCodeGenerator 
     from assembler import GNUx86AssemblerCallGraphBuilder
     from treecache import CachedAssemblerCallGraphBuilder
     
@@ -113,7 +114,15 @@ def main():
     if args.export or args.capture or args.replay:
         printLine('Generate Code')
         postProcessor = CodePostProcessor()
-        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, postProcessor, backupFinder, excludeModules, ignoreGlobalsFromModuls, ignoreDerivedTypes, ftgPrefix, abstractTypes, args.measure)
+        generatorSettings = CodeGeneratorSettings()
+        generatorSettings.excludeModules = excludeModules
+        generatorSettings.ignoredModulesForGlobals = ignoreGlobalsFromModuls
+        generatorSettings.ignoredTypes   = ignoreDerivedTypes
+        generatorSettings.ignorePrefix   = ftgPrefix
+        generatorSettings.abstractTypes  = abstractTypes
+        generatorSettings.measureTime    = args.measure
+        generatorSettings.clearCache     = False
+        generator = CombinedCodeGenerator(args.capture, args.replay, sourceFiles, modifySourceFiles, templatePath, testSourceDir, testDataBaseDir, graphBuilder, postProcessor, backupFinder, generatorSettings)
         generator.generate(subroutineFullName)
         
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import time
 from Cheetah.Template import Template
 from Cheetah import ImportHooks
 from assertions import assertType, assertTypeAll
@@ -12,7 +13,6 @@ from supertypes import CallGraphBuilder
 from printout import printLine, printInline, printWarning
 from typefinder import TypeCollection
 from postprocessor import CodePostProcessor
-import time
 
 class CodeGenerator(object):
     
@@ -42,13 +42,6 @@ class CodeGenerator(object):
         self._postProcessor = postProcessor
         self._settings = settings
         
-        self.__excludeModules = excludeModules
-        self.__ignoredModulesForGlobals = ignoredModulesForGlobals
-        self.__ignoredTypes = ignoredTypes
-        self.__ignorePrefix = ignorePrefix
-        self.__abstractTypes = abstractTypes
-        self.__measureTime = measureTime
-        
         templateDir = os.path.dirname(os.path.realpath(self.__templatePath))
         templateDirParent = os.path.abspath(os.path.join(templateDir, os.pardir))
         for name in os.listdir(templateDirParent):
@@ -60,8 +53,8 @@ class CodeGenerator(object):
     def generate(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
 
-        if self.__ignorePrefix != '':
-            ignoreRegex = re.compile('^' + self.__ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
+        if self._settings.ignorePrefix != '':
+            ignoreRegex = re.compile('^' + self._settings.ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
         else:
             ignoreRegex = None
             
@@ -69,23 +62,23 @@ class CodeGenerator(object):
         if subroutine is None:
             raise LookupError("Subroutine not found: " + str(subroutineFullName))
 
-        if self.__measureTime: self.__initTime()
+        if self._settings.measureTime: self.__initTime()
         
         printLine('Build Call Graph', indent = 1)
         callgraph = self.__graphBuilder.buildCallGraph(subroutineFullName)
 
-        if self.__measureTime: self.__time(1)
+        if self._settings.measureTime: self.__time(1)
         
         printLine('Find Interfaces and Types', indent = 1)
-        useTraversal = UseTraversal(self._sourceFiles, self.__excludeModules, self.__abstractTypes)
+        useTraversal = UseTraversal(self._sourceFiles, self._settings.excludeModules, self._settings.abstractTypes)
         useTraversal.parseModules(callgraph.getRoot())
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()
         
-        if self.__measureTime: self.__time(1)
+        if self._settings.measureTime: self.__time(1)
 
         printLine('Analyse Source Code', indent = 1)
-        argumentTracker = VariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
+        argumentTracker = VariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
         argumentTracker.setIgnoreRegex(ignoreRegex)
         
         printLine('Find References to Type Argument Members', indent = 2)
@@ -99,7 +92,7 @@ class CodeGenerator(object):
             typeResultReferences = []
         
         printLine('Find References to Global Variables', indent = 2)
-        globalsTracker = GlobalVariableTracker(self._sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
+        globalsTracker = GlobalVariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoredModulesForGlobals, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callgraph)
         
@@ -108,11 +101,11 @@ class CodeGenerator(object):
         if not os.path.isfile(sourceFile.getPath()):
             raise IOError("File not found: " + sourceFilePath);
         
-        if self.__measureTime: self.__time(1)
+        if self._settings.measureTime: self.__time(1)
         
         self.addCode(subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types)
         
-        if self.__measureTime: self.__time(1, True, 1)
+        if self._settings.measureTime: self.__time(1, True, 1)
         
     def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         raise NotImplementedError()
@@ -173,7 +166,7 @@ class CodeGenerator(object):
             self.__lastTime = self.__startTime
         except AttributeError:
             printWarning('Time measurement not support with your Python version (<3.3)')
-            self.__measureTime
+            self._settings.measureTime = False
 
     def __time(self, indent = 0, printTotal = False, totalIndent = 0):
         secFormat = '{:8.4f}'
@@ -185,11 +178,12 @@ class CodeGenerator(object):
         
 class CodeGeneratorSettings(object):
     
-    def ___init__(self):
+    def __init__(self):
         self.excludeModules = []
         self.ignoredModulesForGlobals = []
         self.ignoredTypes   = []
-        self.abstractTypes  = []
+        self.abstractTypes  = {}
+        self.ignorePrefix = ''
         self.measureTime    = False
         self.clearCache     = False
 
