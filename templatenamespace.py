@@ -908,12 +908,13 @@ class VariableSpecificationBuilder():
         if self.__intent is not None:
             alias.setIntent(self.__intent)
         if self.__allocatable is not None:
-            if self.__allocatable and (alias.getDimension() > 0 or alias.hasClassType()) and not alias.isPointer():
+            if self.__allocatable:
+                if (alias.getDimension() > 0 or alias.hasClassType()) and not alias.isPointer():
                     alias.setAllocatable(True)
             else:
                 alias.setAllocatable(False)
         if self.__pointer is not None:
-            if self.__pointer and not alias.isAllocatable(): 
+            if self.__pointer:
                 alias.setPointer(True)
                 alias.setAllocatable(False)
             else:
