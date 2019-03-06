@@ -34,7 +34,7 @@ class ExportCodeGenerator(CodeGenerator):
         
         printLine('Add Code to Used Modules', indent = 1)
         self.__backupFinder.setBackupSuffixPrefix(self.__backupFinder.EXPORT_SUFFIX_PREFIX)
-        refModules = list(self.__extractModulesFromVariableReferences(globalsReferences))
+        refModules = list(self.__getModulesFromCallgraph(callgraph).union(self.__extractModulesFromVariableReferences(globalsReferences)))
         refModules.sort(reverse = True)
         for refModule in refModules:
             refModuleName = refModule.getName() 
@@ -72,5 +72,14 @@ class ExportCodeGenerator(CodeGenerator):
                         module = self.__modifySourceFiles.findModule(module.getName())
                     if module is not None:
                         modules.add(module)
+        
+        return modules
+    
+    def __getModulesFromCallgraph(self, callgraph):
+        modules = set()
+        for moduleName in callgraph.getAllModuleNames():
+            module = self.__modifySourceFiles.findModule(moduleName)
+            if module is not None:
+                modules.add(module)
         
         return modules
