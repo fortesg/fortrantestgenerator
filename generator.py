@@ -122,11 +122,30 @@ class CodeGenerator(object):
         for variable in subroutine.getVariables():
             if variable.hasDerivedType() and not variable.isTypeAvailable() and variable.getDerivedTypeName() in types:
                 variable.setType(types[variable.getDerivedTypeName()])
-    
+                
     def _findModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
         
-        return self._sourceFiles.findModule(moduleName);
+        return self._sourceFiles.findModule(moduleName)
+    
+    def _shiftLineNumberByPreprocesserorEndifs(self, subroutine, fromLineNumber):
+        found = False
+        toLineNumber = -1
+        for i, _, j in subroutine.getStatements():
+            if found:
+                toLineNumber = i
+                break
+            elif j >= fromLineNumber:
+                found = True
+                toLineNumber = j
+        
+        shiftedLineNumber = fromLineNumber
+        for lineNumber in range(fromLineNumber, toLineNumber):
+            line = subroutine.getLine(lineNumber)
+            if line.strip() == '#endif':
+                shiftedLineNumber = lineNumber
+                
+        return shiftedLineNumber
 
     def _processTemplate(self, sourceFilePath, lineNumber, part, templateNameSpace):
         printInline('Process Template ' + os.path.basename(self.__templatePath) + ' [' + part + ']' + ' on file ' + sourceFilePath, indent = 2)

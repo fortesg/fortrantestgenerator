@@ -17,6 +17,13 @@
 #def export
 #end def export
 ##
+#def exportAfterUse
+#end def exportAfterUse
+##
+#def exportBeforeContains
+$export
+#end def exportBeforeContains
+##
 #def replay
 #end def replay
 ##
@@ -36,8 +43,10 @@
   $captureBeforeEnd
 #elif $part == 'captureAfterSubroutine' 
   $captureAfterSubroutine
-#elif $part == 'export' 
-  $export
+#elif $part == 'exportAfterUse' 
+  $exportAfterUse
+#elif $part == 'exportBeforeContains' 
+  $exportBeforeContains
 #elif $part == 'replay' 
   $replay
 #elif not $part

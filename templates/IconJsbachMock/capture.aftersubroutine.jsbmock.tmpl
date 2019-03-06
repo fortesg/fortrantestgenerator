@@ -4,7 +4,6 @@ $mergeBegin('ftg')
 SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture()
 
   USE mo_mpi,  ONLY: get_my_mpi_all_id
-  USE mo_jsb_interface_mock, ONLY: jsbmock_start_capture
 
   CHARACTER(len=1024) :: basename, mkdirerr
 
@@ -26,7 +25,6 @@ END SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture
 SUBROUTINE ftg_${subroutine.name}_stop_jsbach_capture()
 
   USE mo_mpi,  ONLY: get_my_mpi_all_id
-  USE mo_jsb_interface_mock, ONLY: jsbmock_stop
 
   WRITE (0,'(A,I0.2,A)') 'FTG STOP JSBACH CAPTURE ${subroutine.name} (Rank #', get_my_mpi_all_id(), ')'
   CALL jsbmock_stop()

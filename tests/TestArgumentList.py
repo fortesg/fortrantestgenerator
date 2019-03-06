@@ -129,7 +129,7 @@ INTEGER :: arg4
         expSpec = '''
 INTEGER, ALLOCATABLE, INTENT(inout) :: arg0
 INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: arg1
-INTEGER, INTENT(in) :: arg2
+INTEGER, POINTER, INTENT(in) :: arg2
 TYPE(test), INTENT(inout), OPTIONAL :: arg3
 INTEGER, INTENT(out), OPTIONAL :: arg4
 '''.strip()
