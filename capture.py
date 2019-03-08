@@ -46,11 +46,7 @@ class CaptureCodeGenerator(CodeGenerator):
         originalSourceFile = subroutine.getSourceFile()
         sourceFilePath = originalSourceFile.getPath()
         self._setTypesToSubroutineVariables(subroutine, types)
-        
-        for variable in subroutine.getVariables():
-            if variable.hasDerivedType() and not variable.isTypeAvailable() and variable.getDerivedTypeName() in types:
-                variable.setType(types[variable.getDerivedTypeName()])
-        
+
         self.__backupFinder.create(sourceFilePath)
         templateNameSpace = CaptureTemplatesNameSpace(subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, self.__testDataDir, callgraph, self._postProcessor)
         # Reihenfolge wichtig: von unten nach oben!!!

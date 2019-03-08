@@ -120,8 +120,12 @@ class CodeGenerator(object):
         assertType(types, 'types', TypeCollection)
         
         for variable in subroutine.getVariables():
-            if variable.hasDerivedType() and not variable.isTypeAvailable() and variable.getDerivedTypeName() in types:
-                variable.setType(types[variable.getDerivedTypeName()])
+            if variable.hasDerivedType() and not variable.isTypeAvailable():
+                if variable.getDerivedTypeName() in types and types[variable.getDerivedTypeName()] is not None:
+                    variable.setType(types[variable.getDerivedTypeName()])
+                else:
+                    printWarning("Type " + variable.getDerivedTypeName() + " of variable " + variable.getName() + " not found.", location = "CodeGenerator")
+                    
                 
     def _findModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
