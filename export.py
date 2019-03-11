@@ -4,7 +4,7 @@ from assertions import assertType, assertTypeAll
 from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
 from templatenamespace import ExportNameSpace
 from backup import BackupFileFinder
-from printout import printLine, printWarning
+from printout import printLine, printWarning, printDebug
 from callgraph import CallGraph
 from typefinder import TypeCollection
 
@@ -38,23 +38,22 @@ class ExportCodeGenerator(CodeGenerator):
         refModules.sort(reverse = True)
         for refModule in refModules:
             refModuleName = refModule.getName() 
-            if not refModule.isPublic():
-                usedSourceFile = refModule.getSourceFile()
-                usedSourceFilePath = usedSourceFile.getPath()
-                if usedSourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
-                    usedSourceFilePath = usedSourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
-                    usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
-                self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
-                backup = self.__backupFinder.create(usedSourceFilePath)
-                subroutine = self._findSubroutine(subroutineFullName)
-                self._setTypesToSubroutineVariables(subroutine, types)
-                exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph, self._postProcessor)
-                result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, exportTemplateNameSpace)
-                lastUseLineNumber = refModule.getLastUseLineNumber()
-                lastUseLineNumber = self._shiftLineNumberByPreprocesserorEndifs(refModule, lastUseLineNumber)
-                result = self._processTemplate(usedSourceFilePath, lastUseLineNumber, self.AFTER_USE_TEMPLATE_PART, exportTemplateNameSpace) or result
-                if backup and not result:
-                    self.__backupFinder.remove(usedSourceFilePath)
+            usedSourceFile = refModule.getSourceFile()
+            usedSourceFilePath = usedSourceFile.getPath()
+            if usedSourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
+                usedSourceFilePath = usedSourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
+                usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
+            self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
+            backup = self.__backupFinder.create(usedSourceFilePath)
+            subroutine = self._findSubroutine(subroutineFullName)
+            self._setTypesToSubroutineVariables(subroutine, types)
+            exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph, self._postProcessor)
+            result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, exportTemplateNameSpace)
+            lastUseLineNumber = refModule.getLastUseLineNumber()
+            lastUseLineNumber = self._shiftLineNumberByPreprocesserorEndifs(refModule, lastUseLineNumber)
+            result = self._processTemplate(usedSourceFilePath, lastUseLineNumber, self.AFTER_USE_TEMPLATE_PART, exportTemplateNameSpace) or result
+            if backup and not result:
+                self.__backupFinder.remove(usedSourceFilePath)
 
     def _findSubroutine(self, subroutineFullName):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
