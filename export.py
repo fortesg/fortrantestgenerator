@@ -4,7 +4,7 @@ from assertions import assertType, assertTypeAll
 from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
 from templatenamespace import ExportNameSpace
 from backup import BackupFileFinder
-from printout import printLine
+from printout import printLine, printWarning
 from callgraph import CallGraph
 from typefinder import TypeCollection
 
@@ -81,5 +81,7 @@ class ExportCodeGenerator(CodeGenerator):
             module = self.__modifySourceFiles.findModule(moduleName)
             if module is not None:
                 modules.add(module)
+            else:
+                printWarning('Module not found: ' + moduleName)
         
         return modules
