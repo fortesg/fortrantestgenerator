@@ -379,6 +379,7 @@ class GlobalsNameSpace(object):
             variables.add(variable)
             if variable.hasDerivedType() and variable.isTypeAvailable():
                 types.add(variable.getType())
+        variables = sorted(variables)
         
         testModule = subroutine.getName().getModuleName()
         modules = dict()    
