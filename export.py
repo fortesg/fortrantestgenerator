@@ -81,7 +81,7 @@ class ExportCodeGenerator(CodeGenerator):
             module = self.__modifySourceFiles.findModule(moduleName)
             if module is not None:
                 modules.add(module)
-            else:
+            elif moduleName not in self._settings.excludeModules:
                 printWarning('Module not found: ' + moduleName)
         
         return modules
