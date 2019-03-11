@@ -1,5 +1,9 @@
 #extends FTGTemplate
 
+#def captureAfterUse
+CAPTURE AFTER USE
+#end def captureAfterUse
+
 #def captureBeforeContains
 CAPTURE BEFORE CONTAINS
 #end def captureBeforeContains
@@ -16,9 +20,13 @@ CAPTURE BEFORE END
 CAPTURE AFTER SUBROUTINE
 #end def captureAfterSubroutine
 
-#def export
-EXPORT
-#end def export
+#def exportAfterUse
+EXPORT AFTER USE
+#end def exportAfterUse
+
+#def exportBeforeContains
+EXPORT BEFORE CONTAINS
+#end def exportBeforeContains
 
 #def replay
 REPLAY

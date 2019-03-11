@@ -34,6 +34,8 @@ class TestTemplate(unittest.TestCase):
 
     def testTestTemplate(self):
         template = Template(file=TEST_DIR + '/TestTemplate.tmpl')
+        template.part = 'captureAfterUse'
+        self.assertEqual('CAPTURE AFTER USE', str(template).strip())
         template.part = 'captureBeforeContains'
         self.assertEqual('CAPTURE BEFORE CONTAINS', str(template).strip())
         template.part = 'captureAfterLastSpecification'
@@ -42,8 +44,10 @@ class TestTemplate(unittest.TestCase):
         self.assertEqual('CAPTURE BEFORE END', str(template).strip())
         template.part = 'captureAfterSubroutine'
         self.assertEqual('CAPTURE AFTER SUBROUTINE', str(template).strip())
-        template.part = 'export'
-        self.assertEqual('EXPORT', str(template).strip())
+        template.part = 'exportAfterUse'
+        self.assertEqual('EXPORT AFTER USE', str(template).strip())
+        template.part = 'exportBeforeContains'
+        self.assertEqual('EXPORT BEFORE CONTAINS', str(template).strip())
         template.part = 'replay'
         self.assertEqual('REPLAY', str(template).strip())
         
@@ -90,7 +94,7 @@ class TestTemplate(unittest.TestCase):
         self.assertTrue(str(template).strip())
         template.part = 'captureBeforeEnd'
         self.assertTrue(str(template).strip())
-        template.part = 'export'
+        template.part = 'exportBeforeContains'
         self.assertTrue(str(template).strip())
         
 if __name__ == "__main__":
