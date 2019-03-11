@@ -121,8 +121,9 @@ class CodeGenerator(object):
         
         for variable in subroutine.getVariables():
             if variable.hasDerivedType() and not variable.isTypeAvailable():
-                if variable.getDerivedTypeName() in types and types[variable.getDerivedTypeName()] is not None:
-                    variable.setType(types[variable.getDerivedTypeName()])
+                typE = types.getType(variable.getDerivedTypeName(), subroutine.getModule())
+                if typE is not None:
+                    variable.setType(typE)
                 else:
                     printWarning("Type " + variable.getDerivedTypeName() + " of variable " + variable.getName() + " not found.", location = "CodeGenerator")
                     
