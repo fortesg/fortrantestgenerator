@@ -88,6 +88,9 @@ SUBROUTINE ftg_${subroutine.name}_capture_data($commaList('stage', $args, $resul
 
   $resetRegistrations
   IF (stage == 'input') THEN
+    ! MTIME CALENDAR TYPE --> Remove this line if mtime is not used
+    CALL ftg_write("ftg_mtime_calendar", calendarType())
+  
     ! REQUIRED IN ARGUMENTS
     #for $var in $args.intentIn.requireds.usedVariables
       $ftgWrite($var) $clearLine
