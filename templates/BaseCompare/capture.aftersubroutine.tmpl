@@ -24,68 +24,58 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage)
 
   END SUBROUTINE ftg_${subroutine.name}_init_serializer
 
-  SUBROUTINE ftg_${subroutine.name}_close_serializer()
+  SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
 
-   CALL ftg_destroy_savepoint()
-   CALL ftg_destroy_serializer()
+    CHARACTER(*), INTENT(IN) :: stage
+    INTEGER(kind=4) error
+
+    CALL ftg_destroy_savepoint()
+    CALL ftg_destroy_serializer()
+    
+    IF (stage == 'output') THEN
+      CALL MPI_BARRIER (MPI_COMM_WORLD, error)
+      STOP 'FTG STOP'
+    END IF
 
   END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
-SUBROUTINE ftg_${subroutine.name}_capture_input($commaList($args))
+SUBROUTINE ftg_${subroutine.name}_capture_data($commaList('stage', $args, $result))
 
   $globals.imports
   $types.imports
 
-  $args.specs(intent = 'in')
-
-  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4
-  CHARACTER(len=256) :: ftg_name
-
-  CALL ftg_${subroutine.name}_init_serializer('input')
-
-  ! REQUIRED ARGUMENTS
-  #for $var in $args.requireds.usedVariables
-    $ftgWrite($var)
-  #end for
-
-  ! OPTIONAL ARGUMENTS
-  #for $var in $args.optionals.usedVariables
-    IF (PRESENT($var.container(0))) THEN $mergeBegin('present')
-      $ftgWrite($var) $clearLine
-    END IF $mergeEnd('present')
-  #end for
-
-  ! GLOBALS
-  #for $var in $globals.usedVariables
-    $ftgWrite($var)
-  #end for
-
-  CALL ftg_${subroutine.name}_close_serializer()
-
-END SUBROUTINE ftg_${subroutine.name}_capture_input
-
-SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $result))
-
-  $globals.imports
-  $types.imports
-
-  $args.allOut.specs(intent = 'in', allocatable = False)
+  CHARACTER(*), INTENT(IN) :: stage
+  $args.specs(intent = 'in', allocatable = False)
   #if $subroutine.isFunction:
-    $result.spec(intent = 'in', allocatable = False)
+    $result.spec(intent = 'in', allocatable = False, optional = True)
   #end if
 
-  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, error
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, ftg_d5, ftg_d6
   CHARACTER(len=256) :: ftg_name
 
-  CALL ftg_${subroutine.name}_init_serializer('output')
+  CALL ftg_${subroutine.name}_init_serializer(stage)
 
   $resetRegistrations
-  ! REQUIRED ARGUMENTS
+  IF (stage == 'input') THEN
+    ! REQUIRED IN ARGUMENTS
+    #for $var in $args.intentIn.requireds.usedVariables
+      $ftgWrite($var) $clearLine
+    #end for
+  
+    ! OPTIONAL IN ARGUMENTS
+    #for $var in $args.intentIn.optionals.usedVariables
+      IF (PRESENT($var.container(0))) THEN $mergeBegin('present')
+        $ftgWrite($var) $clearLine
+      END IF $mergeEnd('present')
+    #end for
+  END IF
+
+  ! REQUIRED OUT + INOUT ARGUMENTS
   #for $var in $args.allOut.requireds.usedVariables
-    $ftgWrite($var)
+    $ftgWrite($var) $clearLine
   #end for
-    
-  ! OPTIONAL ARGUMENTS
+
+  ! OPTIONAL OUT + INOUT ARGUMENTS
   #for $var in $args.allOut.optionals.usedVariables
     IF (PRESENT($var.container(0))) THEN $mergeBegin('present')
       $ftgWrite($var) $clearLine
@@ -93,22 +83,21 @@ SUBROUTINE ftg_${subroutine.name}_capture_output($commaList($args.allOut, $resul
   #end for
   
   #if $subroutine.isFunction
-    ! RESULT
-    #for $var in $result.usedVariables
-      $ftgWrite($var)
-    #end for
+    IF (stage == 'output' .AND. PRESENT($result)) THEN
+      ! FUNCTION RESULT
+      #for $var in $result.usedVariables
+        $ftgWrite($var) $clearLine
+      #end for
+    END IF
   #end if
   
   ! GLOBALS
   #for $var in $globals.usedVariables
-    $ftgWrite($var)
+    $ftgWrite($var) $clearLine 
   #end for
-  
-  CALL ftg_${subroutine.name}_close_serializer()
-  
-  CALL MPI_BARRIER (MPI_COMM_WORLD, error)
-  STOP 'FTG STOP'
 
-END SUBROUTINE ftg_${subroutine.name}_capture_output
+  CALL ftg_${subroutine.name}_close_serializer(stage)
+
+END SUBROUTINE ftg_${subroutine.name}_capture_data
   
 $epilogue
