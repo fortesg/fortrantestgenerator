@@ -53,7 +53,7 @@
       #set $cd = 0
       #for $ld in $loopDims
         #set $cd += 1
-        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
+        DO ftg_d$ld = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
         #silent $closeStatements.append('END DO ' + $mergeEnd('do' + str($level)))
       #end for        
     #end if      
