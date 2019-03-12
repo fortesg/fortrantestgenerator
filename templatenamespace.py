@@ -372,13 +372,10 @@ class GlobalsNameSpace(object):
 
         self.usedVariables = []
         variables = set()
-        types = set()
         for ref in globalsReferences:
             self.usedVariables.append(UsedVariable(ref))
             variable = ref.getLevel0Variable()
             variables.add(variable)
-            if variable.hasDerivedType() and variable.isTypeAvailable():
-                types.add(variable.getType())
         variables = sorted(variables)
         
         testModule = subroutine.getName().getModuleName()
@@ -392,12 +389,6 @@ class GlobalsNameSpace(object):
                 if varName != variable.getOriginalName():
                     varName += ' => ' + variable.getOriginalName()
                 modules[moduleName].append(varName)
-        for typE in types:
-            moduleName = typE.getDeclaredInName()
-            if isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
-                if moduleName not in modules:
-                    modules[moduleName] = []
-                modules[moduleName].append(typE.getName())
          
         self.imports = []
         for module, elements in sorted(modules.items()):
@@ -416,34 +407,30 @@ class TypesNameSpace(object):
         assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         assertType(includeTestModule, 'includeTestModule', bool)
         
-        variables = set(subroutine.getDerivedTypeArguments())
-        for reference in globalsReferences:
-            variables.add(reference.getLevel0Variable())
-            
-        self.__types = dict()
-        for variable in variables:
+        types = set()
+        for variable in subroutine.getDerivedTypeArguments():
             if variable.hasDerivedType() and variable.isTypeAvailable():
-                typE = variable.getType()
-                if typE.getName() not in self.__types:
-                    self.__types[typE.getName()] = typE
+                types.add(variable.getType())
                     
+        refTypes = set()
         for reference in typeArgumentReferences + typeResultReferences + globalsReferences:
             for level in reference.getLevels():
                 variable = reference.getVariable(level)
                 if variable is not None:
-                    variables.add(variable)
                     if variable.hasDerivedType() and variable.isTypeAvailable():
-                        typE = variable.getType()
-                        if typE.isAbstract() and typE.hasAssignedImplementation():
-                            implType = typE.getAssignedImplementation()
-                            if implType.getName() not in self.__types:
-                                self.__types[implType.getName()] = implType
+                        refTypes.add(variable.getType())
+                        
+        for typE in refTypes: 
+            if typE.isAbstract() and typE.hasAssignedImplementation():
+                implType = typE.getAssignedImplementation()
+                if implType.getName() not in types:
+                    types.add(implType)
                     
         testModule = subroutine.getName().getModuleName()
         modules = dict()    
-        for typE in self.__types.values():
+        for typE in types:
             moduleName = typE.getDeclaredInName()
-            if  isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
+            if isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
                 if moduleName not in modules:
                     modules[moduleName] = []
                 modules[moduleName].append(typE.getName())
@@ -456,14 +443,6 @@ class TypesNameSpace(object):
             self.imports  = self.imports.strip(', ')
             self.imports += "\n"
         self.imports = self.imports.strip("\n")
-        
-    def __addMemberTypesToTypSet(self, typE):
-        for member in typE.getMembers():
-            if member.hasDerivedType() and member.isPointer() and member.isTypeAvailable():
-                memberType = member.getType()
-                if memberType.getName() not in self.__types:
-                    self.__types[memberType.getName] = memberType 
-                    self.__addMemberTypesToTypSet(memberType)
         
 class ExportNameSpace(object):
     
