@@ -1,7 +1,7 @@
 $prologue $mergeBegin('ftg')
 $mergeBegin('ftg')
 IF (ftg_${subroutine.name}_capture_output_enabled .AND. ftg_${subroutine.name}_capture_active()) THEN
-  CALL ftg_${subroutine.name}_capture_data($commaList("'output'", "ftg_" + $subroutine.name + "_output_dir", $args, $result))
+  CALL ftg_${subroutine.name}_capture_data($commaList("'output'", $args, $result))
 END IF
 
 $epilogue $mergeEnd('ftg')

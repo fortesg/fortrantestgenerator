@@ -2,7 +2,7 @@ $prologue $mergeBegin('ftg')
 $mergeBegin('ftg')
 ftg_${subroutine.name}_round = ftg_${subroutine.name}_round + 1
 IF (ftg_${subroutine.name}_capture_input_enabled .AND. ftg_${subroutine.name}_capture_active()) THEN
-  CALL ftg_${subroutine.name}_capture_data($commaList("'input'", "ftg_" + $subroutine.name + "_input_dir", $args))
+  CALL ftg_${subroutine.name}_capture_data($commaList("'input'", $args))
 END IF
 
 $epilogue $mergeEnd('ftg')
