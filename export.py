@@ -2,9 +2,9 @@ import os
 from generator import CodeGenerator 
 from assertions import assertType, assertTypeAll
 from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
-from templatenamespace import ExportNameSpace
+from templatenamespace import ExportTemplatesNameSpace
 from backup import BackupFileFinder
-from printout import printLine, printWarning, printDebug
+from printout import printLine, printWarning
 from callgraph import CallGraph
 from typefinder import TypeCollection
 
@@ -24,7 +24,7 @@ class ExportCodeGenerator(CodeGenerator):
         self.__modifySourceFiles = modifySourceFiles     
         self.__backupFinder = backupFinder 
 
-    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):  # @UnusedVariable
+    def addCode(self, subroutineFullName, typeArgumentReferences, typeResultReferences, globalsReferences, callgraph, types):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
         assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
         assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
@@ -37,8 +37,6 @@ class ExportCodeGenerator(CodeGenerator):
         refModules = list(self.__getModulesFromCallgraph(callgraph).union(self.__extractModulesFromVariableReferences(globalsReferences)))
         refModules.sort(reverse = True)
         for refModule in refModules:
-            refModuleName = refModule.getName() 
-            printDebug(refModuleName + ' : ' + str(refModule.getIndex()) + ' : ' + str(refModule.getContainsLineNumber()))
             usedSourceFile = refModule.getSourceFile()
             usedSourceFilePath = usedSourceFile.getPath()
             if usedSourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
@@ -48,7 +46,7 @@ class ExportCodeGenerator(CodeGenerator):
             backup = self.__backupFinder.create(usedSourceFilePath)
             subroutine = self._findSubroutine(subroutineFullName)
             self._setTypesToSubroutineVariables(subroutine, types)
-            exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph, self._postProcessor)
+            exportTemplateNameSpace = ExportTemplatesNameSpace(refModule, typeArgumentReferences, typeResultReferences, globalsReferences, subroutine, callgraph, self._postProcessor)
             lastLine = refModule.getContainsLineNumber()
             if lastLine < 0:
                 lastLine = refModule.getLastLineNumber()

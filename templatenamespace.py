@@ -1,9 +1,8 @@
 from assertions import assertType, assertTypeAll
-from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName
+from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName, Module
 from callgraph import CallGraph
 from postprocessor import CodePostProcessor
 
-# TODO Gemeinsamkeiten zwischen Capture- und ReplayTemplatesNameSpace in Oberklasse zusammenfuehren
 class TemplatesNameSpace(object):
     
     def __init__(self, subroutine, typeArgumentReferences, typeResultReferences, globalsReferences, testDataDir, callgraph, postProcessor):
@@ -130,53 +129,6 @@ class TemplatesNameSpace(object):
             return bound
                 
         return ''
-    
-#     def allocatedOrAssociated(self, variable, dim, *placeholder):
-#         assertType(variable, 'variable', UsedVariable, True)
-#         assertType(dim, 'dim', int)
-#         assertTypeAll(placeholder, 'placeholder', str)
-#         
-#         if variable is None:
-#             return ''
-#         
-#         ref = variable.getReference()
-#         totalDim = ref.getTotalDimensions()
-#         if dim > totalDim:
-#             dim = totalDim
-#         top = 0
-#         pointer = False
-#         allocatable = False
-#         perc = ''
-#         aa = '('
-#         totalAllocatablesAndPointers = ref.getNumberOfPointerAndAllocatableLevels()
-#         allocatablesAndPointers = 0
-#         for level in ref.getLevels():
-#             var = ref.getVariable(level)
-#             if var is None:
-#                 return ''
-#             aa += perc + var.getName()
-#             perc = '%'
-#             pointer = var.isPointer()
-#             allocatable = var.isAllocatable()
-#             allocatablesAndPointers += (pointer or allocatable)
-#             bot = top 
-#             top += var.getDimension()
-#             if top < dim or (allocatablesAndPointers < totalAllocatablesAndPointers and dim == totalDim):
-#                 if top > bot:
-#                     aa += '('
-#                     sep = ''
-#                     for i in range(bot, top):
-#                         aa += sep + placeholder[i]
-#                         sep = ', '
-#                     aa += ')'
-#             else:
-#                 break
-#         aa += ')'
-#         if allocatable:
-#             return 'ALLOCATED' + aa
-#         elif pointer:
-#             return 'ASSOCIATED' + aa
-#         return ''
     
     def allocatedOrAssociated(self, variable, minLevel = 0):
         assertType(variable, 'variable', UsedVariable, True)
@@ -378,11 +330,11 @@ class GlobalsNameSpace(object):
             variables.add(variable)
         variables = sorted(variables)
         
-        testModule = subroutine.getName().getModuleName()
+        testModule = subroutine.getModule()
         modules = dict()    
         for variable in variables:
             moduleName = variable.getDeclaredInName()
-            if moduleName != testModule or includeTestModule:
+            if moduleName != testModule.getName() or includeTestModule:
                 if moduleName not in modules:
                     modules[moduleName] = []
                 varName = variable.getName() 
@@ -394,9 +346,6 @@ class GlobalsNameSpace(object):
         for module, elements in sorted(modules.items()):
             self.imports.append('USE ' + module + ', ONLY: ' + ', '.join(elements))
         self.imports = "\n".join(self.imports)
-        
-        exportGlobals = ExportGlobalsNameSpace(testModule, sourceFile, globalsReferences)
-        self.exports = exportGlobals.exports
 
 class TypesNameSpace(object):
     
@@ -412,7 +361,7 @@ class TypesNameSpace(object):
             if variable.hasDerivedType() and variable.isTypeAvailable():
                 types.add(variable.getType())
                     
-        refTypes = set()
+        refTypes = set(types)
         for reference in typeArgumentReferences + typeResultReferences + globalsReferences:
             for level in reference.getLevels():
                 variable = reference.getVariable(level)
@@ -422,15 +371,15 @@ class TypesNameSpace(object):
                         
         for typE in refTypes: 
             if typE.isAbstract() and typE.hasAssignedImplementation():
-                implType = typE.getAssignedImplementation()
-                if implType.getName() not in types:
-                    types.add(implType)
+                types.add(typE.getAssignedImplementation())
+        types = sorted(types) 
                     
-        testModule = subroutine.getName().getModuleName()
+        testModule = subroutine.getModule()
         modules = dict()    
         for typE in types:
-            moduleName = typE.getDeclaredInName()
-            if isinstance(moduleName, str) and (moduleName != testModule or includeTestModule):
+            module = typE.getModule()
+            if module is not None and module != testModule or includeTestModule:
+                moduleName = module.getName()
                 if moduleName not in modules:
                     modules[moduleName] = []
                 modules[moduleName].append(typE.getName())
@@ -444,17 +393,22 @@ class TypesNameSpace(object):
             self.imports += "\n"
         self.imports = self.imports.strip("\n")
         
-class ExportNameSpace(object):
+class ExportTemplatesNameSpace(object):
     
-    def __init__(self, moduleName, sourceFile, globalsReferences, subroutine, callgraph, postProcessor):
-        assertType(moduleName, 'moduleName', str)
-        assertType(sourceFile, 'sourceFile', SourceFile)
-        assertType(globalsReferences, 'globalsReferences', list)
+    def __init__(self, currentModule, typeArgumentReferences, typeResultReferences, globalsReferences, subroutine, callgraph, postProcessor):
+        assertType(currentModule, 'currentModule', Module)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
+        assertType(subroutine, 'subroutine', Subroutine)
+        assertType(callgraph, 'callgraph', CallGraph)
+        assertType(postProcessor, 'postProcessor', CodePostProcessor)
         
         self._postProcessor = postProcessor
         
-        self.module = ModuleNameSpace(moduleName, callgraph)
-        self.globals = ExportGlobalsNameSpace(moduleName, sourceFile, globalsReferences)
+        self.module = ModuleNameSpace(currentModule.getName(), callgraph)
+        self.globals = ExportGlobalsNameSpace(currentModule, globalsReferences)
+        self.types = ExportTypesNameSpace(currentModule, typeArgumentReferences, typeResultReferences, globalsReferences, subroutine)
         self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
     
     def mergeBegin(self, key):
@@ -465,34 +419,64 @@ class ExportNameSpace(object):
         
 class ExportGlobalsNameSpace(object):
     
-    def __init__(self, moduleName, sourceFile, globalsReferences):
-        assertType(moduleName, 'moduleName', str)
-        assertType(sourceFile, 'sourceFile', SourceFile)
+    def __init__(self, currentModule, globalsReferences):
+        assertType(currentModule, 'currentModule', Module)
         assertType(globalsReferences, 'globalsReferences', list)
         
-        publicElements = sourceFile.getModule(moduleName).getPublicElements()
+        publicElements = currentModule.getPublicElements()
         
         self.exports = 'PUBLIC :: '
         variables = set()
-        types = set()
         for ref in globalsReferences:
             variable = ref.getLevel0Variable()
-            refModule = variable.getDeclaredInName()
-            if refModule == moduleName:
+            refModule = variable.getModule()
+            if refModule == currentModule:
                 variableName = variable.getOriginalName().lower()
                 if variableName not in variables and not variable.isPublic() and variableName not in publicElements:
                     self.exports += variableName + ", "
                     variables.add(variableName)
-            if variable.hasDerivedType() and variable.isTypeAvailable():
-                typE = variable.getType()
-                refModule = typE.getDeclaredInName()
-                if refModule == moduleName:
-                    typeName = typE.getName().lower()
-                    if typeName not in types and typeName not in publicElements:
-                        self.exports += typeName + ", "
-                        types.add(typeName)
         self.exports = self.exports.strip(', ')
+        if self.exports == 'PUBLIC ::':
+            self.exports = ''
+            
+class ExportTypesNameSpace(object):
+    
+    def __init__(self, currentModule, typeArgumentReferences, typeResultReferences, globalsReferences, subroutine):
+        assertType(currentModule, 'currentModule', Module)
+        assertType(subroutine, 'subroutine', Subroutine)
+        assertTypeAll(typeArgumentReferences, 'typeArgumentReferences', VariableReference)
+        assertTypeAll(typeResultReferences, 'typeResultReferences', VariableReference)
+        assertTypeAll(globalsReferences, 'globalsReferences', VariableReference)
         
+        types = set()
+        for variable in subroutine.getDerivedTypeArguments():
+            if variable.hasDerivedType() and variable.isTypeAvailable():
+                types.add(variable.getType())
+                    
+        refTypes = set(types)
+        for reference in typeArgumentReferences + typeResultReferences + globalsReferences:
+            for level in reference.getLevels():
+                variable = reference.getVariable(level)
+                if variable is not None:
+                    if variable.hasDerivedType() and variable.isTypeAvailable():
+                        refTypes.add(variable.getType())
+                        
+        for typE in refTypes: 
+            if typE.isAbstract() and typE.hasAssignedImplementation():
+                implType = typE.getAssignedImplementation()
+                if implType.getName() not in types:
+                    types.add(implType)
+        types = sorted(types)
+
+        publicElements = currentModule.getPublicElements()
+        self.exports = 'PUBLIC :: '
+        for typE in types:
+            module = typE.getModule()
+            typeName = typE.getName().lower()
+            if module is not None and module == currentModule and typeName not in publicElements:
+                self.exports += typeName + ", "
+                
+        self.exports = self.exports.strip(', ')
         if self.exports == 'PUBLIC ::':
             self.exports = ''
             
