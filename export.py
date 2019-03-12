@@ -38,6 +38,7 @@ class ExportCodeGenerator(CodeGenerator):
         refModules.sort(reverse = True)
         for refModule in refModules:
             refModuleName = refModule.getName() 
+            printDebug(refModuleName + ' : ' + str(refModule.getIndex()) + ' : ' + str(refModule.getContainsLineNumber()))
             usedSourceFile = refModule.getSourceFile()
             usedSourceFilePath = usedSourceFile.getPath()
             if usedSourceFilePath.endswith(self.__backupFinder.getBackupSuffix()):
@@ -48,7 +49,10 @@ class ExportCodeGenerator(CodeGenerator):
             subroutine = self._findSubroutine(subroutineFullName)
             self._setTypesToSubroutineVariables(subroutine, types)
             exportTemplateNameSpace = ExportNameSpace(refModuleName, usedSourceFile, globalsReferences, subroutine, callgraph, self._postProcessor)
-            result = self._processTemplate(usedSourceFilePath, refModule.getContainsLineNumber() - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, exportTemplateNameSpace)
+            lastLine = refModule.getContainsLineNumber()
+            if lastLine < 0:
+                lastLine = refModule.getLastLineNumber()
+            result = self._processTemplate(usedSourceFilePath, lastLine - 1, self.BEFORE_CONTAINS_TEMPLATE_PART, exportTemplateNameSpace)
             lastUseLineNumber = refModule.getLastUseLineNumber()
             lastUseLineNumber = self._shiftLineNumberByPreprocesserorEndifs(refModule, lastUseLineNumber)
             result = self._processTemplate(usedSourceFilePath, lastUseLineNumber, self.AFTER_USE_TEMPLATE_PART, exportTemplateNameSpace) or result
