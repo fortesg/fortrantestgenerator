@@ -63,7 +63,7 @@ SUBROUTINE ftg_${subroutine.name}_close_serializer(stage)
 
 END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
-SUBROUTINE ftg_${subroutine.name}_capture_data(stage, dir, $commaList($args))
+SUBROUTINE ftg_${subroutine.name}_capture_data($commaList('stage', 'dir', $args, $result))
 
   USE m_ser_ftg, ONLY: ftg_write, ftg_register_only
   
@@ -71,13 +71,17 @@ SUBROUTINE ftg_${subroutine.name}_capture_data(stage, dir, $commaList($args))
   $types.imports
 
   CHARACTER(*), INTENT(IN) :: stage, dir
-  $args.specs(intent = 'in')
+  $args.specs(intent = 'in', allocatable = False)
+  #if $subroutine.isFunction:
+    $result.spec(intent = 'in', allocatable = False, optional = True)
+  #end if
 
   INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, ftg_d5, ftg_d6
   CHARACTER(len=256) :: ftg_name
 
   CALL ftg_${subroutine.name}_init_serializer(stage, dir)
 
+  $resetRegistrations
   IF (stage == 'input') THEN
     ! REQUIRED IN ARGUMENTS
     #for $var in $args.intentIn.requireds.usedVariables
@@ -103,6 +107,15 @@ SUBROUTINE ftg_${subroutine.name}_capture_data(stage, dir, $commaList($args))
       $ftgWrite($var) $clearLine
     END IF $mergeEnd('present')
   #end for
+  
+  #if $subroutine.isFunction
+    IF (stage == 'output' .AND. PRESENT($result)) THEN
+      ! FUNCTION RESULT
+      #for $var in $result.usedVariables
+        $ftgWrite($var) $clearLine
+      #end for
+    END IF
+  #end if
   
   ! GLOBALS
   #for $var in $globals.usedVariables
