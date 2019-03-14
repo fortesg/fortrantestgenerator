@@ -54,9 +54,9 @@ class CodeGenerator(object):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
 
         if self._settings.ignorePrefix != '':
-            ignoreRegex = re.compile('^' + self._settings.ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
+            self._settings.ignoreSubroutinesRegex = re.compile('^' + self._settings.ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
         else:
-            ignoreRegex = None
+            self._settings.ignoreSubroutinesRegex = None
             
         subroutine = self._findSubroutine(subroutineFullName)
         if subroutine is None:
@@ -79,7 +79,6 @@ class CodeGenerator(object):
 
         printLine('Analyse Source Code', indent = 1)
         argumentTracker = VariableTracker(self._sourceFiles, self._settings, interfaces, types, callGraphBuilder = self.__graphBuilder)
-        argumentTracker.setIgnoreRegex(ignoreRegex)
         
         printLine('Find References to Type Argument Members', indent = 2)
         typeArgumentReferences = argumentTracker.trackDerivedTypeArguments(callgraph)
@@ -93,7 +92,6 @@ class CodeGenerator(object):
         
         printLine('Find References to Global Variables', indent = 2)
         globalsTracker = GlobalVariableTracker(self._sourceFiles, self._settings, interfaces, types, callGraphBuilder = self.__graphBuilder)
-        globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callgraph)
         
         sourceFile = subroutine.getSourceFile()
