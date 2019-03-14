@@ -45,7 +45,7 @@ def main():
     sys.path.append(config[CFG_FCG_DIR])
         
     from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES, CFG_ASSEMBLER_DIRS,\
-    CFG_SPECIAL_MODULE_FILES, CFG_CACHE_DIR, CFG_SOURCE_DIRS, CFG_SOURCE_FILES_PREPROCESSED, CFG_ABSTRACT_TYPES
+    CFG_SPECIAL_MODULE_FILES, CFG_CACHE_DIR, CFG_SOURCE_DIRS, CFG_SOURCE_FILES_PREPROCESSED, CFG_ABSTRACT_TYPES, CFG_ALWAYS_FULL_TYPES
     from source import SubroutineFullName, SourceFiles
     from backup import BackupFileFinder
     from postprocessor import CodePostProcessor
@@ -65,6 +65,7 @@ def main():
     excludeModules = config[CFG_EXCLUDE_MODULES]
     ignoreGlobalsFromModuls = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     ignoreDerivedTypes = config[CFG_IGNORE_DERIVED_TYPES]
+    alwaysFullTypes = config[CFG_ALWAYS_FULL_TYPES]
     abstractTypes = config[CFG_ABSTRACT_TYPES]
     sourceDirs = config[CFG_SOURCE_DIRS]
 
@@ -118,6 +119,7 @@ def main():
         generatorSettings = CodeGeneratorSettings()
         generatorSettings.excludeModules = excludeModules
         generatorSettings.ignoreGlobalsFromModules = ignoreGlobalsFromModuls
+        generatorSettings.fullTypes      = alwaysFullTypes
         generatorSettings.ignoredTypes   = ignoreDerivedTypes
         generatorSettings.ignorePrefix   = ftgPrefix
         generatorSettings.abstractTypes  = abstractTypes
