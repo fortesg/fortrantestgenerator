@@ -70,6 +70,7 @@ END SUBROUTINE ftg_${subroutine.name}_close_serializer
 
 SUBROUTINE ftg_${subroutine.name}_capture_data($commaList('stage', $args, $result))
 
+  USE mtime, ONLY: calendarType
   USE m_ser_ftg, ONLY: ftg_write, ftg_register_only
   
   $globals.imports
