@@ -72,6 +72,7 @@ class TestTemplate(unittest.TestCase):
                 self.subroutine = DummySubnamespace()
                 self.module = DummySubnamespace()
                 self.globals = DummySubnamespace()
+                self.types = DummySubnamespace()
                 self.args = ArgumentList([])
                 self.result = None
                 self.dataDir = 'DATADIR'
