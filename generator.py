@@ -54,7 +54,7 @@ class CodeGenerator(object):
         assertType(subroutineFullName, 'subroutineFullName', SubroutineFullName)
 
         if self._settings.ignorePrefix != '':
-            self._settings.ignoreSubroutinesRegex = re.compile('^' + self._settings.ignorePrefix + subroutineFullName.getSimpleName() + '_.*$')
+            self._settings.ignoreSubroutinesRegex = re.compile('^' + self._settings.ignorePrefix + '.*$')
         else:
             self._settings.ignoreSubroutinesRegex = None
             
