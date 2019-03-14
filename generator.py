@@ -6,7 +6,7 @@ from Cheetah.Template import Template
 from Cheetah import ImportHooks
 from assertions import assertType, assertTypeAll
 from source import SourceFiles, SubroutineFullName, Subroutine
-from trackvariable import VariableTracker
+from trackvariable import VariableTracker, VariableTrackerSettings
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from supertypes import CallGraphBuilder
@@ -78,7 +78,7 @@ class CodeGenerator(object):
         if self._settings.measureTime: self.__time(2)
 
         printLine('Analyse Source Code', indent = 1)
-        argumentTracker = VariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
+        argumentTracker = VariableTracker(self._sourceFiles, self._settings, interfaces, types, callGraphBuilder = self.__graphBuilder)
         argumentTracker.setIgnoreRegex(ignoreRegex)
         
         printLine('Find References to Type Argument Members', indent = 2)
@@ -92,7 +92,7 @@ class CodeGenerator(object):
             typeResultReferences = []
         
         printLine('Find References to Global Variables', indent = 2)
-        globalsTracker = GlobalVariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoreGlobalsFromModules, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
+        globalsTracker = GlobalVariableTracker(self._sourceFiles, self._settings, interfaces, types, callGraphBuilder = self.__graphBuilder)
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callgraph)
         
@@ -203,13 +203,10 @@ class CodeGenerator(object):
             printLine(totalAsterisk + ' Total: ' + secFormat.format(now - self.__startTime) + ' Seconds ***', indent = totalIndent)
         self.__lastTime = now
         
-class CodeGeneratorSettings(object):
+class CodeGeneratorSettings(VariableTrackerSettings):
     
     def __init__(self):
-        self.excludeModules = []
-        self.ignoreGlobalsFromModules = []
-        self.ignoredTypes   = []
-        self.abstractTypes  = {}
+        super(CodeGeneratorSettings, self).__init__()
         self.ignorePrefix = ''
         self.measureTime    = False
         self.clearCache     = False
