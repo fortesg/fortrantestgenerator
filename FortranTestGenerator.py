@@ -117,7 +117,7 @@ def main():
         postProcessor = CodePostProcessor()
         generatorSettings = CodeGeneratorSettings()
         generatorSettings.excludeModules = excludeModules
-        generatorSettings.ignoredModulesForGlobals = ignoreGlobalsFromModuls
+        generatorSettings.ignoreGlobalsFromModules = ignoreGlobalsFromModuls
         generatorSettings.ignoredTypes   = ignoreDerivedTypes
         generatorSettings.ignorePrefix   = ftgPrefix
         generatorSettings.abstractTypes  = abstractTypes

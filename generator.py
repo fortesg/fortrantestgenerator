@@ -28,7 +28,7 @@ class CodeGenerator(object):
         
         assertType(settings, 'settings', CodeGeneratorSettings)
         assertTypeAll(settings.excludeModules, 'settings.excludeModules', str)
-        assertTypeAll(settings.ignoredModulesForGlobals, 'settings.ignoredModulesForGlobals', str)        
+        assertTypeAll(settings.ignoreGlobalsFromModules, 'settings.ignoreGlobalsFromModules', str)        
         assertTypeAll(settings.ignoredTypes, 'settings.ignoredTypes', str)        
         assertType(settings.ignorePrefix, 'settings.ignorePrefix', str)        
         assertType(settings.abstractTypes, 'settings.abstractTypes', dict)        
@@ -92,7 +92,7 @@ class CodeGenerator(object):
             typeResultReferences = []
         
         printLine('Find References to Global Variables', indent = 2)
-        globalsTracker = GlobalVariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoredModulesForGlobals, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
+        globalsTracker = GlobalVariableTracker(self._sourceFiles, self._settings.excludeModules, self._settings.ignoreGlobalsFromModules, self._settings.ignoredTypes, interfaces, types, callGraphBuilder = self.__graphBuilder)
         globalsTracker.setIgnoreRegex(ignoreRegex)
         globalsReferences = globalsTracker.trackGlobalVariables(callgraph)
         
@@ -207,7 +207,7 @@ class CodeGeneratorSettings(object):
     
     def __init__(self):
         self.excludeModules = []
-        self.ignoredModulesForGlobals = []
+        self.ignoreGlobalsFromModules = []
         self.ignoredTypes   = []
         self.abstractTypes  = {}
         self.ignorePrefix = ''
