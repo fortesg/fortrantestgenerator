@@ -9,8 +9,9 @@ PRIVATE
 INTEGER, PARAMETER :: base = 23
 REAL :: number = 0
 TYPE(t_comm_variable), ALLOCATABLE :: comm_variable(:)
+TYPE(bbstr) :: bv(2)
 
-PUBLIC :: set, get, init_comm_variable, comm_variable
+PUBLIC :: set, get, init_comm_variable, comm_variable, bv
 
 CONTAINS
 

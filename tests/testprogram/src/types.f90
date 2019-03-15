@@ -62,9 +62,18 @@ IMPLICIT NONE
 
   TYPE, EXTENDS(abstr) :: concr
     INTEGER :: internal = 0
+    INTEGER, ALLOCATABLE :: multi(:)
     CONTAINS
     PROCEDURE :: deff => impl
   END TYPE concr
+
+  TYPE :: abstrcont
+    CLASS(abstr), POINTER :: p
+  END TYPE abstrcont
+
+  TYPE :: bbstr
+    TYPE(abstrcont) :: bb(3)
+  END TYPE bbstr
 
   TYPE(testj) :: tj
 
@@ -96,6 +105,6 @@ CONTAINS
   INTEGER FUNCTION impl(this)
       CLASS(concr), INTENT(inout) :: this
       this%internal = this%internal + 1
-      impl = this%internal
+      impl = this%internal + this%multi(1)
   END FUNCTION impl
 END MODULE types

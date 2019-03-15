@@ -1,19 +1,19 @@
 PROGRAM maingeneric
 
 USE types
-USE globals, ONLY : set, init_comm_variable
+USE globals, ONLY : set, init_comm_variable, bv
 USE sub, ONLY : wrapper, init
 
 IMPLICIT NONE
 
 include 'mpif.h'
 
-INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u
+INTEGER rank, size, ierror, tag, status(MPI_STATUS_SIZE), u, v
 TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag(4)
 REAL :: out, result
-CLASS(abstr), ALLOCATABLE :: av
+CLASS(abstr), ALLOCATABLE, TARGET :: av
 
 CALL MPI_INIT(ierror)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
@@ -49,6 +49,16 @@ CALL init_jmodels(1)
 CALL init_comm_variable()
 
 ALLOCATE(concr::av)
+SELECT TYPE (av)
+  TYPE IS (concr)
+    ALLOCATE(av%multi(19))
+END SELECT
+
+DO u = 1, 2
+  DO v = 1, 3
+    bv(u)%bb(v)%p => av
+  END DO
+END DO
 
 flag(:) = .TRUE.
 

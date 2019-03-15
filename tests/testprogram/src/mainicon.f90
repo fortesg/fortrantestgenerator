@@ -3,17 +3,17 @@ PROGRAM maingeneric
 USE mo_mpi,            ONLY: get_my_mpi_all_id, start_mpi, stop_mpi
 
 USE types
-USE globals, ONLY : set, init_comm_variable
+USE globals, ONLY : set, init_comm_variable, bv
 USE sub, ONLY : wrapper, init
 
 IMPLICIT NONE
 
-INTEGER rank, u
+INTEGER rank, u, v, w
 TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag(4)
 REAL :: out, result
-CLASS(abstr), ALLOCATABLE :: av
+CLASS(abstr), ALLOCATABLE, TARGET :: av
 
 CALL start_mpi('testprogram:mainicon')
 rank = get_my_mpi_all_id()
@@ -48,6 +48,16 @@ CALL init_jmodels(1)
 CALL init_comm_variable()
 
 ALLOCATE(concr::av)
+SELECT TYPE (av)
+  TYPE IS (concr)
+    ALLOCATE(av%multi(19))
+END SELECT
+
+DO u = 1, 2
+  DO v = 1, 3
+    bv(u)%bb(v)%p => av
+  END DO
+END DO
 
 flag(:) = .TRUE.
 

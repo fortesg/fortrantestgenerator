@@ -1,7 +1,7 @@
 MODULE sub
 
 USE types
-USE globals, ONLY : set, get, comm_variable
+USE globals, ONLY : set, get, comm_variable, bv
 
 IMPLICIT NONE
 
@@ -18,22 +18,22 @@ SUBROUTINE init(start)
   self = start
 END SUBROUTINE init
 
-FUNCTION wrapper(ra, rlog, abstractVar, oreal, oa)
+FUNCTION wrapper(ra, rlog, av1, oreal, oa)
   TYPE(testa), INTENT(inout) :: ra
   LOGICAL, INTENT(in) :: rlog(4)
-  CLASS(abstr), INTENT(inout) :: abstractVar
+  CLASS(abstr), INTENT(inout) :: av1
   REAL, INTENT(out), OPTIONAL :: oreal
   TYPE(testa), INTENT(inout), OPTIONAL :: oa
   REAL :: wrapper
 
-  wrapper = testsub(ra, rlog, abstractVar, oreal, oa)
+  wrapper = testsub(ra, rlog, av1, oreal, oa)
 END FUNCTION wrapper
 
-FUNCTION testsub(ra, rlog, abstractVar, oreal, oa)
+FUNCTION testsub(ra, rlog, av1, oreal, oa)
 
   TYPE(testa), INTENT(inout) :: ra
   LOGICAL, INTENT(in) :: rlog(4)
-  CLASS(abstr), INTENT(inout) :: abstractVar
+  CLASS(abstr), INTENT(inout) :: av1
   REAL, INTENT(out), OPTIONAL :: oreal
   TYPE(testa), INTENT(inout), OPTIONAL :: oa
   TYPE(jmodel) :: jm
@@ -43,7 +43,10 @@ FUNCTION testsub(ra, rlog, abstractVar, oreal, oa)
   REAL, POINTER :: testsub
 
   IF (rlog(1)) THEN
-    ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:) + self + abstractVar%deff()
+    ra%c%r2(:,:) = ra%b(1)%i2(1:2, 1:2) * ra%b(1)%i0 + ra%c%r2(:,:) + self + av1%deff()
+    IF (rlog(2)) THEN
+      ra%c%r2(:,:) = ra%c%r2(:,:) + bv(1)%bb(1)%p%deff()
+    END IF
   END IF
 
   IF (PRESENT(oa)) THEN
