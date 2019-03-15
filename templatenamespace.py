@@ -694,7 +694,7 @@ class FilledVariable(UsedVariable):
     
     def alias(self, alias, level):
         container = self.container(level - 1)
-        dim = self.__dim - container.dim()
+        dim = self.__dim - container.totalDim()
         indices = self.__indices[container.dim():]
         return FilledVariable(super(FilledVariable, self).alias(alias, level).getReference(), dim, *indices)
 
