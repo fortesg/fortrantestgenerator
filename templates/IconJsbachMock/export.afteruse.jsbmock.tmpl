@@ -1,7 +1,8 @@
-#if $module.calledHere('__mo_jsb_interface_MOD_interface_full')
+#if $module.calledHere('__mo_jsb_interface_MOD_interface_full') or $module.calledHere('__mo_jsb_interface_MOD_jsbach_start_timestep') or $module.calledHere('__mo_jsb_interface_MOD_jsbach_finish_timestep') \
+    or $module.calledHere('__mo_jsb_interface_dsl4jsb_MOD_interface_full') or $module.calledHere('__mo_jsb_interface_dsl4jsb_MOD_jsbach_start_timestep') or $module.calledHere('__mo_jsb_interface_dsl4jsb_MOD_jsbach_finish_timestep')
   $prologue $mergeBegin('ftg')
   $mergeBegin('ftg')
-  USE mo_jsb_interface_mock, ONLY: jsbach_interface
+  USE mo_jsb_interface_mock, ONLY: jsbach_interface, jsbach_start_timestep, jsbach_finish_timestep
   
   $epilogue $mergeEnd('ftg')
 #end if
