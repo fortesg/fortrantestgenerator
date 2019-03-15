@@ -13,6 +13,24 @@ TYPE(bbstr) :: bv(2)
 
 PUBLIC :: set, get, init_comm_variable, comm_variable, bv
 
+
+#ifdef __FTG__
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: number
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
+#endif
+
+
+#ifdef __FTG__
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: number
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
+#endif
+
 CONTAINS
 
 SUBROUTINE set(new)

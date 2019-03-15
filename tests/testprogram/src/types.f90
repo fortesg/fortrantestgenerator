@@ -77,6 +77,24 @@ IMPLICIT NONE
 
   TYPE(testj) :: tj
 
+
+#ifdef __FTG__
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: tj
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
+#endif
+
+
+#ifdef __FTG__
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: tj
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
+#endif
+
 CONTAINS
 
   FUNCTION get_model_by_id(id) RESULT(model)

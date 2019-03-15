@@ -13,7 +13,7 @@ TYPE(testa) :: a, oa
 TYPE(testb), TARGET :: b(3)
 LOGICAL :: flag(4)
 REAL :: out, result
-CLASS(abstr), ALLOCATABLE, TARGET :: av
+CLASS(abstr), ALLOCATABLE, TARGET :: av1, av2(:)
 
 CALL start_mpi('testprogram:mainicon')
 rank = get_my_mpi_all_id()
@@ -47,26 +47,37 @@ oa%c%r2(2,2) = rank + 0.22
 CALL init_jmodels(1)
 CALL init_comm_variable()
 
-ALLOCATE(concr::av)
-SELECT TYPE (av)
+ALLOCATE(concr::av1)
+SELECT TYPE (av1)
   TYPE IS (concr)
-    ALLOCATE(av%multi(19))
+    ALLOCATE(av1%multi(19))
+    av1%multi(:) = 4321
 END SELECT
 
-DO u = 1, 2
-  DO v = 1, 3
-    bv(u)%bb(v)%p => av
+ALLOCATE(concr::av2(6))
+SELECT TYPE (av2)
+  TYPE IS (concr)
+    DO u = 1, 6
+      ALLOCATE(av2(u)%multi(19))
+      av2(u)%multi(:) = 8654
   END DO
-END DO
+END SELECT
+
+bv(1)%bb(1)%p => av2(1)
+bv(1)%bb(2)%p => av2(2)
+bv(1)%bb(3)%p => av2(3)
+bv(2)%bb(1)%p => av2(4)
+bv(2)%bb(2)%p => av2(5)
+bv(2)%bb(3)%p => av2(6)
 
 flag(:) = .TRUE.
 
 CALL set(109.0)
 
 IF (MOD(rank, 2) == 0) THEN
-  result = wrapper(a, flag, av, oa = oa)
+  result = wrapper(a, flag, av1, oa = oa)
 ELSE
-  result = wrapper(a, flag, av, out, oa)
+  result = wrapper(a, flag, av1, out, oa)
   PRINT*, 'node', rank, ' out: ', out
 END IF
 

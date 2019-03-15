@@ -11,6 +11,26 @@ INTEGER :: self
 
 PUBLIC :: init, wrapper
 
+
+#ifdef __FTG__
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: self
+PUBLIC :: testsub
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
+#endif
+
+
+#ifdef __FTG__
+! =========== BEGIN FORTRAN TEST GENERATOR (FTG) ===========
+
+PUBLIC :: self
+PUBLIC :: testsub
+
+! =========== END FORTRAN TEST GENERATOR (FTG) =============
+#endif
+
 CONTAINS
 
 SUBROUTINE init(start)
