@@ -17,7 +17,7 @@ SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture()
       WRITE (0,*) 'FTG INIT *** ERROR: ', TRIM(mkdirerr)
     END IF 
   
-    CALL jsbmock_start_capture(ftg_${subroutine.name}_jsbach_dir, basename, 'jsbach')
+    CALL jsbmock_start_capture(ftg_${subroutine.name}_jsbach_dir, basename)
   END IF
 
 END SUBROUTINE ftg_${subroutine.name}_start_jsbach_capture

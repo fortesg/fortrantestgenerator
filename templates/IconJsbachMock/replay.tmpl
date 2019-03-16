@@ -174,7 +174,7 @@ SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay()
 
   WRITE (0,'(A,I0.2,A)') 'FTG START JSBACH REPLAY ${subroutine.name} (Rank #', mpi_rank, ')'
   WRITE (basename,'(A,I0.2)') 'ftg_${subroutine.name}_jsbach_', mpi_rank
-  CALL jsbmock_start_replay(JSBACH_DIR, basename, 'jsbach')
+  CALL jsbmock_start_replay(JSBACH_DIR, basename)
 
 END SUBROUTINE ftg_${subroutine.name}_start_jsbach_replay
 
