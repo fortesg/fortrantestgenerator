@@ -16,8 +16,8 @@
     #set $container = $aliasVar.container($level - ($var.level - $aliasVar.level))
     #set $filledContainer = $fillIndices($container, $ad, *$indices[$d - $ad:])
     #if $needsAllocation($filledContainer)
-      #if $ad > 0
-        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $ad, *$indices[$d - $ad:])
+      #if $d > 0
+        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $d, *$indices)
         #set $contName = 'ftg_name'
       #else 
         #set $contName = '"' + str($container) + '"'
@@ -53,7 +53,7 @@
       #set $cd = 0
       #for $ld in $loopDims
         #set $cd += 1
-        DO ftg_d$d = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
+        DO ftg_d$ld = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
         #silent $closeStatements.append('END DO ' + $mergeEnd('do' + str($level)))
       #end for        
     #end if      
