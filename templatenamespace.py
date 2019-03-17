@@ -2,6 +2,7 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName, Module
 from callgraph import CallGraph
 from postprocessor import CodePostProcessor
+from printout import printDebug
 
 class TemplatesNameSpace(object):
     
@@ -410,6 +411,7 @@ class ExportTemplatesNameSpace(object):
         self.globals = ExportGlobalsNameSpace(currentModule, globalsReferences)
         self.types = ExportTypesNameSpace(currentModule, typeArgumentReferences, typeResultReferences, globalsReferences, subroutine)
         self.subroutine = SubroutineNameSpace(subroutine, None, None, callgraph)
+        self.clearLine = CodePostProcessor.CLEAR_LINE
     
     def mergeBegin(self, key):
         return self._postProcessor.mergeBeginTag(key)
@@ -424,6 +426,7 @@ class ExportGlobalsNameSpace(object):
         assertType(globalsReferences, 'globalsReferences', list)
         
         publicElements = currentModule.getPublicElements()
+        printDebug(publicElements)
         
         self.exports = 'PUBLIC :: '
         variables = set()

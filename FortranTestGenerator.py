@@ -10,7 +10,7 @@ import sys
 import argparse;
 from ftgconfigurator import loadFortranTestGeneratorConfiguration, CFG_TEMPLATE, CFG_BACKUP_SUFFIX, CFG_FTG_PREFIX,\
     CFG_TEST_SOURCE_DIR, CFG_TEST_DATA_BASE_DIR, CFG_MODIFY_SOURCE_DIRS, CFG_FCG_CONFIG_FILE, CFG_FTG_CONFIG_FILE, CFG_FCG_DIR
-from printout import printLine
+from printout import printLine, printDebug
 
 def parseArguments(argParser):
     argParser.add_argument('-a', '--restoreCapture', action="store_true", help='Restore only Capture Backup Files')
@@ -110,7 +110,7 @@ def main():
         backupFinder.setBackupSuffixPrefix(BackupFileFinder.CAPTURE_SUFFIX_PREFIX)
         backupFinder.restore()
         sourceFiles.clearCache()
-    elif modifySourceDirs is None or modifySourceDirs == sourceDirs: 
+    elif modifySourceDirs is None or modifySourceDirs == sourceDirs:
         sourceFiles.setSpecialModuleFiles(backupFinder.extendSpecialModuleFiles(sourceFiles.getSpecialModuleFiles()))
 
     if args.export or args.capture or args.replay:
