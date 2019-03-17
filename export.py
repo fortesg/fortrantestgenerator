@@ -4,7 +4,7 @@ from assertions import assertType, assertTypeAll
 from source import SourceFiles, SourceFile, SubroutineFullName, VariableReference
 from templatenamespace import ExportTemplatesNameSpace
 from backup import BackupFileFinder
-from printout import printLine, printWarning, printDebug
+from printout import printLine, printWarning
 from callgraph import CallGraph
 from typefinder import TypeCollection
 
@@ -43,7 +43,6 @@ class ExportCodeGenerator(CodeGenerator):
                 usedSourceFilePath = usedSourceFilePath.replace(self.__backupFinder.getBackupSuffix(), CodeGenerator.DEFAULT_SUFFIX)
                 usedSourceFile = SourceFile(usedSourceFilePath, usedSourceFile.isPreprocessed())
                 refModule = usedSourceFile.getModule(refModule.getName())
-            printDebug(usedSourceFile)
             self.__backupFinder.setBackupSuffixPrefix(BackupFileFinder.EXPORT_SUFFIX_PREFIX)
             backup = self.__backupFinder.create(usedSourceFilePath)
             subroutine = self._findSubroutine(subroutineFullName)

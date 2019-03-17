@@ -2,7 +2,6 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName, Module
 from callgraph import CallGraph
 from postprocessor import CodePostProcessor
-from printout import printDebug
 
 class TemplatesNameSpace(object):
     
@@ -426,7 +425,6 @@ class ExportGlobalsNameSpace(object):
         assertType(globalsReferences, 'globalsReferences', list)
         
         publicElements = currentModule.getPublicElements()
-        printDebug(publicElements)
         
         self.exports = 'PUBLIC :: '
         variables = set()
