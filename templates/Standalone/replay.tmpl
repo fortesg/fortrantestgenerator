@@ -19,13 +19,18 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 
 INTEGER (kind=4) :: mpi_rank, mpi_size, mpi_err
 INTEGER :: total_failure_count
+CHARACTER(len=9) :: arg1
+LOGICAL :: verbose
+
+CALL GET_COMMAND_ARGUMENT(1, arg1)
+verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose'
 
 ! Remove if capture code already deleted
 ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
 ftg_${subroutine.name}_capture_output_enabled = .FALSE.
 
 WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') * '
-ftg_cmp_print_when_equal = .TRUE.
+ftg_cmp_print_when_equal = verbose
 ftg_cmp_count_missing_field_as_failure = .FALSE.
 
 CALL MPI_INIT(mpi_err)

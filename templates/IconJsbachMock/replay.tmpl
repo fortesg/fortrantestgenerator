@@ -25,7 +25,12 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 #end if
 
 INTEGER :: mpi_rank, mpi_size, total_failure_count
-CHARACTER(9) :: total_failure_count_char
+CHARACTER(len=9) :: total_failure_count_char
+CHARACTER(len=9) :: arg1
+LOGICAL :: verbose
+
+CALL GET_COMMAND_ARGUMENT(1, arg1)
+verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose'
 
 CALL start_mpi('ftg_${subroutine.name}_test')
 
@@ -33,7 +38,7 @@ mpi_rank = get_my_mpi_all_id()
 mpi_size = get_my_mpi_all_comm_size()
 
 WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (#', mpi_rank, ') * '
-ftg_cmp_print_when_equal = .TRUE.
+ftg_cmp_print_when_equal = verbose
 ftg_cmp_count_missing_field_as_failure = .FALSE.
 
 CALL message('FTG', '*** Run test for ${subroutine.name} ***')	
