@@ -178,7 +178,7 @@ SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resul
   
   ! ARGUMENTS
   #for $var in $args.allOut.usedVariables
-    #if not $var.hasContainerWithType('t_patch') 
+    #if not $var.hasContainerWithType('t_comm_pattern') 
       $ftgCompare($var) $clearLine
     #end if 
   #end for
@@ -192,7 +192,7 @@ SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resul
   
   ! GLOBALS
   #for $var in $globals.usedVariables
-    #if not $var.hasContainerWithType('t_patch') and not $var.fromModule('mo_real_timer')
+    #if not $var.hasContainerWithType('t_comm_pattern') and not $var.fromModule('mo_real_timer')
       $ftgCompare($var) $clearLine
     #end if
   #end for
