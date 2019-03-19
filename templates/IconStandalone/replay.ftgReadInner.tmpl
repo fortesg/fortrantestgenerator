@@ -1,10 +1,6 @@
 #set $var = $ftgReadInner_var
 #set $filledAlias = $ftgReadInner_filledAlias
-#if $var.type.upper().startswith('CHARACTER')
-  #set $mandDim = $var.totalDim
-#else
-  #set $mandDim = $var.mandatoryDimensions
-#end if
+#set $mandDim = $var.mandatoryDimensions
 #if $mandDim > 0
   $writeVarNameWithFilledIndicesToString($var, 'ftg_name', $mandDim, 'ftg_d1', 'ftg_d2', 'ftg_d3', 'ftg_d4', 'ftg_d5', 'ftg_d6')
   #set $varName = 'ftg_name'
