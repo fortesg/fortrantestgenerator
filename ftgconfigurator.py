@@ -1,5 +1,4 @@
 import os
-import sys
 from printout import printError
 
 CFG_FCG_DIR = 'FCG_DIR'
