@@ -97,7 +97,7 @@ class BackupFileFinder(object):
         originalFile = originalFile.replace(BackupFileFinder.CAPTURE_SUFFIX_PREFIX, '')
         originalFile = originalFile.replace(self.__backupSuffix, BackupFileFinder.DEFAULT_SUFFIX.upper())
         if not os.path.exists(originalFile):
-            originalFile = originalFile.replace(self.__backupSuffix, BackupFileFinder.DEFAULT_SUFFIX)
+            originalFile = originalFile.replace(BackupFileFinder.DEFAULT_SUFFIX.upper(), BackupFileFinder.DEFAULT_SUFFIX)
         return originalFile
             
     def __getBackupFile(self, originalFile):
