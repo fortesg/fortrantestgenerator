@@ -473,8 +473,8 @@ class ExportTypesNameSpace(object):
         self.exports = 'PUBLIC :: '
         for typE in types:
             module = typE.getModule()
-            typeName = typE.getName().lower()
-            if module is not None and module == currentModule and typeName not in publicElements:
+            typeName = typE.getName()
+            if module is not None and module == currentModule and not typE.isPublic() and typeName not in publicElements:
                 self.exports += typeName + ", "
                 
         self.exports = self.exports.strip(', ')
