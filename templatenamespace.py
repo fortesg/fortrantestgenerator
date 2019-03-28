@@ -2,6 +2,7 @@ from assertions import assertType, assertTypeAll
 from source import Subroutine, SourceFile, VariableReference, Variable, SubroutineFullName, Module
 from callgraph import CallGraph
 from postprocessor import CodePostProcessor
+from printout import printDebug
 
 class TemplatesNameSpace(object):
     
@@ -432,6 +433,7 @@ class ExportGlobalsNameSpace(object):
             variable = ref.getLevel0Variable()
             refModule = variable.getModule()
             if refModule == currentModule:
+                printDebug(str(variable) + ' : ' + str(variable.isPublic()))
                 variableName = variable.getOriginalName().lower()
                 if variableName not in variables and not variable.isPublic() and variableName not in publicElements:
                     self.exports += variableName + ", "
