@@ -2,11 +2,10 @@ $prologue $mergeBegin('ftg')
 $mergeBegin('ftg')
 LOGICAL :: ftg_${subroutine.name}_capture_active_local
 
-ftg_${subroutine.name}_capture_active_local = .FALSE.
 ftg_${subroutine.name}_round = ftg_${subroutine.name}_round + 1
-IF (ftg_${subroutine.name}_capture_input_enabled .AND. ftg_${subroutine.name}_capture_active()) THEN
+ftg_${subroutine.name}_capture_active_local = ftg_${subroutine.name}_capture_active()
+IF (ftg_${subroutine.name}_capture_input_enabled .AND. ftg_${subroutine.name}_capture_active_local) THEN
   CALL ftg_${subroutine.name}_capture_data($commaList("'input'", $args))
-  ftg_${subroutine.name}_capture_active_local = .TRUE.
 END IF
 
 $epilogue $mergeEnd('ftg')
