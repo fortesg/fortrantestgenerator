@@ -15,6 +15,10 @@
     $include('NicamStandalone/capture.ftgWriteInner.tmpl')
 #end def ftgWriteInner
 
+#def replay
+    $include('NicamStandalone/replay.tmpl')
+#end def replay
+
 #def ftgRead($var)
     #set global $ftgRead_var = $var
     $include('NicamStandalone/replay.ftgRead.tmpl')

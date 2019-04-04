@@ -1,0 +1,199 @@
+PROGRAM ftg_${subroutine.name}_test
+
+USE mpi
+
+USE ${module.name}, ONLY: ${subroutine.name}
+! Remove if capture code already deleted
+USE ${module.name}, ONLY: ftg_${subroutine.name}_capture_input_enabled, ftg_${subroutine.name}_capture_output_enabled
+
+USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
+USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
+
+$globals.imports
+$types.imports
+  
+IMPLICIT NONE
+
+CHARACTER(*), PARAMETER :: INPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/input'
+CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/output'
+
+INTEGER (kind=4) :: mpi_rank, mpi_size, mpi_err
+INTEGER :: total_failure_count
+CHARACTER(len=9) :: arg1
+LOGICAL :: verbose
+
+CALL GET_COMMAND_ARGUMENT(1, arg1)
+verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose'
+
+! Remove if capture code already deleted
+ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
+ftg_${subroutine.name}_capture_output_enabled = .FALSE.
+
+WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') * '
+ftg_cmp_print_when_equal = verbose
+ftg_cmp_count_missing_field_as_failure = .FALSE.
+
+CALL MPI_INIT(mpi_err)
+CALL MPI_COMM_RANK(MPI_COMM_WORLD, mpi_rank, mpi_err)
+CALL MPI_COMM_SIZE(MPI_COMM_WORLD, mpi_size, mpi_err)
+
+IF (mpi_rank == 0) THEN
+  WRITE(*,'(A)') '*** FTG: Run test for ${subroutine.name} ***'
+END IF
+  
+CALL ftg_test_${subroutine.name}(total_failure_count)
+
+IF (mpi_rank == 0) THEN
+  IF (total_failure_count > 0) THEN
+    WRITE(*,'(A,I0,A)') '*** FTG: ${subroutine.name}: TEST FAILED, total number of failures: ', total_failure_count, ' ***'
+    STOP 2
+  ELSE
+    WRITE(*,'(A)') '*** FTG: ${subroutine.name}: TEST PASSED  ***'
+  END IF
+END IF
+
+CALL MPI_FINALIZE(mpi_err)
+
+CONTAINS
+  
+SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
+
+  INTEGER, INTENT(out) :: total_failure_count
+    
+  $args.specs(intent = '', allocatable = True, charLengthZero = True)
+  #if $subroutine.isFunction
+      $result.spec(name = $subroutine.name + '_result', intent = '', allocatable = False)
+  #end if
+  
+  INTEGER :: failure_count, mpi_stat(MPI_STATUS_SIZE)
+  
+  ! ----------- REPLAY -----------
+  CALL ftg_${subroutine.name}_replay_input($commaList($args))
+
+  #if $subroutine.isFunction
+    #if $result.pointer
+      ${subroutine.name}_result => ${subroutine.name}($commaList($args))
+    #else
+      ${subroutine.name}_result = ${subroutine.name}($commaList($args))
+    #end if
+  #else
+    CALL ${subroutine.name}($commaList($args))
+  #end if
+
+  ! ----------- COMPARE -----------
+  ! One process after another to get nice, ordered printing
+  ! Change this if to slow
+  IF (mpi_rank > 0) THEN
+      CALL mpi_recv(total_failure_count, 1, MPI_INT, mpi_rank - 1, 0, MPI_COMM_WORLD, mpi_stat, mpi_err)
+  ELSE
+      total_failure_count = 0
+  END IF
+  
+  #if $subroutine.isFunction
+      #set $resultArg = $subroutine.name + '_result'
+  #else
+    #set $resultArg = ''
+  #end if  
+  CALL ftg_${subroutine.name}_compare_output($commaList($args.allOut, $resultArg, 'failure_count'))
+  
+  IF (failure_count == 0) THEN
+      WRITE (*,'(A,I0.2,A)') 'FTG ${subroutine.name}: RANK #', mpi_rank, ' OK'
+  ELSE
+      WRITE (*,'(A,I0.2,A,I0,A)') 'FTG ${subroutine.name}: RANK #', mpi_rank, ' FAILED: ', failure_count, ' failures'
+  END IF
+  
+  total_failure_count = total_failure_count + failure_count 
+
+  IF (mpi_rank < mpi_size - 1) THEN
+      CALL mpi_send(total_failure_count, 1, MPI_INT, mpi_rank + 1, 0, MPI_COMM_WORLD, mpi_err)
+  END IF
+
+  CALL mpi_bcast(total_failure_count, 1, MPI_INT, mpi_size - 1, MPI_COMM_WORLD, mpi_err)
+
+END SUBROUTINE ftg_test_${subroutine.name}
+
+SUBROUTINE ftg_${subroutine.name}_init_serializer(stage, dir)
+
+  CHARACTER(*), INTENT(IN) :: stage, dir
+
+  CHARACTER(len=1024) :: basename
+
+  WRITE (basename,'(A,A,A,I0.2)') 'ftg_${subroutine.name}_', TRIM(stage), '_', mpi_rank
+  
+  CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'r')
+  CALL ftg_set_savepoint(stage)
+
+END SUBROUTINE ftg_${subroutine.name}_init_serializer
+
+SUBROUTINE ftg_${subroutine.name}_close_serializer()
+
+  CALL ftg_destroy_savepoint()
+  CALL ftg_destroy_serializer()
+
+END SUBROUTINE ftg_${subroutine.name}_close_serializer
+
+SUBROUTINE ftg_${subroutine.name}_replay_input($commaList($args))
+  
+  $args.specs(intent = 'inout', allocatable = True)
+
+  INTEGER, DIMENSION(8) :: ftg_bounds
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, ftg_d5, ftg_d6, ftg_sizeonedim
+  CHARACTER(len=256) :: ftg_name
+
+  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT STARTED ${subroutine.name} (Rank #', mpi_rank, ')'
+  CALL ftg_${subroutine.name}_init_serializer('input', INPUT_DIR)
+
+  ! ARGUMENTS
+  #for $var in $args.usedVariables
+    $ftgRead($var) $clearLine
+  #end for
+
+  ! GLOBALS
+  #for $var in $globals.usedVariables
+    $ftgRead($var) $clearLine
+  #end for
+  
+  CALL ftg_${subroutine.name}_close_serializer()
+  WRITE (0,'(A,I0.2,A)') 'FTG READ INPUT FINISHED ${subroutine.name} (Rank #', mpi_rank, ')'
+
+END SUBROUTINE ftg_${subroutine.name}_replay_input
+
+SUBROUTINE ftg_${subroutine.name}_compare_output($commaList($args.allOut, $result, 'failure_count'))
+  
+  $args.allOut.specs(intent = 'in', allocatable = False)
+  #if $subroutine.isFunction:
+    $result.spec(intent = 'in', allocatable = False)
+  #end if
+  
+  INTEGER, INTENT(out) :: failure_count
+  LOGICAL :: result
+  INTEGER :: ftg_d1, ftg_d2, ftg_d3, ftg_d4, ftg_d5, ftg_d6
+  CHARACTER(len=256) :: ftg_name
+  
+  WRITE (0,'(A,I0.2,A)') 'FTG COMPARE OUTPUT DATA ${subroutine.name} (Rank #', mpi_rank, ')'
+  CALL ftg_${subroutine.name}_init_serializer('output', OUTPUT_DIR)
+  
+  failure_count = 0
+  
+  ! ARGUMENTS
+  #for $var in $args.allOut.usedVariables
+    $ftgCompare($var) $clearLine
+  #end for
+  
+  #if $subroutine.isFunction
+    ! RESULT
+    #for $var in $result.usedVariables
+      $ftgCompare($var) $clearLine
+    #end for
+  #end if
+  
+  ! GLOBALS
+  #for $var in $globals.usedVariables
+    $ftgCompare($var) $clearLine
+  #end for
+  
+  CALL ftg_${subroutine.name}_close_serializer()
+  
+END SUBROUTINE ftg_${subroutine.name}_compare_output
+
+END PROGRAM ftg_${subroutine.name}_test
