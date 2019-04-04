@@ -1,0 +1,73 @@
+#set $var = $ftgRead_var
+#if $var.dim > 4
+  ! *** WARNING: Type not supported by serialbox *** 
+  !     $var 
+  !     $var.type, DIMENSION($var.dim)
+#else
+  #set $closeStatements = []
+  #if $var.type.upper().startswith('CHARACTER')
+    #set $mandDim = $var.totalDim
+  #else
+    #set $mandDim = $var.mandatoryDimensions
+  #end if
+  #set $indices = ['ftg_d1', 'ftg_d2', 'ftg_d3', 'ftg_d4', 'ftg_d5', 'ftg_d6']
+  #set $d = 0
+  #set $ad = 0
+  #set $aliasVar = $var
+  #set $filledVar = $fillIndices($var, $mandDim, *$indices)
+  #set $filledAlias = $filledVar
+  #for $level in $var.levels[:-1]
+    #set $container = $aliasVar.container($level - ($var.level - $aliasVar.level))
+    #set $filledContainer = $fillIndices($container, $ad, *$indices[$d - $ad:])
+    #if $needsAllocation($filledContainer)
+      #if $d > 0
+        $writeVarNameWithFilledIndicesToString($container, "ftg_name", $d, *$indices)
+        #set $contName = 'ftg_name'
+      #else 
+        #set $contName = '"' + str($container) + '"'
+      #end if
+      IF (ftg_field_exists($contName)) THEN
+        #if $container.dim > 0
+          ftg_bounds = ftg_get_bounds($contName)
+        #end if
+        $alloc($filledContainer, "ftg_bounds(1):ftg_bounds(2)", "ftg_bounds(3):ftg_bounds(4)", "ftg_bounds(5):ftg_bounds(6)", "ftg_bounds(7):ftg_bounds(8)")
+      ELSE
+        $alloc($filledContainer, "0", "0", "0", "0")
+      END IF
+    #end if
+    #if $container.polymorph
+      #set $alias = 'polym' + str($level)
+      SELECT TYPE ($alias => $filledContainer) $mergeBegin('switch' + str($level))
+      TYPE IS ($container.dynamicType) $mergeBegin('switch' + str($level))
+      #silent $closeStatements.append('END SELECT ' + $mergeEnd('switch' + str($level)))
+      #set $aliasVar = $var.alias($alias, $level) 
+      #set $filledAlias = $filledVar.alias($alias, $level) 
+      #set $ad = 0
+    #else
+      #set $aa = $allocatedOrAssociated($filledContainer, $level)
+      #if $aa
+        IF ($aa) THEN $mergeBegin('if' + str($level))
+        #silent $closeStatements.append('END IF ' + $mergeEnd('if' + str($level)))
+      #end if
+    #end if
+    #if $d < $mandDim
+      #set $loopDims = range($d + 1, $d + $container.dim + 1) 
+      #set $d += $container.dim
+      #set $ad += $container.dim
+      #set $cd = 0
+      #for $ld in $loopDims
+        #set $cd += 1
+        DO ftg_d$ld = LBOUND($filledContainer, $cd), UBOUND($filledContainer, $cd) $mergeBegin('do' + str($level))
+        #silent $closeStatements.append('END DO ' + $mergeEnd('do' + str($level)))
+      #end for        
+    #end if      
+  #end for
+  $ftgReadInner($var, $filledAlias) $clearLine
+  #for $close in reversed($closeStatements)
+    $close
+  #end for
+  #if 'END DO' in [s[0:6] for s in $closeStatements]
+  
+  #end if
+#end if  
+$clearLine
