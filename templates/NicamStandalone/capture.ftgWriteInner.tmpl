@@ -15,24 +15,24 @@
   #if $var.dim == 5
     ftg_shape = SHAPE($filledAlias)
     IF (ftg_shape(1) == 1) THEN
-      CALL ftg_write($varName, $filledAlias(1,:,:,:,:), LBOUND($filledAlias(1,:,:,:,:)), UBOUND($filledAlias(1,:,:,:,:)))
+      CALL ftg_write($varName, ${filledAlias}(1,:,:,:,:), LBOUND(${filledAlias}(1,:,:,:,:)), UBOUND(${filledAlias}(1,:,:,:,:)))
       CALL ftg_add_field_metainfo($varName, "ftg:sizeonedim", 1)
     ELSE IF (ftg_shape(2) == 1) THEN
-      CALL ftg_write($varName, $filledAlias(:,1,:,:,:), LBOUND($filledAlias(:,1,:,:,:)), UBOUND($filledAlias(:,1,:,:,:)))
+      CALL ftg_write($varName, ${filledAlias}(:,1,:,:,:), LBOUND(${filledAlias}(:,1,:,:,:)), UBOUND(${filledAlias}(:,1,:,:,:)))
       CALL ftg_add_field_metainfo($varName, "ftg:sizeonedim", 2)
     ELSE IF (ftg_shape(3) == 1) THEN
-      CALL ftg_write($varName, $filledAlias(:,:,1,:,:), LBOUND($filledAlias(:,:,1,:,:)), UBOUND($filledAlias(:,:,1,:,:)))
+      CALL ftg_write($varName, ${filledAlias}(:,:,1,:,:), LBOUND(${filledAlias}(:,:,1,:,:)), UBOUND(${filledAlias}(:,:,1,:,:)))
       CALL ftg_add_field_metainfo($varName, "ftg:sizeonedim", 3)
     ELSE IF (ftg_shape(4) == 1) THEN
-      CALL ftg_write($varName, $filledAlias(:,:,:,1,:), LBOUND($filledAlias(:,:,:,1,:)), UBOUND($filledAlias(:,:,:,1,:)))
+      CALL ftg_write($varName, ${filledAlias}(:,:,:,1,:), LBOUND(${filledAlias}(:,:,:,1,:)), UBOUND(${filledAlias}(:,:,:,1,:)))
       CALL ftg_add_field_metainfo($varName, "ftg:sizeonedim", 4)
     ELSE IF (ftg_shape(5) == 1) THEN
-      CALL ftg_write($varName, $filledAlias(:,:,:,:,1), LBOUND($filledAlias(:,:,:,:,1)), UBOUND($filledAlias(:,:,:,:,1)))
+      CALL ftg_write($varName, ${filledAlias}(:,:,:,:,1), LBOUND(${filledAlias}(:,:,:,:,1)), UBOUND(${filledAlias}(:,:,:,:,1)))
       CALL ftg_add_field_metainfo($varName, "ftg:sizeonedim", 5)
     END IF
   #else
     CALL ftg_write($varName, $filledAlias, LBOUND($filledAlias), UBOUND($filledAlias))
-  #endif
+  #end if
 #else
   CALL ftg_write($varName, $filledAlias)
 #end if

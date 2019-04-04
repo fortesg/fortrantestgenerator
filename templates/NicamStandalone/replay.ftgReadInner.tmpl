@@ -16,20 +16,20 @@
     CALL ftg_get_field_metainfo($varName, "ftg:sizeonedim", ftg_sizeonedim)
     ftg_bounds = ftg_get_bounds($varName)
     IF (ftg_sizeonedim == 1) THEN
-      ALLOCATE($varName(1, ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8))
-      CALL ftg_read($varName, $filledAlias(1,:,:,:,:))
+      ALLOCATE(${varName}(1, ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8))
+      CALL ftg_read($varName, ${filledAlias}(1,:,:,:,:))
     ELSE (ftg_sizeonedim == 2) THEN
-      ALLOCATE($varName(ftg_bounds(1):ftg_bounds(2), 1, ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8))
-      CALL ftg_read($varName, $filledAlias(:,1,:,:,:))
+      ALLOCATE(${varName}(ftg_bounds(1):ftg_bounds(2), 1, ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8))
+      CALL ftg_read($varName, ${filledAlias}(:,1,:,:,:))
     ELSE (ftg_sizeonedim == 3) THEN
-      ALLOCATE($varName(ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), 1, ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8))
-      CALL ftg_read($varName, $filledAlias(:,:,1,:,:))
+      ALLOCATE(${varName}(ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), 1, ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8))
+      CALL ftg_read($varName, ${filledAlias}(:,:,1,:,:))
     ELSE (ftg_sizeonedim == 4) THEN
-      ALLOCATE($varName(ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), 1, ftg_bounds(7):ftg_bounds(8))
-      CALL ftg_read($varName, $filledAlias(:,:,:,1,:))
+      ALLOCATE(${varName}(ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), 1, ftg_bounds(7):ftg_bounds(8))
+      CALL ftg_read($varName, ${filledAlias}(:,:,:,1,:))
     ELSE (ftg_sizeonedim == 5) THEN
-      ALLOCATE($varName(ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8), 1)
-      CALL ftg_read($varName, $filledAlias(:,:,:,:,1))
+      ALLOCATE(${varName}(ftg_bounds(1):ftg_bounds(2), ftg_bounds(3):ftg_bounds(4), ftg_bounds(5):ftg_bounds(6), ftg_bounds(7):ftg_bounds(8), 1)
+      CALL ftg_read($varName, ${filledAlias}(:,:,:,:,1))
     END IF
   #elif $var.pointer
     CALL ftg_allocate_and_read_pointer($varName, $filledAlias)

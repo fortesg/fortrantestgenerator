@@ -15,19 +15,19 @@
   #if $var.dim == 5
     CALL ftg_get_field_metainfo($varName, "ftg:sizeonedim", ftg_sizeonedim)
     IF (ftg_sizeonedim == 1) THEN
-      CALL ftg_compare($varName, $filledAlias(1,:,:,:,:), LBOUND($filledAlias(1,:,:,:,:)), UBOUND($filledAlias(1,:,:,:,:)))
+      CALL ftg_compare($varName, ${filledAlias}(1,:,:,:,:), LBOUND(${filledAlias}(1,:,:,:,:)), UBOUND(${filledAlias}(1,:,:,:,:)))
     ELSE (ftg_sizeonedim == 2) THEN
-      CALL ftg_compare($varName, $filledAlias(:,1,:,:,:), LBOUND($filledAlias(:,1,:,:,:)), UBOUND($filledAlias(:,1,:,:,:)))
+      CALL ftg_compare($varName, ${filledAlias}(:,1,:,:,:), LBOUND(${filledAlias}(:,1,:,:,:)), UBOUND(${filledAlias}(:,1,:,:,:)))
     ELSE (ftg_sizeonedim == 3) THEN
-      CALL ftg_compare($varName, $filledAlias(:,:,1,:,:), LBOUND($filledAlias(:,:,1,:,:)), UBOUND($filledAlias(:,:,1,:,:)))
+      CALL ftg_compare($varName, ${filledAlias}(:,:,1,:,:), LBOUND(${filledAlias}(:,:,1,:,:)), UBOUND(${filledAlias}(:,:,1,:,:)))
     ELSE (ftg_sizeonedim == 4) THEN
-      CALL ftg_compare($varName, $filledAlias(:,:,:,1,:), LBOUND($filledAlias(:,:,:,1,:)), UBOUND($filledAlias(:,:,:,1,:)))
+      CALL ftg_compare($varName, ${filledAlias}(:,:,:,1,:), LBOUND(${filledAlias}(:,:,:,1,:)), UBOUND(${filledAlias}(:,:,:,1,:)))
     ELSE (ftg_sizeonedim == 5) THEN
-      CALL ftg_compare($varName, $filledAlias(:,:,:,:,1), LBOUND($filledAlias(:,:,:,:,1)), UBOUND($filledAlias(:,:,:,:,1)))
+      CALL ftg_compare($varName, ${filledAlias}(:,:,:,:,1), LBOUND(${filledAlias}(:,:,:,:,1)), UBOUND(${filledAlias}(:,:,:,:,1)))
     END IF
   #else
     CALL ftg_compare($varName, $filledAlias, result, failure_count, LBOUND($filledAlias), UBOUND($filledAlias))
-  #endif 
+  #end if 
 #else
   CALL ftg_compare($varName, $filledAlias, result, failure_count)
 #end if
