@@ -1,9 +1,10 @@
 #set $var = $ftgCompare_var
-#if $var.dim > 4:
+#if $var.dim > 4
   ! *** WARNING: Type not supported by serialbox *** 
   !     $var 
   !     $var.type, DIMENSION($var.dim)
-#else
+#end if
+#if $var.dim <= 5
   #set $closeStatements = []
   #if $var.type.upper().startswith('CHARACTER')
     #set $mandDim = $var.totalDim
