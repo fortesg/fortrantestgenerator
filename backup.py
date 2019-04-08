@@ -36,7 +36,9 @@ class BackupFileFinder(object):
             for root, _, files in os.walk(sourceDir):
                 for name in files:
                     if name.find(self.getBackupSuffix()) >= 0:
-                        backupFiles.append(os.path.join(root, name))
+                        path = os.path.join(root, name)
+                        if path not in backupFiles:
+                            backupFiles.append(path)
         #Sorting makes capture backups to be restored before export backups
         # and export backups set to special module files
         return sorted(backupFiles) 
