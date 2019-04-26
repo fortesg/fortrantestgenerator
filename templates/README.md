@@ -3,13 +3,15 @@
 ```
 ../FTGTemplate.tmpl
 │
+├─ BaseCompare/BaseCompare.tmpl
+│
 └─ Standalone/Standalone.tmpl
    │  
    ├─ StandaloneNoMPI/StandaloneNoMPI.tmpl
    │
-   └─ IconStandalone/IconStandalone.tmpl
-      │
-      ├─ IconCompare/IconCompare.tmpl
-      │
-      └─ IconTestbed/IconTestbed.tmpl
+   ├─ IconStandalone/IconStandalone.tmpl
+   │  │
+   │  └─ IconJsbachMock/IconJsbachMock.tmpl
+   │
+   └─ NicamStandalone/NicamStandalone.tmpl  
 ```
