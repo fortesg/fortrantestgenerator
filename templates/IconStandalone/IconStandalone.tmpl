@@ -1,15 +1,15 @@
 #extends Standalone
 
 #def captureAfterSubroutine
-    $include('IconStandalone/capture.aftersubroutine.tmpl')
+  $include('IconStandalone/capture.aftersubroutine.tmpl')
 #end def captureAfterSubroutine
 
 #def replay
-    $include('IconStandalone/replay.tmpl')
+  $include('IconStandalone/replay.tmpl')
 #end def replay
 
 #def ftgReadInner($var, $filledAlias)
-    #set global $ftgReadInner_var = $var
-    #set global $ftgReadInner_filledAlias = $filledAlias
-    $include('IconStandalone/replay.ftgReadInner.tmpl')
+  #set global $ftgReadInner_var = $var
+  #set global $ftgReadInner_filledAlias = $filledAlias
+  $include('IconStandalone/replay.ftgReadInner.tmpl')
 #end def ftgReadInner
