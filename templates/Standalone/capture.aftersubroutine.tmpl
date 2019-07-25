@@ -29,7 +29,7 @@ SUBROUTINE ftg_${subroutine.name}_init_serializer(stage)
     WRITE (0,'(A,A,A)') 'FTG INIT *** ERROR: ', TRIM(mkdir_err), ' ***'
   END IF 
   
-  ignore_bullshit_max_dim_size = 100000
+  ignore_bullshit_max_dim_size = 10000000
   ignore_bullshit_allow_negative_indices = .TRUE.
   
   CALL ftg_set_serializer(TRIM(dir), TRIM(basename), 'w')
