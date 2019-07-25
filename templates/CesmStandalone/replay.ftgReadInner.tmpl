@@ -1,0 +1,21 @@
+#set $var = $ftgReadInner_var
+#set $filledAlias = $ftgReadInner_filledAlias
+#set $mandDim = $var.mandatoryDimensions
+#if $mandDim > 0
+  $writeVarNameWithFilledIndicesToString($var, 'ftg_name', $mandDim, 'ftg_d1', 'ftg_d2', 'ftg_d3', 'ftg_d4', 'ftg_d5', 'ftg_d6')
+  #set $varName = 'ftg_name'
+#else 
+  #set $varName = '"' + str($var) + '"'
+#end if
+#if $needsAllocation($var)
+  #if $var.pointer
+    CALL ftg_allocate_and_read_pointer($varName, $filledAlias)
+  #else
+    CALL ftg_allocate_and_read_allocatable($varName, $filledAlias)
+  #end if
+#elif $var.container.type == 'type(t_fvdycore_grid)' and $var.lastname.startswith('comm')
+  CALL ftg_read_mpi_comm($varName, $filledAlias)
+#else
+  CALL ftg_read($varName, $filledAlias)
+#end if
+$clearLine
