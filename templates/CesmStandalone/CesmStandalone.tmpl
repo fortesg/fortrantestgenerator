@@ -1,0 +1,12 @@
+#extends Standalone
+
+#def captureAfterSubroutine
+    #super
+    $include('CesmStandalone/capture.aftersubroutine.tmpl')
+#end def captureAfterSubroutine
+
+#def ftgWriteInner($var, $filledAlias)
+    #set global $ftgWriteInner_var = $var
+    #set global $ftgWriteInner_filledAlias = $filledAlias
+    $include('CesmStandalone/capture.ftgWriteInner.tmpl')
+#end def ftgWriteInner

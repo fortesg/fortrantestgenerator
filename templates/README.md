@@ -13,5 +13,7 @@
    │  │
    │  └─ IconJsbachMock/IconJsbachMock.tmpl
    │
+   ├─ CesmStandalone/CesmStandalone.tmpl  
+   │
    └─ NicamStandalone/NicamStandalone.tmpl  
 ```

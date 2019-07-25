@@ -1,0 +1,37 @@
+$prologue $mergeBegin('ftg')
+$mergeBegin('ftg')
+SUBROUTINE ftg_read_mpi_comm(fieldname, comm)
+
+  USE m_ser_ftg, ONLY: ftg_field_exists, ftg_read
+
+  CHARACTER(LEN=*), INTENT(IN) :: fieldname
+  INTEGER, INTENT(OUT)         :: comm
+
+  INTEGER, PARAMETER :: MAX_COMM_COUNT = 64  ! Increase if necessary
+  INTEGER, SAVE :: mpi_comms(MAX_COMM_COUNT,2) = 0, comm_count = 0
+
+  INTEGER :: old_comm, color, rank, error, i
+
+  comm = MPI_COMM_NULL
+
+  IF (ftg_field_exists(fieldname)) THEN
+    CALL ftg_read(fieldname, old_comm)
+    IF (old_comm /= MPI_COMM_NULL) THEN
+      DO i = 1, comm_count
+        IF (mpi_comms(i, 1) == old_comm) THEN
+          comm = mpi_comms(i, 2)
+          RETURN
+        END IF
+      END DO
+
+      CALL ftg_read(TRIM(fieldname)//'@color', color)
+      CALL ftg_read(TRIM(fieldname)//'@rank', rank)
+      CALL MPI_COMM_SPLIT(MPI_COMM_WORLD, color, rank, comm, error)
+      comm_count = comm_count + 1
+      mpi_comms(comm_count,:) = (/ old_comm, comm /)
+    END IF
+  END IF
+
+END SUBROUTINE ftg_read_mpi_comm
+  
+$epilogue $mergeEnd('ftg')
