@@ -1,37 +1,34 @@
 $prologue $mergeBegin('ftg')
 $mergeBegin('ftg')
-SUBROUTINE ftg_read_mpi_comm(fieldname, comm)
+SUBROUTINE ftg_write_mpi_comm(fieldname, comm)
 
-  USE m_ser_ftg, ONLY: ftg_field_exists, ftg_read
+  USE mpi
+  USE m_ser_ftg, ONLY: ftg_write
 
   CHARACTER(LEN=*), INTENT(IN) :: fieldname
-  INTEGER, INTENT(OUT)         :: comm
+  INTEGER, INTENT(IN)          :: comm
 
-  INTEGER, PARAMETER :: MAX_COMM_COUNT = 64  ! Increase if necessary
-  INTEGER, SAVE :: mpi_comms(MAX_COMM_COUNT,2) = 0, comm_count = 0
+  INTEGER :: world_rank, world_rank_bit, color, group, rank, error
 
-  INTEGER :: old_comm, color, rank, error, i
-
-  comm = MPI_COMM_NULL
-
-  IF (ftg_field_exists(fieldname)) THEN
-    CALL ftg_read(fieldname, old_comm)
-    IF (old_comm /= MPI_COMM_NULL) THEN
-      DO i = 1, comm_count
-        IF (mpi_comms(i, 1) == old_comm) THEN
-          comm = mpi_comms(i, 2)
-          RETURN
-        END IF
-      END DO
-
-      CALL ftg_read(TRIM(fieldname)//'@color', color)
-      CALL ftg_read(TRIM(fieldname)//'@rank', rank)
-      CALL MPI_COMM_SPLIT(MPI_COMM_WORLD, color, rank, comm, error)
-      comm_count = comm_count + 1
-      mpi_comms(comm_count,:) = (/ old_comm, comm /)
-    END IF
+  IF (comm /= MPI_COMM_NULL) THEN
+    ! Attention! This color calculation only works with at most 31 processes
+    CALL MPI_COMM_RANK(MPI_COMM_WORLD, world_rank, error)
+    world_rank_bit = ibset(0, world_rank)
+    ! If this leads to an "Invalid communicator" error,
+    ! comment or remove the current call to ftg_write_mpi_comm
+    ! or initialize/set the variable passed as comm to MPI_COMM_NULL.
+    ! Be careful as your solution will apply to all processes!
+    CALL MPI_ALLREDUCE(world_rank_bit, color, 1, MPI_INT, MPI_BOR, comm, error)
+    CALL MPI_COMM_RANK(comm, rank, error)
+  ELSE
+    color = MPI_UNDEFINED
+    rank = MPI_PROC_NULL
   END IF
 
-END SUBROUTINE ftg_read_mpi_comm
+  CALL ftg_write(fieldname, comm)
+  CALL ftg_write(TRIM(fieldname)//'@color', color)
+  CALL ftg_write(TRIM(fieldname)//'@rank', rank)
+
+END SUBROUTINE ftg_write_mpi_comm
   
 $epilogue $mergeEnd('ftg')
