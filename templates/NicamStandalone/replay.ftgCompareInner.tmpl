@@ -13,7 +13,10 @@
 #end if
 #if $mandDim < $var.totalDim
   #if $var.dim == 5
-    CALL ftg_get_field_metainfo($varName, "ftg:sizeonedim", ftg_sizeonedim)
+    ftg_sizeonedim = 1
+    IF (ftg_field_exists($varName)) THEN
+      CALL ftg_get_field_metainfo($varName, "ftg:sizeonedim", ftg_sizeonedim)
+    END IF
     IF (ftg_sizeonedim == 1) THEN
       CALL ftg_compare($varName, ${filledAlias}(1,:,:,:,:), result, failure_count, LBOUND(${filledAlias}(1,:,:,:,:)), UBOUND(${filledAlias}(1,:,:,:,:)))
     ELSE IF (ftg_sizeonedim == 2) THEN
