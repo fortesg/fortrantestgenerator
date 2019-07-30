@@ -29,10 +29,6 @@ verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose'
 ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
 ftg_${subroutine.name}_capture_output_enabled = .FALSE.
 
-WRITE (ftg_cmp_message_prefix,'(A,I0.2,A)') 'FTG ${subroutine.name} (', mpi_rank, ') * '
-ftg_cmp_print_when_equal = verbose
-ftg_cmp_count_missing_field_as_failure = .FALSE.
-
 CALL MPI_INIT(mpi_err)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, mpi_rank, mpi_err)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, mpi_size, mpi_err)
