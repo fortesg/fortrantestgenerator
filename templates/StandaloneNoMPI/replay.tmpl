@@ -32,7 +32,6 @@ CALL ftg_test_${subroutine.name}(failure_count)
 
 IF (failure_count > 0) THEN
   WRITE(*,'(A,I0,A)') '*** FTG: ${subroutine.name}: TEST FAILED, total number of failures: ', failure_count, ' ***'
-  STOP 2
 ELSE
   WRITE(*,'(A)') '*** FTG: ${subroutine.name}: TEST PASSED  ***'
 END IF
