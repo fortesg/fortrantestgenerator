@@ -5,6 +5,11 @@
   $include('CesmStandalone/capture.aftersubroutine.tmpl')
 #end def captureAfterSubroutine
 
+#def ftgWrite($var)
+  #set global $ftgWrite_var = $var
+  $include('CesmStandalone/capture.ftgWrite.tmpl')
+#end def ftgWrite
+
 #def ftgWriteInner($var, $filledAlias)
   #set global $ftgWriteInner_var = $var
   #set global $ftgWriteInner_filledAlias = $filledAlias
@@ -15,11 +20,21 @@
   $include('CesmStandalone/replay.tmpl')
 #end def replay
 
+#def ftgRead($var)
+  #set global $ftgRead_var = $var
+  $include('CesmStandalone/replay.ftgRead.tmpl')
+#end def ftgRead
+
 #def ftgReadInner($var, $filledAlias)
   #set global $ftgReadInner_var = $var
   #set global $ftgReadInner_filledAlias = $filledAlias
   $include('CesmStandalone/replay.ftgReadInner.tmpl')
 #end def ftgReadInner
+
+#def ftgCompare($var)
+  #set global $ftgCompare_var = $var
+  $include('CesmStandalone/replay.ftgCompare.tmpl')
+#end def ftgCompare
 
 #def ftgCompareInner($var, $filledAlias)
   #set global $ftgCompareInner_var = $var
