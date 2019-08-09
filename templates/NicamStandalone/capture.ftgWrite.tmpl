@@ -35,7 +35,7 @@
         #silent $closeStatements.append('END IF ' + $mergeEnd('if' + str($level)))
       #end if
     #end if
-    #if $level < $var.level and $needsRegistration($filledContainer)
+    #if ($level < $var.level and $needsRegistration($filledContainer)) or ($var.type.upper().startswith('CHARACTER') and $level == $var.level and $d < $mandDim)
       #if $d > 0
         $writeVarNameWithFilledIndicesToString($container, "ftg_name", $d, *$indices)
         #set $contName = 'ftg_name'
