@@ -329,6 +329,7 @@ class GlobalsNameSpace(object):
             variable = ref.getLevel0Variable()
             variables.add(variable)
         variables = sorted(variables)
+        self.usedVariables = sorted(self.usedVariables)
         
         testModule = subroutine.getModule()
         modules = dict()    
@@ -495,6 +496,21 @@ class UsedVariable(object):
     
     def __ne__(self, other):
         return not self == other
+    
+    def __lt__(self, other):
+        return self.expression() < other.expression()
+        
+    def __le__(self, other):
+        return self.expression() <= other.expression()
+        
+    def __gt__(self, other):
+        return self.expression() > other.expression()
+        
+    def __ge__(self, other):
+        return self.expression() >= other.expression()
+    
+    def __cmp__(self, other):
+        return cmp(self.expression(), other.expression())
         
     def __hash__(self):
         return hash(self.__ref)
@@ -713,6 +729,7 @@ class Argument(object):
                 self.__used.append(UsedVariable(ref))
         if not self.__used and variable.hasBuiltInType():
             self.__used.append(UsedVariable(VariableReference(variable.getName(), variable.getDeclaredIn().getName(), 0, variable)))
+        self.__used = sorted(self.__used)
             
     def __eq__(self, other):
         if (other is None or not isinstance(other, Argument)):
