@@ -3,9 +3,9 @@ PROGRAM ftg_${subroutine.name}_test
 USE mtime
 USE mo_kind
 USE mo_exception,      ONLY: message, finish
-USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast, p_comm_Work !ICON
+USE mo_mpi,            ONLY: start_mpi, stop_mpi, get_my_mpi_all_communicator, get_my_mpi_all_id, get_my_mpi_all_comm_size, work_mpi_barrier, p_recv, p_send, p_bcast, p_sum, p_comm_Work !ICON
 
-USE ${module.name}, ONLY: ${subroutine.name}
+USE $module.name, ONLY: $subroutine.name
 
 USE m_ser_ftg, ONLY: ftg_set_serializer, ftg_set_savepoint, ftg_destroy_serializer, ftg_destroy_savepoint, ftg_print_serializer_debuginfo, ftg_field_exists, ftg_get_bounds, ftg_read, ftg_allocate_and_read_pointer, ftg_allocate_and_read_allocatable
 USE m_ser_ftg_cmp, ONLY: ftg_compare, ftg_cmp_message_prefix, ftg_cmp_print_when_equal, ftg_cmp_count_missing_field_as_failure
@@ -26,11 +26,13 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 
 INTEGER :: mpi_rank, mpi_size, total_failure_count
 CHARACTER(len=9) :: total_failure_count_char
-CHARACTER(len=9) :: arg1
-LOGICAL :: verbose
+CHARACTER(len=9) :: arg1, arg2
+LOGICAL :: verbose, ordered
 
 CALL GET_COMMAND_ARGUMENT(1, arg1)
-verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose'
+CALL GET_COMMAND_ARGUMENT(2, arg2)
+verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose' .OR. TRIM(arg2) == '-v' .OR. TRIM(arg2) == '--verbose'
+ordered = TRIM(arg1) == '-o' .OR. TRIM(arg1) == '--ordered' .OR. TRIM(arg2) == '-o' .OR. TRIM(arg2) == '--ordered'
 
 CALL start_mpi('ftg_${subroutine.name}_test')
 
@@ -86,9 +88,8 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   #end if
 
   ! ----------- COMPARE -----------
-  ! One process after another to get nice, ordered printing
-  ! Change this if to slow
-  IF (mpi_rank > 0) THEN
+  ! When ordered is set, compare on process after another to get nice, ordered printing
+  IF (ordered .AND. mpi_rank > 0) THEN
       CALL p_recv(total_failure_count, mpi_rank - 1, 0)
   ELSE
       total_failure_count = 0
@@ -109,11 +110,14 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   
   total_failure_count = total_failure_count + failure_count 
 
-  IF (mpi_rank < mpi_size - 1) THEN
-      CALL p_send(total_failure_count, mpi_rank + 1, 0)
+  IF (ordered) THEN
+    IF (mpi_rank < mpi_size - 1) THEN
+        CALL p_send(total_failure_count, mpi_rank + 1, 0)
+    END IF
+    CALL p_bcast(total_failure_count, mpi_size - 1)
+  ELSE
+    total_failure_count = p_sum(failure_count, get_my_mpi_all_communicator())
   END IF
-  
-  CALL p_bcast(total_failure_count, mpi_size - 1)
 
 END SUBROUTINE ftg_test_${subroutine.name}
 
