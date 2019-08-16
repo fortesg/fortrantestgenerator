@@ -1,8 +1,13 @@
 #set $var = $ftgWrite_var
-#if $var.dim > 4 or $var.type.upper().startswith('CHARACTER'):
+WRITE (*,*) '*** DEBUG WRITE *** $var'
+#if $var.dim > 4 or ($var.type.upper().startswith('CHARACTER') and $var.dim > 0):
   ! *** WARNING: Type not supported by serialbox *** 
   !     $var 
   !     $var.type, DIMENSION($var.dim)
+#elif $var.type.upper().startswith('CHARACTER') and $var.totalDim > 0:
+    ! *** WARNING: Left out *** 
+    !     $var 
+    !     $var.type, DIMENSION($var.dim), totalDim: $var.totalDim
 #else
   #set $closeStatements = []
   #set $mandDim = $var.mandatoryDimensions
