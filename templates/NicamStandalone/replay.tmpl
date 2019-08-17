@@ -106,7 +106,7 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   	END IF
     CALL mpi_bcast(total_failure_count, 1, MPI_INT, mpi_size - 1, MPI_COMM_WORLD, mpi_err)
   ELSE
-    CALL mpi_allreduce(failure_count, total_failure_count, 1, MPI_INT, MPI_SUM, , MPI_COMM_WORLD, mpi_err)
+    CALL mpi_allreduce(failure_count, total_failure_count, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD, mpi_err)
   END IF
 
 END SUBROUTINE ftg_test_${subroutine.name}
