@@ -20,11 +20,13 @@ CHARACTER(*), PARAMETER :: OUTPUT_DIR = '${dataDir}/ftg_${subroutine.name}_test/
 
 INTEGER (kind=4) :: mpi_rank, mpi_size, mpi_err
 INTEGER :: total_failure_count
-CHARACTER(len=9) :: arg1
-LOGICAL :: verbose
+CHARACTER(len=9) :: arg1, arg2
+LOGICAL :: verbose, ordered
 
 CALL GET_COMMAND_ARGUMENT(1, arg1)
-verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose'
+CALL GET_COMMAND_ARGUMENT(2, arg2)
+verbose = TRIM(arg1) == '-v' .OR. TRIM(arg1) == '--verbose' .OR. TRIM(arg2) == '-v' .OR. TRIM(arg2) == '--verbose'
+ordered = TRIM(arg1) == '-o' .OR. TRIM(arg1) == '--ordered' .OR. TRIM(arg2) == '-o' .OR. TRIM(arg2) == '--ordered'
 
 ! Remove if capture code already deleted
 ftg_${subroutine.name}_capture_input_enabled = .FALSE. 
@@ -77,9 +79,8 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   #end if
 
   ! ----------- COMPARE -----------
-  ! One process after another to get nice, ordered printing
-  ! Change this if to slow
-  IF (mpi_rank > 0) THEN
+  ! When ordered is set, compare on process after another to get nice, ordered printing
+  IF (ordered .AND. mpi_rank > 0) THEN
       CALL mpi_recv(total_failure_count, 1, MPI_INT, mpi_rank - 1, 0, MPI_COMM_WORLD, mpi_stat, mpi_err)
   ELSE
       total_failure_count = 0
@@ -100,11 +101,14 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   
   total_failure_count = total_failure_count + failure_count 
 
-  IF (mpi_rank < mpi_size - 1) THEN
+  IF (ordered) THEN
+    IF (mpi_rank < mpi_size - 1) THEN
       CALL mpi_send(total_failure_count, 1, MPI_INT, mpi_rank + 1, 0, MPI_COMM_WORLD, mpi_err)
+  	END IF
+    CALL mpi_bcast(total_failure_count, 1, MPI_INT, mpi_size - 1, MPI_COMM_WORLD, mpi_err)
+  ELSE
+    CALL mpi_allreduce(failure_count, total_failure_count, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD, mpi_err)
   END IF
-
-  CALL mpi_bcast(total_failure_count, 1, MPI_INT, mpi_size - 1, MPI_COMM_WORLD, mpi_err)
 
 END SUBROUTINE ftg_test_${subroutine.name}
 
