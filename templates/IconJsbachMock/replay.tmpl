@@ -88,7 +88,7 @@ SUBROUTINE ftg_test_${subroutine.name}(total_failure_count)
   #end if
 
   ! ----------- COMPARE -----------
-  ! When ordered is set, compare on process after another to get nice, ordered printing
+  ! When ordered is set, compare one process after another to get nice, ordered printing
   IF (ordered .AND. mpi_rank > 0) THEN
       CALL p_recv(total_failure_count, mpi_rank - 1, 0)
   ELSE
